@@ -60,9 +60,9 @@ namespace MapNotify_3_28
         public ToggleNode ShowAtlasHighlight { get; set; } = new(false);
         public ToggleNode ShowAtlasBonusHighlight { get; set; } = new(false);
         public ToggleNode ShowMavenWitnessHighlight { get; set; } = new(false);
-        public Vector4 AtlasNotCompletedColor { get; set; } = new(1f, 0f, 0f, 0.4f);
-        public Vector4 AtlasBonusIncompleteColor { get; set; } = new(1f, 0.5f, 0f, 0.4f);
-        public Vector4 MavenWitnessColor { get; set; } = new(0.7f, 0f, 1f, 0.6f);
+        public Vector4 AtlasNotCompletedColor { get; set; } = new(1f, 0f, 0f, 1.0f);
+        public Vector4 AtlasBonusIncompleteColor { get; set; } = new(1f, 0.5f, 0f, 1.0f);
+        public Vector4 MavenWitnessColor { get; set; } = new(0.7f, 0f, 1f, 1.0f);
         public RangeNode<int> AtlasHighlightRadius { get; set; } = new(15, 1, 100);
         public RangeNode<int> AtlasBonusHighlightRadius { get; set; } = new(18, 1, 100);
         public RangeNode<int> MavenWitnessHighlightRadius { get; set; } = new(21, 1, 100);

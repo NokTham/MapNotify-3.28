@@ -420,7 +420,7 @@ namespace MapNotify_3_28
                 );
                 ImGui.SameLine();
                 HelpMarker(
-                    "Specific interval for Map Stash tabs due to high performance cost.\nThis setting is only applied once upon Initialization"
+                    "Specific interval for Map Stash tabs due to high performance cost.\nThis setting is only applied once upon Initialization\nReload the plugin to use the updated setting"
                 );
                 
                 Settings.ShowForInvitations.Value = Checkbox(
