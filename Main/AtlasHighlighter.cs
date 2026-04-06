@@ -169,10 +169,13 @@ public partial class MapNotify_3_28
                     var nameElement = tooltip.GetChildAtIndex(1)?.GetChildAtIndex(0);
                     uiMapName = nameElement?.Text;
 
-                    if (string.IsNullOrEmpty(uiMapName) && nameElement?.ChildCount > 0)
-                        uiMapName = nameElement.GetChildAtIndex(0)?.Text;
+                    if (nameElement != null) {
+                        uiMapName = nameElement.Text;
+                        if (string.IsNullOrEmpty(uiMapName) && nameElement.ChildCount > 0)
+                            uiMapName = nameElement.GetChildAtIndex(0)?.Text;
+                    }
 
-                    if (!string.IsNullOrEmpty(uiMapName) && uiMapName.Contains('<'))
+                    if (uiMapName != null && uiMapName.Length > 0 && uiMapName[0] == '<')
                     {
                         uiMapName = MapNameRegex.Replace(uiMapName, "$1");
                     }

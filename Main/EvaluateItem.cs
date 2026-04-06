@@ -28,7 +28,7 @@ namespace MapNotify_3_28
             }
         }
 
-        public static readonly List<string> ModNameBlacklist = new List<string>()
+        public static readonly string[] ModNameBlacklist = 
         {
             "AfflictionMapDeliriumStacks",
             "AfflictionMapReward",
@@ -78,6 +78,9 @@ namespace MapNotify_3_28
             public int OriginatorCurrency { get; set; }
             public int OriginatorMaps { get; set; }
             public bool IsOriginatorMap { get; set; }
+            public bool IsFragment { get; set; }
+            public bool IsMavenMap { get; set; }
+            public string WindowID { get; private set; }
             public ItemDetails(NormalInventoryItem Item, Entity Entity)
             {
                 this.Item = Item;
@@ -101,6 +104,7 @@ namespace MapNotify_3_28
                     }
                     return 0;
                 }
+                WindowID = $"##{Entity.Address}";
                 var BaseItem = gameController?.Files?.BaseItemTypes?.Translate(Entity?.Path);
                 var ItemName = BaseItem?.BaseName ?? "Unknown";
                 ClassID = BaseItem?.ClassName ?? string.Empty;
@@ -117,7 +121,9 @@ namespace MapNotify_3_28
                 var mapComponent = Entity.GetComponent<ExileCore.PoEMemory.Components.MapKey>() ?? null;
                 Tier = mapComponent?.Tier ?? -1;
                 var path = Entity.Path ?? string.Empty;
-                NeedsPadding = Tier != -1 || path.Contains("Maven") || path.Contains("Fragments/") || path.Contains("Invitations/");
+                IsFragment = path.Contains("Fragments/") && !path.Contains("Maven"); // Fragments/Maven is not a fragment for this purpose
+                IsMavenMap = path.Contains("MavenMap") || path.Contains("Invitations/Maven");
+                NeedsPadding = Tier != -1 || IsMavenMap || IsFragment;
                 Bricked = false;
                 Corrupted = Entity.GetComponent<Base>()?.isCorrupted ?? false;
 
@@ -154,19 +160,21 @@ namespace MapNotify_3_28
                         if (element == null) return null;
                         if (!string.IsNullOrEmpty(element.Text) && element.Text.Contains("Quality"))
                             return element.Text;
-                        foreach (var child in element.Children)
+                        var children = element.Children;
+                        for (int i = 0; i < children.Count; i++)
                         {
-                            var found = FindQualityText(child);
+                            var found = FindQualityText(children[i]);
                             if (found != null) return found;
                         }
                         return null;
                     }
                     var qualityLine = FindQualityText(Item.Tooltip);
-                    if (!string.IsNullOrEmpty(qualityLine))
-                    {
-                        var match = System.Text.RegularExpressions.Regex.Match(qualityLine, @"(\d+)%");
-                        if (match.Success) return int.Parse(match.Groups[1].Value);
-                    }
+                    if (string.IsNullOrEmpty(qualityLine)) return 0;
+                    int start = -1;
+                    for (int i = 0; i < qualityLine.Length; i++) { if (char.IsDigit(qualityLine[i])) { start = i; break; } }
+                    if (start == -1) return 0;
+                    int end = qualityLine.IndexOf('%', start);
+                    if (end != -1 && int.TryParse(qualityLine.Substring(start, end - start), out var res)) return res;
                     return 0;
                 }
 

@@ -54,10 +54,12 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     private bool ItemIsMap(Entity entity)
     {
         if (entity == null || entity.Address == 0) return false;
+        if (entity.HasComponent<ExileCore.PoEMemory.Components.MapKey>()) return true;
+        
         var path = entity.Path;
-        return entity.HasComponent<ExileCore.PoEMemory.Components.MapKey>() ||
-               (path != null && (path.Contains("MavenMap") || path.Contains("Fragments/Maven") ||
-                                 path.Contains("Invitations/Maven")));
+        if (path == null) return false;
+        return path.StartsWith("Metadata/Items/Maps/MavenMap", StringComparison.Ordinal) || 
+               path.Contains("Maven");
     }
 
     private List<NormalInventoryItem> GetInventoryItems()
@@ -79,29 +81,27 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         return result;
     }
 
-    private void AddItemsFromElement(Element element, List<NormalInventoryItem> result)
+    private void FindMapsInElementRecursive(Element element, List<NormalInventoryItem> result, HashSet<long> seenAddresses, int depth)
     {
-        if (element == null || !element.IsVisible) return;
+        if (element == null || !element.IsVisible || depth > 20) return;
 
         // ExileAPI's NormalInventoryItem check
         // Sometimes elements are both an Element and a NormalInventoryItem
         var item = element.AsObject<NormalInventoryItem>();
         if (item?.Item != null && item.Address != 0)
         {
-            if (ItemIsMap(item.Item))
+            if (ItemIsMap(item.Item) && seenAddresses.Add(item.Address))
             {
-                result.Add(item);
+                result.Add(item); // Add only if not already seen
             }
-            // If we found an item, we usually don't need to look at its children
-            return;
         }
 
         // If this wasn't an item, check all of its children (Recursion)
-        if (element.ChildCount > 0)
+        if (element.ChildCount > 0 && element.ChildCount < 1000) // Add a safeguard for extremely large child counts
         {
             foreach (var child in element.Children)
             {
-                AddItemsFromElement(child, result);
+                FindMapsInElementRecursive(child, result, seenAddresses, depth + 1);
             }
         }
     }
@@ -128,45 +128,27 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         if (stashElement?.IsVisible == true && stashElement.VisibleStash != null &&
             stashElement.VisibleStash.InvType == InventoryType.MapStash && Settings.FilterMapStash.Value)
         {
-            FindMapsInElement(stashElement, result);
+            // Jump closer to the items container using indices provided: 2->0->0->1->1->2->0->4
+            var mapContainer = stashElement.GetChildAtIndex(2)?.GetChildAtIndex(0)?.GetChildAtIndex(0)?
+                                            .GetChildAtIndex(1)?.GetChildAtIndex(1)?.GetChildAtIndex(2)?
+                                            .GetChildAtIndex(0)?.GetChildAtIndex(4);
+            FindMapsInElement(mapContainer ?? stashElement, result);
         }
 
         return (stashElement?.IndexVisibleStash ?? -1, result);
     }
 
     private void FindMapsInElement(Element element, List<NormalInventoryItem> result)
-    {
-        if (element == null || !element.IsVisible) return;
-
-        // In specialized tabs, the element itself might not be a NormalInventoryItem,
-        // but it might HAVE an Item property if we cast it.
-        var invItem = element.AsObject<NormalInventoryItem>();
-
-        if (invItem?.Item != null && invItem.Address != 0)
-        {
-            if (ItemIsMap(invItem.Item))
-            {
-                if (!result.Any(x => x.Address == invItem.Address))
-                    result.Add(invItem);
-            }
-            // Even if we find an item, specialized tabs sometimes nest them.
-            // We continue searching just in case.
-        }
-
-        // Recursively check children
-        if (element.ChildCount > 0)
-        {
-            // Limit recursion depth to prevent crashes in massive UI trees
-            foreach (var child in element.Children)
-            {
-                FindMapsInElement(child, result);
-            }
-        }
+    { // This overload is called by GetRegularStashItems and GetMapStashItems.
+        // It needs to create its own HashSet for uniqueness.
+        var seenAddresses = new HashSet<long>();
+        FindMapsInElementRecursive(element, result, seenAddresses, 0);
     }
 
     private List<NormalInventoryItem> GetMerchantItems()
     {
         var result = new List<NormalInventoryItem>();
+        var seenAddresses = new HashSet<long>();
         var merchantPanel = ingameState?.IngameUi?.OfflineMerchantPanel;
         if (merchantPanel != null && merchantPanel.IsVisible)
         {
@@ -176,7 +158,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             {
                 foreach (var it in visibleInv)
                 {
-                    if (it?.Item != null && ItemIsMap(it.Item))
+                    if (it?.Item != null && ItemIsMap(it.Item) && seenAddresses.Add(it.Item.Address))
                         result.Add(it);
                 }
             }
@@ -205,20 +187,18 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             return new List<NormalInventoryItem>();
 
         var result = new List<NormalInventoryItem>();
+        var seenAddresses = new HashSet<long>(); // New HashSet for uniqueness
         bool isTradeWindow = (window == tradeWindow); // Determine if it's the TradeWindow
 
         if (isTradeWindow)
         {
-            // Using GetChildAtIndex chain to prevent console spam when elements aren't yet available
+            // Safe chain prevents log spam when UI indices aren't fully loaded
             var tradeRoot = window.GetChildAtIndex(3)?.GetChildAtIndex(1)?.GetChildAtIndex(0)?.GetChildAtIndex(0);
-            if (tradeRoot != null)
-            {
-                var otherSide = tradeRoot.GetChildAtIndex(1)?.GetChildAtIndex(1);
-                if (otherSide != null) FindMapsInElement(otherSide, result);
+            var otherSide = tradeRoot?.GetChildAtIndex(1)?.GetChildAtIndex(1);
+            if (otherSide != null) FindMapsInElementRecursive(otherSide, result, seenAddresses, 0);
 
-                var selfSide = tradeRoot.GetChildAtIndex(0)?.GetChildAtIndex(2);
-                if (selfSide != null) FindMapsInElement(selfSide, result);
-            }
+            var selfSide = tradeRoot?.GetChildAtIndex(0)?.GetChildAtIndex(2);
+            if (selfSide != null) FindMapsInElementRecursive(selfSide, result, seenAddresses, 0);
         }
         else // PurchaseWindow, PurchaseWindowHideout, HaggleWindow
         {
@@ -228,8 +208,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                 foreach (var tab in currentTabContainer.Children)
                 {
                     if (tab.IsVisible)
-                    {
-                        FindMapsInElement(tab.GetChildAtIndex(0), result); // Assuming tab.GetChildAtIndex(0) is the inventory grid
+                    {   // Assuming tab.GetChildAtIndex(0) is the inventory grid
+                        FindMapsInElementRecursive(tab.GetChildAtIndex(0), result, seenAddresses, 0);
                     }
                 }
             }
@@ -336,9 +316,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                 if (Settings.PadForAltPricer.Value && ItemDetails.NeedsPadding)
                     boxOrigin = new nuVector2(mousePos.X + 25, mousePos.Y + 30);
 
-                // Performance: avoid constant string interpolation for ImGui ID
-                // Using the address as a string is fine for one window, but we should cache the ID
-                var windowId = ItemDetails.MapName ?? entity.Address.ToString();
+                // Use cached window ID to avoid per-frame string allocations
+                var windowId = ItemDetails.WindowID;
 
                 // Parsing inventory, don't use boxOrigin
                 if (isInventory)
@@ -377,8 +356,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                 {
                     ImGui.BeginGroup();
 
-                    // Fragments (Scarabs) logic: Use entity.Path check instead of slow translation
-                    bool isFragment = entity.Path.Contains("Fragments/") && !entity.Path.Contains("Maven");
+                    // Optimization: Check path once. 
+                    // Ideally, move this 'isFragment' check into the ItemDetails class constructor to cache it.
+                    bool isFragment = ItemDetails.IsFragment;
+
                     if (!isFragment && (isInventory || Settings.ShowMapName.Value))
                     {
                         ImGui.TextColored(ItemDetails.ItemColor, $"{ItemDetails.MapName}");
