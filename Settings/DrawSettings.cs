@@ -26,6 +26,20 @@ namespace MapNotify_3_28
                 ImGui.EndTooltip();
             }
         }
+
+        public static void WarningMarker(string desc)
+        {
+            ImGui.TextColored(new nuVector4(1.0f, 0.0f, 0.0f, 1.0f), "(!)");
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.BeginTooltip();
+                ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0f);
+                ImGui.TextUnformatted(desc);
+                ImGui.PopTextWrapPos();
+                ImGui.EndTooltip();
+            }
+        }
+
         public static int IntSlider(string labelString, RangeNode<int> setting)
         {
             var refValue = setting.Value;
@@ -430,7 +444,7 @@ namespace MapNotify_3_28
                 Settings.FilterInventory.Value = Checkbox("Filter Inventory", Settings.FilterInventory.Value); ImGui.SameLine(0f, 25f);
                 Settings.FilterStash.Value = Checkbox("Filter Stash", Settings.FilterStash.Value); ImGui.SameLine(0f, 25f);
                 Settings.FilterMapStash.Value = Checkbox("Filter Map Stash", Settings.FilterMapStash.Value); ImGui.SameLine(0f, 0f);
-                HelpMarker(
+                WarningMarker(
       "Filtering Map Stash Tab is very resource intensive, use with caution."
   ); ImGui.SameLine(0f, 25f);
                 Settings.FilterShops.Value = Checkbox("Filter Shops", Settings.FilterShops.Value); ImGui.SameLine(0f, 25f);
