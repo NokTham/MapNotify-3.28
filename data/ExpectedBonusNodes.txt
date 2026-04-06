@@ -1,4 +1,5 @@
-# Maps that possess a Bonus Objective (Exclude Unique Maps)
+# Maps that possess a Bonus Objective (EXCLUDE Unique Maps)
+# This list is needed for the Atlas Highlighter, if you notice there's a map missing, just add its name.
 Academy
 Acid Caverns
 Alleyways

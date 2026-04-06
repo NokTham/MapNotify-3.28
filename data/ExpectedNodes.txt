@@ -1,4 +1,6 @@
 # Whitelist for all Atlas nodes (Names or IDs)
+# This list is needed for the Atlas Highlighter, if you notice there's a map missing, just add its name.
+# Unique maps go here only, since they don't have additional Bonus besides their completion, they are treated as Completion only.
 # Standard Maps
 Academy
 Acid Caverns
