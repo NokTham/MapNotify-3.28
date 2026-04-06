@@ -9,6 +9,10 @@ Notifications about map mods, quantity, packsize and other useful information fo
 
 ![Image](https://i.imgur.com/TGwiiOs.png)
 
+![Image](https://i.imgur.com/Wzh48nV.png)
+
+![Image](https://i.imgur.com/JaMQjQZ.png)
+
 ![Image](https://i.imgur.com/5sdGnSM.png)
 
 ![Image](https://i.imgur.com/q4mYaWD.png)
