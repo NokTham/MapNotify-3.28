@@ -1,7 +1,9 @@
 # MapNotify
 Notifications about map mods, quantity, packsize and other useful information for immediate parsing
 
-!![hippo](https://i.imgur.com/6X2qUWh.gif)
+![hippo](https://i.imgur.com/6X2qUWh.gif)
+
+![hippo](https://i.imgur.com/FDQVQBm.gif)
 
 ![Image](https://i.imgur.com/jrhYncI.png)
 
