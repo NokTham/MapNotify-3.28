@@ -197,30 +197,39 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         else if (ui.HaggleWindow?.IsVisible == true)
             window = ui.HaggleWindow;
 
+        var tradeWindow = ui.ChildCount > 108 ? ui.GetChildAtIndex(108) : null;
+        if (window == null && tradeWindow?.IsVisible == true)
+            window = tradeWindow;
+
         if (window == null)
             return new List<NormalInventoryItem>();
 
         var result = new List<NormalInventoryItem>();
-        var tabContainer = window.GetChildFromIndices(8, 1);
+        bool isTradeWindow = (window == tradeWindow); // Determine if it's the TradeWindow
 
-        if (tabContainer != null)
+        if (isTradeWindow)
         {
-            foreach (var tab in tabContainer.Children)
+            // Using GetChildAtIndex chain to prevent console spam when elements aren't yet available
+            var tradeRoot = window.GetChildAtIndex(3)?.GetChildAtIndex(1)?.GetChildAtIndex(0)?.GetChildAtIndex(0);
+            if (tradeRoot != null)
             {
-                if (tab.IsVisible)
+                var otherSide = tradeRoot.GetChildAtIndex(1)?.GetChildAtIndex(1);
+                if (otherSide != null) FindMapsInElement(otherSide, result);
+
+                var selfSide = tradeRoot.GetChildAtIndex(0)?.GetChildAtIndex(2);
+                if (selfSide != null) FindMapsInElement(selfSide, result);
+            }
+        }
+        else // PurchaseWindow, PurchaseWindowHideout, HaggleWindow
+        {
+            var currentTabContainer = window.GetChildAtIndex(8)?.GetChildAtIndex(1);
+            if (currentTabContainer != null)
+            {
+                foreach (var tab in currentTabContainer.Children)
                 {
-                    var inventoryGrid = tab.GetChildAtIndex(0);
-                    if (inventoryGrid != null)
+                    if (tab.IsVisible)
                     {
-                        var itemList = inventoryGrid
-                            .GetChildrenAs<NormalInventoryItem>()
-                            .Skip(1)
-                            .ToList();
-                        foreach (var it in itemList)
-                        {
-                            if (it?.Item != null && ItemIsMap(it.Item))
-                                result.Add(it);
-                        }
+                        FindMapsInElement(tab.GetChildAtIndex(0), result); // Assuming tab.GetChildAtIndex(0) is the inventory grid
                     }
                 }
             }
@@ -456,7 +465,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                                 ImGui.TextColored(SharpToNu(StyledText.Color), $"{StyledText.Text}");
 
                         if (ItemDetails.ActiveGoodMods.Count > 0 && ItemDetails.ActiveBadMods.Count > 0)
-                            ImGui.Dummy(new nuVector2(0, 5)); // Adds a 10-pixel vertical space
+                            ImGui.Dummy(new nuVector2(0, 10)); // Adds a 10-pixel vertical space
 
                         if (ItemDetails.ActiveBadMods.Count > 0)
                             foreach (var StyledText in ItemDetails.ActiveBadMods)
@@ -685,10 +694,12 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             ui.PurchaseWindow?.IsVisible == true
             || ui.PurchaseWindowHideout?.IsVisible == true
             || ui.HaggleWindow?.IsVisible == true;
+        var tradeWindow = ui.ChildCount > 108 ? ui.GetChildAtIndex(108) : null;
+        bool isTradeWindowVisible = tradeWindow?.IsVisible == true;
 
-        if (Settings.FilterTrade && isShopVisible)
+        if (Settings.FilterTrade && (isShopVisible || isTradeWindowVisible))
         {
-            // Use the cached value to prevent CPU lag
+            // Use the cached value to prevent CPU lag, GetPurchaseWindowItems now handles all these windows.
             var cachedShopItems = _purchaseWindowItems.Value;
             if (cachedShopItems != null)
             {
