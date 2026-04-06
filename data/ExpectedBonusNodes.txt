@@ -1,0 +1,144 @@
+# Maps that possess a Bonus Objective (Exclude Unique Maps)
+Academy
+Acid Caverns
+Alleyways
+Ancient City
+Arachnid Nest
+Arachnid Tomb
+Arcade
+Arena
+Arid Lake
+Armoury
+Arsenal
+Ashen Wood
+Atoll
+Basilica
+Bazaar
+Beach
+Belfry
+Bog
+Bone Crypt
+Bramble Valley
+Burial Chambers
+Cage
+Caldera
+Canyon
+Carcass
+Castle Ruins
+Cavern
+Cells
+Cemetery
+Channel
+Chateau
+City Square
+Cold River
+Colosseum
+Conservatory
+Coral Ruins
+Core
+Courthouse
+Courtyard
+Coves
+Crater
+Crimson Temple
+Crimson Township
+Crystal Ore
+Cursed Crypt
+Dark Forest
+Defiled Cathedral
+Desert
+Desert Spring
+Dig
+Dry Sea
+Dunes
+Dungeon
+Estuary
+Excavation
+Factory
+Fields
+Flooded Mine
+Forbidden Woods
+Forking River
+Foundry
+Frozen Cabins
+Fungal Hollow
+Gardens
+Geode
+Ghetto
+Glacier
+Grave Trough
+Graveyard
+Grotto
+Haunted Mansion
+Iceberg
+Infested Valley
+Ivory Temple
+Jungle Valley
+Laboratory
+Lair
+Lava Chamber
+Lava Lake
+Library
+Lighthouse
+Lookout
+Malformation
+Marshes
+Mausoleum
+Maze
+Mesa
+Mineral Pools
+Moon Temple
+Mud Geyser
+Museum
+Necropolis
+Orchard
+Overgrown Ruin
+Overgrown Shrine
+Palace
+Park
+Pen
+Peninsula
+Phantasmagoria
+Pier
+Pit
+Plateau
+Plaza
+Port
+Precinct
+Primordial Blocks
+Primordial Pool
+Promenade
+Racecourse
+Ramparts
+Reef
+Relic Chambers
+Residence
+Scriptorium
+Sepulchre
+Shipyard
+Shore
+Shrine
+Siege
+Silo
+Spider Forest
+Spider Lair
+Strand
+Sulphur Vents
+Summit
+Sunken City
+Temple
+Terrace
+Thicket
+Tower
+Toxic Sewer
+Tropical Island
+Underground River
+Underground Sea
+Vaal Pyramid
+Vault
+Villa
+Volcano
+Waste Pool
+Wasteland
+Waterways
+Wharf

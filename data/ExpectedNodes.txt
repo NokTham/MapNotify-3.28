@@ -1,0 +1,201 @@
+# Whitelist for all Atlas nodes (Names or IDs)
+# Standard Maps
+Academy
+Acid Caverns
+Alleyways
+Ancient City
+Arachnid Nest
+Arachnid Tomb
+Arcade
+Arena
+Arid Lake
+Armoury
+Arsenal
+Ashen Wood
+Atoll
+Basilica
+Bazaar
+Beach
+Belfry
+Bog
+Bone Crypt
+Bramble Valley
+Burial Chambers
+Cage
+Caldera
+Canyon
+Carcass
+Castle Ruins
+Cavern
+Cells
+Cemetery
+Channel
+Chateau
+City Square
+Cold River
+Colosseum
+Conservatory
+Coral Ruins
+Core
+Courthouse
+Courtyard
+Coves
+Crater
+Crimson Temple
+Crimson Township
+Crystal Ore
+Cursed Crypt
+Dark Forest
+Defiled Cathedral
+Desert
+Desert Spring
+Dig
+Dry Sea
+Dunes
+Dungeon
+Estuary
+Excavation
+Factory
+Fields
+Flooded Mine
+Forbidden Woods
+Forking River
+Foundry
+Frozen Cabins
+Fungal Hollow
+Gardens
+Geode
+Ghetto
+Glacier
+Grave Trough
+Graveyard
+Grotto
+Haunted Mansion
+Iceberg
+Infested Valley
+Ivory Temple
+Jungle Valley
+Laboratory
+Lair
+Lava Chamber
+Lava Lake
+Library
+Lighthouse
+Lookout
+Malformation
+Marshes
+Mausoleum
+Maze
+Mesa
+Mineral Pools
+Moon Temple
+Mud Geyser
+Museum
+Necropolis
+Orchard
+Overgrown Ruin
+Overgrown Shrine
+Palace
+Park
+Pen
+Peninsula
+Phantasmagoria
+Pier
+Pit
+Plateau
+Plaza
+Port
+Precinct
+Primordial Blocks
+Primordial Pool
+Promenade
+Racecourse
+Ramparts
+Reef
+Relic Chambers
+Residence
+Scriptorium
+Sepulchre
+Shipyard
+Shore
+Shrine
+Siege
+Silo
+Spider Forest
+Spider Lair
+Strand
+Sulphur Vents
+Summit
+Sunken City
+Temple
+Terrace
+Thicket
+Tower
+Toxic Sewer
+Tropical Island
+Underground River
+Underground Sea
+Vaal Pyramid
+Vaal Temple
+Vault
+Villa
+Volcano
+Waste Pool
+Wasteland
+Waterways
+Wharf
+
+# Unique Maps
+Maelström of Chaos
+Mao Kun
+Oba's Cursed Trove
+Whakawairua Tuahu
+Untainted Paradise
+Caer Blaidd, Wolfpack's Den
+The Vinktar Square
+The Twilight Temple
+The Putrid Cloister
+Hallowed Ground
+Death and Taxes
+Pillars of Arun
+The Hall of Grandmasters
+Olmec's Sanctum
+The Coward's Trial
+Acton's Nightmare
+Poorjoy's Asylum
+Vaults of Atziri
+Doryani's Machinarium
+
+Augmented Distant Memory
+Twisted Distant Memory
+Altered Distant Memory
+Rewritten Distant Memory
+Cortex
+
+Eye of the Storm
+The Shaper's Realm
+Lair of the Hydra
+Pit of the Chimera
+Maze of the Minotaur
+Forge of the Phoenix
+
+Fortress
+Citadel
+Abomination
+Ziggurat
+Sanctuary
+
+The Unleashed Cortex
+
+Moment of Loneliness
+Moment of Trauma
+Moment of Reverence
+
+Crux of Nothingness
+Polaric Void 
+The Apex of Sacrifice
+
+Absence of Symmetry and Harmony
+Absence of Patience and Wisdom
+Absence of Value and Meaning
+Absence of Mercy and Empathy
