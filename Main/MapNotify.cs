@@ -456,7 +456,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                                 ImGui.TextColored(SharpToNu(StyledText.Color), $"{StyledText.Text}");
 
                         if (ItemDetails.ActiveGoodMods.Count > 0 && ItemDetails.ActiveBadMods.Count > 0)
-                            ImGui.Dummy(new nuVector2(0, 10)); // Adds a 10-pixel vertical space
+                            ImGui.Dummy(new nuVector2(0, 5)); // Adds a 10-pixel vertical space
 
                         if (ItemDetails.ActiveBadMods.Count > 0)
                             foreach (var StyledText in ItemDetails.ActiveBadMods)
