@@ -15,6 +15,8 @@ Notifications about map mods, quantity, packsize and other useful information fo
 
 ![Image](https://i.imgur.com/CnVX4KY.png)
 
+![Image](https://i.imgur.com/BsivXOE.png)
+
 # Includes
 ### 1. Enhanced Map Tooltips
 When hovering over a map, an overlay displays:
