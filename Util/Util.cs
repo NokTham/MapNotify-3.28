@@ -39,4 +39,11 @@ namespace MapNotify_3_28
         // Helper to convert Vector4 back to Hex for saving to config files
         public static string ToHex(nuVector4 color) => $"{(byte)(color.X * 255):X2}{(byte)(color.Y * 255):X2}{(byte)(color.Z * 255):X2}{(byte)(color.W * 255):X2}";
     }
+
+    public static class VectorExtensions
+    {
+        // Extension methods to bridge System.Numerics (ImGui) and SharpDX (Graphics)
+        public static sdxVector4 NuToSharp(this nuVector4 v) => new sdxVector4(v.X, v.Y, v.Z, v.W);
+        public static SharpDX.Color ToSharpColor(this nuVector4 v) => new SharpDX.Color(v.X, v.Y, v.Z, v.W);
+    }
 }

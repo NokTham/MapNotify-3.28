@@ -33,6 +33,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     private CachedValue<(int stashIndex, List<NormalInventoryItem>)> _mapStashItems;
     private CachedValue<List<NormalInventoryItem>> _merchantItems;
     private CachedValue<List<NormalInventoryItem>> _purchaseWindowItems;
+    private CachedValue<List<NormalInventoryItem>> _heistLockerItems;
     private bool _showPreviewWindow;
     private List<CapturedMod> _capturedMods = new List<CapturedMod>();
 
@@ -55,10 +56,14 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     {
         if (entity == null || entity.Address == 0) return false;
         if (entity.HasComponent<ExileCore.PoEMemory.Components.MapKey>()) return true;
-        
+        if (entity.HasComponent<HeistContract>() || entity.HasComponent<HeistBlueprint>()) return true;
+
         var path = entity.Path;
-        if (path == null) return false;
-        return path.StartsWith("Metadata/Items/Maps/MavenMap", StringComparison.Ordinal) || 
+        if (string.IsNullOrEmpty(path)) return false;
+
+        return path.StartsWith("Metadata/Items/Maps/MavenMap", StringComparison.Ordinal) ||
+               path.StartsWith("Metadata/Items/Heist/HeistContract", StringComparison.Ordinal) ||
+               path.StartsWith("Metadata/Items/Heist/HeistBlueprint", StringComparison.Ordinal) ||
                path.Contains("Maven");
     }
 
@@ -97,11 +102,13 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         }
 
         // If this wasn't an item, check all of its children (Recursion)
-        if (element.ChildCount > 0 && element.ChildCount < 1000) // Add a safeguard for extremely large child counts
+        int childCount = (int)element.ChildCount;
+        if (childCount > 0 && childCount < 1000)
         {
-            foreach (var child in element.Children)
+            for (int i = 0; i < childCount; i++)
             {
-                FindMapsInElementRecursive(child, result, seenAddresses, depth + 1);
+                var child = element.GetChildAtIndex(i);
+                if (child != null) FindMapsInElementRecursive(child, result, seenAddresses, depth + 1);
             }
         }
     }
@@ -117,7 +124,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             FindMapsInElement(stashElement, result);
         }
 
-        return (stashElement?.IndexVisibleStash ?? -1, result);
+        int index = stashElement != null ? (int)stashElement.IndexVisibleStash : -1;
+        return (index, result);
     }
 
     private (int stashIndex, List<NormalInventoryItem>) GetMapStashItems()
@@ -135,7 +143,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             FindMapsInElement(mapContainer ?? stashElement, result);
         }
 
-        return (stashElement?.IndexVisibleStash ?? -1, result);
+        int index = stashElement != null ? (int)stashElement.IndexVisibleStash : -1;
+        return (index, result);
     }
 
     private void FindMapsInElement(Element element, List<NormalInventoryItem> result)
@@ -160,6 +169,29 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                 {
                     if (it?.Item != null && ItemIsMap(it.Item) && seenAddresses.Add(it.Item.Address))
                         result.Add(it);
+                }
+            }
+        }
+        return result;
+    }
+
+    private List<NormalInventoryItem> GetHeistLockerItems()
+    {
+        var result = new List<NormalInventoryItem>();
+        var ui = ingameState?.IngameUi;
+        if (ui == null || ui.ChildCount <= 98) return result;
+
+        var heistLocker = ui.GetChildAtIndex(98);
+        if (heistLocker?.IsVisible == true && Settings.FilterStash.Value)
+        {
+            var seenAddresses = new HashSet<long>();
+            // Iterate through category containers (indices 7 to 24) to find items in all tabs
+            for (int i = 7; i <= 24; i++)
+            {
+                var container = heistLocker.GetChildAtIndex(i);
+                if (container != null && container.IsVisible)
+                {
+                    FindMapsInElementRecursive(container, result, seenAddresses, 0);
                 }
             }
         }
@@ -233,7 +265,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 
     public override bool Initialise()
     {
-        base.Initialise(); 
+        base.Initialise();
         windowArea = GameController.Window.GetWindowRectangle();
         GoodModsDictionary = LoadConfigGoodMod();
         BadModsDictionary = LoadConfigBadMod();
@@ -261,6 +293,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         _purchaseWindowItems = new TimeCache<List<NormalInventoryItem>>(
             GetPurchaseWindowItems,
             Settings.InventoryCacheInterval.Value
+        );
+        _heistLockerItems = new TimeCache<List<NormalInventoryItem>>(
+            GetHeistLockerItems,
+            Settings.StashCacheInterval.Value
         );
         InitializeAtlasHighlighter(); // Call the new method to initialize Atlas-related caches
         return true;
@@ -403,7 +439,22 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 
                         if (Settings.ShowChisel.Value && !string.IsNullOrEmpty(ItemDetails.ChiselName))
                         {
-                            ImGui.TextColored(new nuVector4(1f, 0.80f, 0.30f, 1f), $"+{ItemDetails.ChiselValue}%% {ItemDetails.ChiselName}");
+                            ImGui.TextColored(Settings.ChiselColor, $"+{ItemDetails.ChiselValue}%% {ItemDetails.ChiselName}");
+                        }
+
+                        if (Settings.ShowHeistInfo.Value && (ItemDetails.HeistAreaLevel > 0 || !string.IsNullOrEmpty(ItemDetails.HeistJob)))
+                        {
+                            var heistColor = new nuVector4(0.5f, 0.8f, 1f, 1f);
+                            if (ItemDetails.HeistAreaLevel > 0)
+                                ImGui.TextColored(heistColor, $"Area Level: {ItemDetails.HeistAreaLevel}");
+
+                            if (!string.IsNullOrEmpty(ItemDetails.HeistJob))
+                            {
+                                var jobText = ItemDetails.HeistLevel > 0
+                                    ? $"{ItemDetails.HeistJob} (Level {ItemDetails.HeistLevel})"
+                                    : ItemDetails.HeistJob;
+                                ImGui.TextColored(heistColor, jobText);
+                            }
                         }
 
                         var showOMaps = Settings.ShowOriginatorMaps.Value;
@@ -453,7 +504,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                                 ImGui.TextColored(SharpToNu(StyledText.Color), $"{StyledText.Text}");
 
                         if (ItemDetails.ActiveGoodMods.Count > 0 && ItemDetails.ActiveBadMods.Count > 0)
-                            ImGui.Dummy(new nuVector2(0, 10)); // Adds a 10-pixel vertical space
+                            ImGui.Dummy(new nuVector2(0, 5)); // Adds a 10-pixel vertical space
 
                         if (ItemDetails.ActiveBadMods.Count > 0)
                             foreach (var StyledText in ItemDetails.ActiveBadMods)
@@ -562,7 +613,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 
     public override void Render()
     {
-
+        // Update window area every frame in case the game window was moved or resized
+        windowArea = GameController.Window.GetWindowRectangle();
         // Capture Hotkey Logic
         bool ctrlHeld = Input.GetKeyState(System.Windows.Forms.Keys.LControlKey) || Input.GetKeyState(System.Windows.Forms.Keys.RControlKey);
         bool shiftHeld = Input.GetKeyState(System.Windows.Forms.Keys.LShiftKey) || Input.GetKeyState(System.Windows.Forms.Keys.RShiftKey);
@@ -613,13 +665,15 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         if (ingameState == null)
             return;
 
+        var ui = ingameState.IngameUi;
+
         if (Settings.ShowAtlasHighlight || Settings.ShowAtlasBonusHighlight || Settings.ShowMavenWitnessHighlight)
         {
             DrawAtlasHighlights();
         }
 
         // 1. Player Inventory
-        if (Settings.FilterInventory && ingameState.IngameUi.InventoryPanel.IsVisible)
+        if (Settings.FilterInventory && ui.InventoryPanel.IsVisible)
         {
             foreach (var item in _inventoryItems.Value)
             {
@@ -637,7 +691,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         }
 
         // 2. Stash
-        var stashUI = ingameState.IngameUi.StashElement;
+        var stashUI = ui.StashElement;
         if (stashUI.IsVisible && stashUI.VisibleStash != null)
         {
             var isMapStash = stashUI.VisibleStash.InvType == InventoryType.MapStash;
@@ -659,8 +713,26 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             }
         }
 
+        // 2.5 Heist Locker
+        var heistLocker = ui.ChildCount > 98 ? ui.GetChildAtIndex(98) : null;
+        if (Settings.FilterStash.Value && heistLocker?.IsVisible == true)
+        {
+            foreach (var item in _heistLockerItems.Value)
+            {
+                if (item?.Item == null) continue;
+                try
+                {
+                    DrawMapBorders(item, item.Item);
+                }
+                catch (Exception ex)
+                {
+                    LogError($"Error drawing heist locker borders: {ex.Message}", 10);
+                }
+            }
+        }
+
         // 3. Kingsmarch / Offline Merchant
-        if (Settings.FilterShops && ingameState.IngameUi.OfflineMerchantPanel.IsVisible)
+        if (Settings.FilterShops && ui.OfflineMerchantPanel.IsVisible)
         {
             foreach (var item in _merchantItems.Value)
             {
@@ -677,7 +749,6 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             }
         }
         // 4. Combined Purchase/Haggle Optimized Block
-        var ui = ingameState.IngameUi;
         bool isShopVisible =
             ui.PurchaseWindow?.IsVisible == true
             || ui.PurchaseWindowHideout?.IsVisible == true

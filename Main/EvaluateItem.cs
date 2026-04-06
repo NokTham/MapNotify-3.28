@@ -71,6 +71,9 @@ namespace MapNotify_3_28
             public int Quantity { get; set; }
             public int Rarity { get; set; }
             public int ModCount { get; set; }
+            public string HeistJob { get; set; }
+            public int HeistAreaLevel { get; set; }
+            public int HeistLevel { get; set; }
             public bool NeedsPadding { get; set; }
             public bool Bricked { get; set; }
             public bool Corrupted { get; set; }
@@ -93,20 +96,6 @@ namespace MapNotify_3_28
 
             public void Update()
             {
-                int GetStatValue(ItemMod m, string key)
-                {
-                var stats = m?.ModRecord?.StatNames;
-                var values = m?.Values;
-                if (stats == null || values == null)
-                        return 0;
-
-                for (int i = 0; i < stats.Length; i++)
-                    {
-                    if (stats[i].Key == key && i < values.Count)
-                        return values[i];
-                    }
-                    return 0;
-                }
                 WindowID = $"##{Entity.Address}";
                 var BaseItem = gameController?.Files?.BaseItemTypes?.Translate(Entity?.Path);
                 var ItemName = BaseItem?.BaseName ?? "Unknown";
@@ -115,7 +104,6 @@ namespace MapNotify_3_28
                 ChiselValue = 0;
                 var packSize = 0;
                 var rarity = 0;
-                var modsComponent = Entity.GetComponent<Mods>();
                 var qualityComponent = Entity.GetComponent<Quality>();
                 var originatorScarabs = 0;
                 var originatorCurrency = 0;
@@ -123,14 +111,19 @@ namespace MapNotify_3_28
                 var settings = pluginSettings;
                 // get and evaluate mods
                 var mapComponent = Entity.GetComponent<ExileCore.PoEMemory.Components.MapKey>() ?? null;
+                var modsComponent = Entity.GetComponent<Mods>();
                 Tier = mapComponent?.Tier ?? -1;
                 var path = Entity.Path ?? string.Empty;
                 IsFragment = path.Contains("Fragments/") && !path.Contains("Maven"); // Fragments/Maven is not a fragment for this purpose
                 IsMavenMap = path.Contains("MavenMap") || path.Contains("Invitations/Maven");
-                NeedsPadding = Tier != -1 || IsMavenMap || IsFragment;
-                Bricked = false;
-                Corrupted = Entity.GetComponent<Base>()?.isCorrupted ?? false;
+                
+                UpdateHeistDetails();
 
+                var baseComponent = Entity.GetComponent<Base>();
+                NeedsPadding = Tier != -1 || IsMavenMap || IsFragment || !string.IsNullOrEmpty(HeistJob);
+                Bricked = false;
+                Corrupted = baseComponent?.isCorrupted ?? false;
+                
                 // Get quality from component, or fallback to tooltip if memory returns 0
                 int quantity = qualityComponent?.ItemQuality ?? 0;
 
@@ -199,20 +192,43 @@ namespace MapNotify_3_28
                     {
                         foreach (var mod in itemMods)
                         {
-                            if (string.IsNullOrEmpty(mod.RawName) || ModNameBlacklist.Any(m => mod.RawName.Contains(m)))
+                            if (string.IsNullOrEmpty(mod.RawName)) continue;
+
+                            bool blacklisted = false;
+                            foreach (var black in ModNameBlacklist) { if (mod.RawName.Contains(black)) { blacklisted = true; break; } }
+                            if (blacklisted)
                             {
                                 ModCount--;
                                 continue;
                             }
 
-                            packSize += GetStatValue(mod, "map_pack_size_+%");
-                            quantity += GetStatValue(mod, "map_item_drop_quantity_+%");
-                            rarity += GetStatValue(mod, "map_item_drop_rarity_+%");
+                            // Optimized: Process all stats for this mod in a single pass
+                            var stats = mod.ModRecord?.StatNames;
+                            var values = mod.Values;
+                            if (stats != null && values != null)
+                            {
+                                for (int i = 0; i < stats.Length && i < values.Count; i++)
+                                {
+                                    var key = stats[i].Key;
+                                    if (string.IsNullOrEmpty(key)) continue;
 
-                            // Originator map bonus stats
-                            originatorScarabs += GetStatValue(mod, "map_scarab_drop_chance_+%_final_from_uber_mod");
-                            originatorCurrency += GetStatValue(mod, "map_currency_drop_chance_+%_final_from_uber_mod");
-                            originatorMaps += GetStatValue(mod, "map_map_item_drop_chance_+%_final_from_uber_mod");
+                                    switch (key)
+                                    {
+                                        case "map_pack_size_+%":
+                                            packSize += values[i]; break;
+                                        case "map_item_drop_quantity_+%":
+                                            quantity += values[i]; break;
+                                        case "map_item_drop_rarity_+%":
+                                            rarity += values[i]; break;
+                                        case "map_scarab_drop_chance_+%_final_from_uber_mod":
+                                            originatorScarabs += values[i]; break;
+                                        case "map_currency_drop_chance_+%_final_from_uber_mod":
+                                            originatorCurrency += values[i]; break;
+                                        case "map_map_item_drop_chance_+%_final_from_uber_mod":
+                                            originatorMaps += values[i]; break;
+                                    }
+                                }
+                            }
 
                             // Optimize Dictionary Search
                             foreach (var entry in GoodModsDictionary)
@@ -292,6 +308,28 @@ namespace MapNotify_3_28
                 #endregion
                 // evaluate rarity for colouring item name
                 ItemColor = GetRarityColor(modsComponent?.ItemRarity ?? ItemRarity.Normal);
+            }
+
+            private void UpdateHeistDetails()
+            {
+                var heistContract = Entity.GetComponent<HeistContract>();
+                var heistBlueprint = Entity.GetComponent<HeistBlueprint>();
+                if (heistContract != null)
+                {
+                    HeistAreaLevel = Entity.GetComponent<Mods>()?.ItemLevel ?? 0;
+                    HeistJob = heistContract.RequiredJob?.Name;
+                    HeistLevel = heistContract.RequiredJobLevel;
+                }
+                else if (heistBlueprint != null)
+                {
+                    HeistAreaLevel = heistBlueprint.AreaLevel;
+                    HeistLevel = -1; // Use -1 to indicate it's a blueprint for the renderer
+                    if (heistBlueprint.Wings != null)
+                    {
+                        HeistJob = string.Join("\n", heistBlueprint.Wings
+                            .Select((w, i) => $"Wing {i + 1}: {string.Join(", ", w.Jobs.Where(j => j.Item1 != null).Select(j => $"{j.Item1.Name} {j.Item2}"))}"));
+                    }
+                }
             }
         }
 

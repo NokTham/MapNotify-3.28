@@ -51,6 +51,8 @@ namespace MapNotify_3_28
         public ToggleNode ShowOriginatorCurrency { get; set; } = new(true);
         public ToggleNode ShowOriginatorMaps { get; set; } = new(true);
         public ToggleNode ShowChisel { get; set; } = new(true);
+        public ToggleNode ShowHeistInfo { get; set; } = new(true);
+        public Vector4 ChiselColor { get; set; } = new(1f, 0.80f, 0.30f, 1f);
 
         public Vector4 Bricked { get; set; } = new(1f, 0f, 0f, 1f);
         public Vector4 MapBorderGood { get; set; } = new(0f, 1f, 0f, 0.35f);

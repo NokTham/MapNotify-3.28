@@ -246,6 +246,9 @@ namespace MapNotify_3_28
                 HelpMarker(
                     "Show chisel applied to map, Maven or Cartographer's (legacy) ."
                 );
+                Settings.ShowHeistInfo.Value = Checkbox("Show Heist Job Info", Settings.ShowHeistInfo.Value);
+                ImGui.SameLine();
+                HelpMarker("Show Job type and Level for Contracts and Blueprints.");
                 
                 Settings.ShowOriginatorMaps.Value = Checkbox(
                     "Show More Maps %",
