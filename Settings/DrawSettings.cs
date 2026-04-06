@@ -224,6 +224,10 @@ namespace MapNotify_3_28
                     "Show Pack Size %",
                     Settings.ShowPackSizePercent.Value
                 );
+                Settings.ShowRarityPercent.Value = Checkbox(
+                    "Show Item Rarity %",
+                    Settings.ShowRarityPercent.Value
+                );
                 Settings.ShowQuantityPercent.Value = Checkbox(
                     "Show Item Quantity %",
                     Settings.ShowQuantityPercent.Value

@@ -69,6 +69,7 @@ namespace MapNotify_3_28
             public int ChiselValue { get; set; }
             public int PackSize { get; set; }
             public int Quantity { get; set; }
+            public int Rarity { get; set; }
             public int ModCount { get; set; }
             public bool NeedsPadding { get; set; }
             public bool Bricked { get; set; }
@@ -94,13 +95,15 @@ namespace MapNotify_3_28
             {
                 int GetStatValue(ItemMod m, string key)
                 {
-                    if (m?.ModRecord?.StatNames == null || m.Values == null)
+                var stats = m?.ModRecord?.StatNames;
+                var values = m?.Values;
+                if (stats == null || values == null)
                         return 0;
 
-                    for (int i = 0; i < m.ModRecord.StatNames.Count(); i++)
+                for (int i = 0; i < stats.Length; i++)
                     {
-                        if (m.ModRecord.StatNames[i].Key == key && i < m.Values.Count())
-                            return m.Values[i];
+                    if (stats[i].Key == key && i < values.Count)
+                        return values[i];
                     }
                     return 0;
                 }
@@ -111,6 +114,7 @@ namespace MapNotify_3_28
                 ChiselName = string.Empty;
                 ChiselValue = 0;
                 var packSize = 0;
+                var rarity = 0;
                 var modsComponent = Entity.GetComponent<Mods>();
                 var qualityComponent = Entity.GetComponent<Quality>();
                 var originatorScarabs = 0;
@@ -129,6 +133,13 @@ namespace MapNotify_3_28
 
                 // Get quality from component, or fallback to tooltip if memory returns 0
                 int quantity = qualityComponent?.ItemQuality ?? 0;
+
+                // If the map has Rarity quality, move the quality value to the rarity variable
+                if (modsComponent?.AlternateQualityType?.Id == "MapRarityQuality")
+                {
+                    rarity = quantity;
+                    quantity = 0;
+                }
 
                 if (modsComponent?.AlternateQualityType != null)
                 {
@@ -196,6 +207,7 @@ namespace MapNotify_3_28
 
                             packSize += GetStatValue(mod, "map_pack_size_+%");
                             quantity += GetStatValue(mod, "map_item_drop_quantity_+%");
+                            rarity += GetStatValue(mod, "map_item_drop_rarity_+%");
 
                             // Originator map bonus stats
                             originatorScarabs += GetStatValue(mod, "map_scarab_drop_chance_+%_final_from_uber_mod");
@@ -235,6 +247,7 @@ namespace MapNotify_3_28
                 }
                 Quantity = quantity;
                 PackSize = packSize;
+                Rarity = rarity;
                 OriginatorScarabs = originatorScarabs;
                 OriginatorCurrency = originatorCurrency;
                 OriginatorMaps = originatorMaps;

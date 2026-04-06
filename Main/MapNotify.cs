@@ -378,20 +378,27 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 
                         var showQuant = Settings.ShowQuantityPercent.Value;
                         var showPack = Settings.ShowPackSizePercent.Value;
+                        var showRarity = Settings.ShowRarityPercent.Value;
 
                         if (showQuant && ItemDetails.Quantity != 0 && showPack && ItemDetails.PackSize != 0)
                         {
-                            ImGui.TextColored(qCol, $"{ItemDetails.Quantity}%% Quant");
+                            ImGui.TextColored(qCol, $"{ItemDetails.Quantity}%% IIQ");
                             ImGui.SameLine();
-                            ImGui.TextColored(new nuVector4(1f, 1f, 1f, 1f), $"{ItemDetails.PackSize}%% Pack Size");
+                            ImGui.TextColored(new nuVector4(1f, 1f, 1f, 1f), $"{ItemDetails.PackSize}%% PS");
                         }
                         else if (showQuant && ItemDetails.Quantity != 0)
                         {
-                            ImGui.TextColored(qCol, $"{ItemDetails.Quantity}%% Quantity");
+                            ImGui.TextColored(qCol, $"{ItemDetails.Quantity}%% IIQ");
                         }
                         else if (showPack && ItemDetails.PackSize != 0)
                         {
-                            ImGui.TextColored(new nuVector4(1f, 1f, 1f, 1f), $"{ItemDetails.PackSize}%% Pack Size");
+                            ImGui.TextColored(new nuVector4(1f, 1f, 1f, 1f), $"{ItemDetails.PackSize}%% PS");
+                        }
+
+                        if (showRarity && ItemDetails.Rarity != 0)
+                        {
+                            if ((showQuant && ItemDetails.Quantity != 0) || (showPack && ItemDetails.PackSize != 0)) ImGui.SameLine();
+                            ImGui.TextColored(new nuVector4(1f, 1f, 1f, 1f), $"{ItemDetails.Rarity}%% IIR");
                         }
 
                         if (Settings.ShowChisel.Value && !string.IsNullOrEmpty(ItemDetails.ChiselName))

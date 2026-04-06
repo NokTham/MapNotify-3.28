@@ -20,6 +20,7 @@ namespace MapNotify_3_28
         public ToggleNode ShowMapName { get; set; } = new(true);
         public ToggleNode ShowModCount { get; set; } = new(true);
         public ToggleNode ShowQuantityPercent { get; set; } = new(true);
+        public ToggleNode ShowRarityPercent { get; set; } = new(true);
         public ToggleNode ColorQuantityPercent { get; set; } = new(true);
           public RangeNode<int> ColorQuantity { get; set; } = new(100, 0, 220);
         public RangeNode<int> BorderDeflation { get; set; } = new(4, 0, 50);
