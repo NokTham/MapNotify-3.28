@@ -200,7 +200,7 @@ namespace MapNotify_3_28
                 Settings.ShowChisel.Value = Checkbox("Show Chisel %", Settings.ShowChisel.Value);
                 ImGui.SameLine();
                 HelpMarker(
-                    "Show chisel applied to map, Maven or Cartographer's (legacy) ."
+                    "Show chisel applied to map, Maven or Cartographer's (legacy)."
                 );
                 Settings.ShowHeistInfo.Value = Checkbox("Show Heist Job Info", Settings.ShowHeistInfo.Value);
                 ImGui.SameLine();
@@ -222,7 +222,15 @@ namespace MapNotify_3_28
                 );
             }
 
-            if (ImGui.TreeNodeEx("Atlas Highlights", ImGuiTreeNodeFlags.CollapsingHeader))
+            bool atlasHeaderOpen = ImGui.TreeNodeEx("Atlas Highlights", ImGuiTreeNodeFlags.CollapsingHeader);
+            ImGui.SameLine();
+            HelpMarker(@"Highlights nodes on the Atlas that:
+- Haven't been completed yet
+- Have missing bonus objectives
+- Are currently witnessed by the Maven
+* Hover a node or type 'a|e' in the Atlas Search Box to force the client to load all nodes data, this is only needed upon logging in, this will also highlight nodes that are not visible");
+
+            if (atlasHeaderOpen)
             {
                 Settings.ShowAtlasHighlight.Value = Checkbox("Incomplete Maps", Settings.ShowAtlasHighlight.Value);
                 ImGui.SameLine();
@@ -238,12 +246,6 @@ namespace MapNotify_3_28
                 ImGui.SameLine();
                 Settings.MavenWitnessColor = ColorButton("Color##MavenWitness", Settings.MavenWitnessColor);
                 Settings.MavenWitnessHighlightRadius.Value = IntSlider("Radius##MavenWitness", Settings.MavenWitnessHighlightRadius, 400f);
-
-                HelpMarker(@"Highlights nodes on the Atlas that:
-- Haven't been completed yet
-- Have missing bonus objectives
-- Are currently witnessed by the Maven
-* Hover a node or type 'a|e' in the Atlas Search Box to force the client to load all nodes data, this is only needed upon logging in, this will also highlight nodes that are not visible");
             }
 
             if (ImGui.TreeNodeEx("Borders and Highlight Colours", ImGuiTreeNodeFlags.CollapsingHeader))
