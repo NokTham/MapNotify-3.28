@@ -14,7 +14,7 @@ namespace MapNotify_3_28
     partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     {
         public static List<string> hoverMods = new List<string>();
-        
+
         private string _rebindingNodeName = null;
         public void DrawHotkeySelector(string label, HotkeyNode node, ToggleNode ctrl, ToggleNode shift, ToggleNode alt)
         {
@@ -111,7 +111,7 @@ namespace MapNotify_3_28
             ImGui.Text(
                 "Plugin by Lachrymatory. -- Edited by Xcesius -- (vibecoded) Updated by NokTham"
             );
-           
+
             if (ImGui.Button("NokTham's GitHub"))
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
@@ -130,7 +130,7 @@ namespace MapNotify_3_28
                 });
             }
 
-            
+
             ImGui.Separator();
 
             if (ImGui.TreeNodeEx("Core Settings", ImGuiTreeNodeFlags.CollapsingHeader))
@@ -140,7 +140,8 @@ namespace MapNotify_3_28
                 HelpMarker("The key used to open the Map Mod Preview window while hovering over a map.");
                 Settings.InventoryCacheInterval.Value = IntSlider(
                     "Inventory Item Caching Interval in ms",
-                    Settings.InventoryCacheInterval
+                    Settings.InventoryCacheInterval,
+                    400f
                 );
                 ImGui.SameLine();
                 HelpMarker(
@@ -148,7 +149,8 @@ namespace MapNotify_3_28
                 );
                 Settings.StashCacheInterval.Value = IntSlider(
                     "Stash Item Caching Interval in ms",
-                    Settings.StashCacheInterval
+                    Settings.StashCacheInterval,
+                    400f
                 );
                 ImGui.SameLine();
                 HelpMarker(
@@ -156,31 +158,31 @@ namespace MapNotify_3_28
                 );
                 Settings.MapStashCacheInterval.Value = IntSlider(
                     "Map Stash Caching Interval in ms",
-                    Settings.MapStashCacheInterval
+                    Settings.MapStashCacheInterval,
+                    400f
                 );
                 ImGui.SameLine();
                 HelpMarker(
                     "Specific interval for Map Stash tabs due to high performance cost.\nThis setting is only applied once upon Initialization\nReload the plugin to use the updated setting"
                 );
-                
+
+                ImGui.Dummy(new nuVector2(0, 5));
+
+                ImGui.Text("Show Highlights:");
                 Settings.ShowForInvitations.Value = Checkbox(
-                    "Display for Maven Invitations",
+                    "Maven Invitations",
                     Settings.ShowForInvitations.Value
                 );
-                Settings.FilterInventory.Value = Checkbox("Filter Inventory", Settings.FilterInventory.Value); ImGui.SameLine(0f, 25f);
-                Settings.FilterStash.Value = Checkbox("Filter Stash", Settings.FilterStash.Value); ImGui.SameLine(0f, 25f);
-                Settings.FilterMapStash.Value = Checkbox("Filter Map Stash", Settings.FilterMapStash.Value); ImGui.SameLine(0f, 0f);
+                Settings.FilterInventory.Value = Checkbox("Inventory", Settings.FilterInventory.Value); ImGui.SameLine(0f, 25f);
+                Settings.FilterStash.Value = Checkbox("Stash", Settings.FilterStash.Value); ImGui.SameLine(0f, 25f);
+                Settings.FilterMapStash.Value = Checkbox("Map Stash", Settings.FilterMapStash.Value); ImGui.SameLine(0f, 0f);
                 WarningMarker(
       "Filtering Map Stash Tab is very resource intensive, use with caution."
   ); ImGui.SameLine(0f, 25f);
-                Settings.FilterShops.Value = Checkbox("Filter Shops", Settings.FilterShops.Value); ImGui.SameLine(0f, 25f);
-                Settings.FilterTrade.Value = Checkbox("Filter Trade", Settings.FilterTrade.Value);
-                ImGui.SameLine(0f, 10f);
-                HelpMarker(
-                    "Enable/disable map highlighting in specific inventory locations."
-                );
+                Settings.FilterShops.Value = Checkbox("Shops", Settings.FilterShops.Value); ImGui.SameLine(0f, 25f);
+                Settings.FilterTrade.Value = Checkbox("Trade", Settings.FilterTrade.Value);
 
-                ImGui.Separator();
+                ImGui.Dummy(new nuVector2(0, 5));
 
                 Settings.BoxForBricked.Value = Checkbox("Mark Bricked", Settings.BoxForBricked.Value);
                 ImGui.SameLine();
@@ -236,8 +238,8 @@ namespace MapNotify_3_28
                     "Warn Below Quantity Percentage",
                     Settings.ColorQuantityPercent.Value
                 );
-                Settings.ColorQuantity.Value = IntSlider("##ColorQuantity", Settings.ColorQuantity);
-                ImGui.SameLine(0f, 25f);
+                Settings.ColorQuantity.Value = IntSlider("##ColorQuantity", Settings.ColorQuantity, 400f);
+                ImGui.SameLine(0f, 10f);
                 HelpMarker(
                     "The colour of the quantity text will be red below this amount and green above it."
                 );
@@ -249,7 +251,7 @@ namespace MapNotify_3_28
                 Settings.ShowHeistInfo.Value = Checkbox("Show Heist Job Info", Settings.ShowHeistInfo.Value);
                 ImGui.SameLine();
                 HelpMarker("Show Job type and Level for Contracts and Blueprints.");
-                
+
                 Settings.ShowOriginatorMaps.Value = Checkbox(
                     "Show More Maps %",
                     Settings.ShowOriginatorMaps.Value
@@ -271,17 +273,17 @@ namespace MapNotify_3_28
                 Settings.ShowAtlasHighlight.Value = Checkbox("Incomplete Maps", Settings.ShowAtlasHighlight.Value);
                 ImGui.SameLine();
                 Settings.AtlasNotCompletedColor = ColorButton("Color##AtlasIncomplete", Settings.AtlasNotCompletedColor);
-                Settings.AtlasHighlightRadius.Value = IntSlider("Radius##AtlasIncomplete", Settings.AtlasHighlightRadius);
+                Settings.AtlasHighlightRadius.Value = IntSlider("Radius##AtlasIncomplete", Settings.AtlasHighlightRadius, 400f);
 
                 Settings.ShowAtlasBonusHighlight.Value = Checkbox("Incomplete Bonus", Settings.ShowAtlasBonusHighlight.Value);
                 ImGui.SameLine();
                 Settings.AtlasBonusIncompleteColor = ColorButton("Color##AtlasBonus", Settings.AtlasBonusIncompleteColor);
-                Settings.AtlasBonusHighlightRadius.Value = IntSlider("Radius##AtlasBonus", Settings.AtlasBonusHighlightRadius);
+                Settings.AtlasBonusHighlightRadius.Value = IntSlider("Radius##AtlasBonus", Settings.AtlasBonusHighlightRadius, 400f);
 
                 Settings.ShowMavenWitnessHighlight.Value = Checkbox("Maven Witness", Settings.ShowMavenWitnessHighlight.Value);
                 ImGui.SameLine();
                 Settings.MavenWitnessColor = ColorButton("Color##MavenWitness", Settings.MavenWitnessColor);
-                Settings.MavenWitnessHighlightRadius.Value = IntSlider("Radius##MavenWitness", Settings.MavenWitnessHighlightRadius);
+                Settings.MavenWitnessHighlightRadius.Value = IntSlider("Radius##MavenWitness", Settings.MavenWitnessHighlightRadius, 400f);
 
                 HelpMarker(@"Highlights nodes on the Atlas that:
 - Haven't been completed yet
@@ -295,11 +297,11 @@ namespace MapNotify_3_28
 
                 Settings.BorderDeflation.Value = IntSlider(
                     "Map Border Deflation##MapBorderDeflation",
-                    Settings.BorderDeflation
+                    Settings.BorderDeflation, 400f
                 );
                 Settings.BorderThickness.Value = IntSlider(
                     "Tooltip Border Thickness##BorderThickness",
-                    Settings.BorderThickness
+                    Settings.BorderThickness, 400f
                 );
 
                 Settings.Bricked = ColorButton("Bricked Map", Settings.Bricked);
@@ -313,7 +315,7 @@ namespace MapNotify_3_28
 
                 Settings.BorderThicknessMap.Value = IntSlider(
                     "Border Thickness for Bricked Maps##BorderThickness Maps",
-                    Settings.BorderThicknessMap
+                    Settings.BorderThicknessMap, 400f
                 );
             }
 

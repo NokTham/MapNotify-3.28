@@ -35,9 +35,11 @@ namespace MapNotify_3_28
             }
         }
 
-        public static int IntSlider(string labelString, RangeNode<int> setting)
+        public static int IntSlider(string labelString, RangeNode<int> setting, float width = 0)
         {
             var refValue = setting.Value;
+            if (width > 0)
+                ImGui.SetNextItemWidth(width);
             ImGui.SliderInt(labelString, ref refValue, setting.Min, setting.Max);
             return refValue;
         }
@@ -57,6 +59,20 @@ namespace MapNotify_3_28
         {
             ImGui.Checkbox(labelString, ref boolValue);
             return boolValue;
+        }
+
+        public static void FixedWidthSeparator(float width, float thickness = 1.0f)
+        {
+            var pos = ImGui.GetCursorScreenPos();
+            // Draw the line manually using the window's draw list
+            ImGui.GetWindowDrawList().AddLine(
+                pos,
+                new nuVector2(pos.X + width, pos.Y),
+                ImGui.GetColorU32(ImGuiCol.Separator),
+                thickness
+            );
+            // Advance the cursor vertically to account for the line and standard spacing
+            ImGui.Dummy(new nuVector2(0, thickness + ImGui.GetStyle().ItemSpacing.Y));
         }
 
         private bool IsModifierKey(System.Windows.Forms.Keys key)
