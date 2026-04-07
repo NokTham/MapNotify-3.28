@@ -97,34 +97,30 @@ namespace MapNotify_3_28
             public void Update()
             {
                 WindowID = $"##{Entity.Address}";
-                var BaseItem = gameController?.Files?.BaseItemTypes?.Translate(Entity?.Path);
+                var path = Entity.Path ?? string.Empty;
+                var BaseItem = gameController?.Files?.BaseItemTypes?.Translate(path);
                 var ItemName = BaseItem?.BaseName ?? "Unknown";
                 ClassID = BaseItem?.ClassName ?? string.Empty;
                 ChiselName = string.Empty;
                 ChiselValue = 0;
                 var packSize = 0;
                 var rarity = 0;
-                var qualityComponent = Entity.GetComponent<Quality>();
-                var originatorScarabs = 0;
-                var originatorCurrency = 0;
-                var originatorMaps = 0;
-                var settings = pluginSettings;
-                // get and evaluate mods
-                var mapComponent = Entity.GetComponent<ExileCore.PoEMemory.Components.MapKey>() ?? null;
+
                 var modsComponent = Entity.GetComponent<Mods>();
+                var baseComponent = Entity.GetComponent<Base>();
+                var mapComponent = Entity.GetComponent<ExileCore.PoEMemory.Components.MapKey>();
+                var qualityComponent = Entity.GetComponent<Quality>();
+
                 Tier = mapComponent?.Tier ?? -1;
-                var path = Entity.Path ?? string.Empty;
-                IsFragment = path.Contains("Fragments/") && !path.Contains("Maven"); // Fragments/Maven is not a fragment for this purpose
+                IsFragment = path.Contains("Fragments/") && !path.Contains("Maven");
                 IsMavenMap = path.Contains("MavenMap") || path.Contains("Invitations/Maven");
-                
+
                 UpdateHeistDetails();
                 IsOriginatorMap = false;
-
-                var baseComponent = Entity.GetComponent<Base>();
-                NeedsPadding = Tier != -1 || IsMavenMap || IsFragment || !string.IsNullOrEmpty(HeistJob);
                 Bricked = false;
                 Corrupted = baseComponent?.isCorrupted ?? false;
-                
+                NeedsPadding = Tier != -1 || IsMavenMap || IsFragment || !string.IsNullOrEmpty(HeistJob);
+
                 // Get quality from component, or fallback to tooltip if memory returns 0
                 int quantity = qualityComponent?.ItemQuality ?? 0;
 
@@ -157,39 +153,16 @@ namespace MapNotify_3_28
                     quantity = ParseTooltipQuality();
                 }
 
-                int ParseTooltipQuality()
-                {
-                    if (Item?.Tooltip == null) return 0;
-                    string FindQualityText(ExileCore.PoEMemory.Element element)
-                    {
-                        if (element == null) return null;
-                        if (!string.IsNullOrEmpty(element.Text) && element.Text.Contains("Quality"))
-                            return element.Text;
-                        var children = element.Children;
-                        for (int i = 0; i < children.Count; i++)
-                        {
-                            var found = FindQualityText(children[i]);
-                            if (found != null) return found;
-                        }
-                        return null;
-                    }
-                    var qualityLine = FindQualityText(Item.Tooltip);
-                    if (string.IsNullOrEmpty(qualityLine)) return 0;
-                    int start = -1;
-                    for (int i = 0; i < qualityLine.Length; i++) { if (char.IsDigit(qualityLine[i])) { start = i; break; } }
-                    if (start == -1) return 0;
-                    int end = qualityLine.IndexOf('%', start);
-                    if (end != -1 && int.TryParse(qualityLine.Substring(start, end - start), out var res)) return res;
-                    return 0;
-                }
-
+                var originatorScarabs = 0;
+                var originatorCurrency = 0;
+                var originatorMaps = 0;
                 var itemMods = modsComponent?.ItemMods;
                 ModCount = itemMods?.Count ?? 0;
 
                 if (modsComponent != null && itemMods != null && ModCount > 0)
                 {
-                    // Only evaluate mods for non-unique maps, but ALWAYS evaluate for Maven items
-                    if (modsComponent.ItemRarity != ItemRarity.Unique || path.Contains("Maven"))
+                    // Only evaluate mods for non-unique maps, but ALWAYS evaluate for Maven items and T17s
+                    if (modsComponent.ItemRarity != ItemRarity.Unique || path.Contains("Maven") || Tier == 17)
                     {
                         foreach (var mod in itemMods)
                         {
@@ -222,11 +195,14 @@ namespace MapNotify_3_28
                                         case "map_item_drop_rarity_+%":
                                             rarity += values[i]; break;
                                         case "map_scarab_drop_chance_+%_final_from_uber_mod":
-                                            originatorScarabs += values[i]; break;
+                                            originatorScarabs += values[i];
+                                            IsOriginatorMap = true; break;
                                         case "map_currency_drop_chance_+%_final_from_uber_mod":
-                                            originatorCurrency += values[i]; break;
+                                            originatorCurrency += values[i];
+                                            IsOriginatorMap = true; break;
                                         case "map_map_item_drop_chance_+%_final_from_uber_mod":
-                                            originatorMaps += values[i]; break;
+                                            originatorMaps += values[i];
+                                            IsOriginatorMap = true; break;
                                     }
                                 }
                             }
@@ -235,32 +211,31 @@ namespace MapNotify_3_28
                             if (!IsOriginatorMap && (mod.RawName == "IsUberMap" || mod.RawName.Contains("MapZanaInfluence")))
                                 IsOriginatorMap = true;
 
-                            // Optimize Dictionary Search
+                            // Optimized Dictionary Search: Early exit if mod is found in the first dictionary
+                            bool foundMod = false;
                             foreach (var entry in GoodModsDictionary)
                             {
                                 if (mod.RawName.Contains(entry.Key))
                                 {
                                     var warning = entry.Value;
-                                    if (warning.Bricking)
-                                    {
-                                        Bricked = true;
-                                    }
+                                    if (warning.Bricking) Bricked = true;
                                     ActiveGoodMods.Add(warning);
+                                    foundMod = true;
                                     break;
                                 }
                             }
 
-                            foreach (var entry in BadModsDictionary)
+                            if (!foundMod)
                             {
-                                if (mod.RawName.Contains(entry.Key))
+                                foreach (var entry in BadModsDictionary)
                                 {
-                                    var bad = entry.Value;
-                                    if (bad.Bricking)
+                                    if (mod.RawName.Contains(entry.Key))
                                     {
-                                        Bricked = true;
+                                        var bad = entry.Value;
+                                        if (bad.Bricking) Bricked = true;
+                                        ActiveBadMods.Add(bad);
+                                        break;
                                     }
-                                    ActiveBadMods.Add(bad);
-                                    break;
                                 }
                             }
                         }
@@ -273,8 +248,7 @@ namespace MapNotify_3_28
                 OriginatorCurrency = originatorCurrency;
                 OriginatorMaps = originatorMaps;
                 {
-                    var baseComp = Entity.GetComponent<Base>();
-                    var mapTrim = baseComp != null ? baseComp.Name.Replace(" Map", "") : "Unknown";
+                    var mapTrim = baseComponent != null ? baseComponent.Name.Replace(" Map", "") : "Unknown";
 
                     if (modsComponent?.ItemRarity == ItemRarity.Unique)
                     {
@@ -309,6 +283,32 @@ namespace MapNotify_3_28
                 #endregion
                 // evaluate rarity for colouring item name
                 ItemColor = GetRarityColor(modsComponent?.ItemRarity ?? ItemRarity.Normal);
+            }
+
+            private int ParseTooltipQuality()
+            {
+                if (Item?.Tooltip == null) return 0;
+                string FindQualityText(ExileCore.PoEMemory.Element element)
+                {
+                    if (element == null) return null;
+                    if (!string.IsNullOrEmpty(element.Text) && element.Text.Contains("Quality"))
+                        return element.Text;
+                    var children = element.Children;
+                    for (int i = 0; i < children.Count; i++)
+                    {
+                        var found = FindQualityText(children[i]);
+                        if (found != null) return found;
+                    }
+                    return null;
+                }
+                var qualityLine = FindQualityText(Item.Tooltip);
+                if (string.IsNullOrEmpty(qualityLine)) return 0;
+                int start = -1;
+                for (int i = 0; i < qualityLine.Length; i++) { if (char.IsDigit(qualityLine[i])) { start = i; break; } }
+                if (start == -1) return 0;
+                int end = qualityLine.IndexOf('%', start);
+                if (end != -1 && int.TryParse(qualityLine.Substring(start, end - start), out var res)) return res;
+                return 0;
             }
 
             private void UpdateHeistDetails()

@@ -13,14 +13,12 @@ namespace MapNotify_3_28
 {
     partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     {
-        public static List<string> hoverMods = new List<string>();
-
         private string _rebindingNodeName = null;
+        
         public void DrawHotkeySelector(string label, HotkeyNode node, ToggleNode ctrl, ToggleNode shift, ToggleNode alt)
         {
             ImGui.Text(label);
 
-            // Fix: Added 'ref' and accessed the underlying boolean '.Value'
             var c = ctrl.Value;
             if (ImGui.Checkbox("Ctrl##" + label, ref c)) ctrl.Value = c;
             ImGui.SameLine();
@@ -34,8 +32,6 @@ namespace MapNotify_3_28
             ImGui.SameLine();
 
             bool isRebinding = _rebindingNodeName == label;
-
-            // Building string based on the ToggleNodes
             string prefix = "";
             if (ctrl.Value) prefix += "Ctrl + ";
             if (shift.Value) prefix += "Shift + ";
@@ -43,10 +39,8 @@ namespace MapNotify_3_28
 
             string buttonText = isRebinding ? "PRESS KEY...###" + label : $"{prefix}{node.Value}###{label}";
 
-            if (ImGui.Button(buttonText, new System.Numerics.Vector2(150, 0)))
-            {
+            if (ImGui.Button(buttonText, new nuVector2(150, 0)))
                 _rebindingNodeName = label;
-            }
 
             if (isRebinding)
             {
@@ -63,48 +57,8 @@ namespace MapNotify_3_28
                 if (Input.GetKeyState(System.Windows.Forms.Keys.Escape)) _rebindingNodeName = null;
             }
         }
-        public static void DebugHover()
-        {
-            var uiHover = ingameState.UIHover ?? null;
-            if (uiHover == null || !uiHover.IsVisible)
-                return;
-            var inventoryItemIcon = uiHover?.AsObject<NormalInventoryItem>() ?? null;
-            if (inventoryItemIcon == null)
-                return;
-            var tooltip = inventoryItemIcon?.Tooltip ?? null;
-            var entity = inventoryItemIcon?.Item ?? null;
-            if (tooltip != null && entity.Address != 0 && entity.IsValid)
-            {
-                var modsComponent = entity.GetComponent<Mods>() ?? null;
-                if (modsComponent == null)
-                    hoverMods.Clear();
-                else if (modsComponent != null && modsComponent.ItemMods.Count() > 0)
-                {
-                    hoverMods.Clear();
-                    var itemMods = modsComponent?.ItemMods ?? null;
-                    if (itemMods == null || itemMods.Count == 0)
-                    {
-                        hoverMods.Clear();
-                        return;
-                    }
-                    foreach (var mod in itemMods)
-                    {
-                        if (
-                            !hoverMods.Contains(
-                                $"{mod.RawName} : {mod.Value1}, {mod.Value2}, {mod.Value3}, {mod.Value4}"
-                            )
-                        )
-                            hoverMods.Add(
-                                $"{mod.RawName} : {mod.Value1}, {mod.Value2}, {mod.Value3}, {mod.Value4}"
-                            );
-                    }
-                }
-            }
-            else
-            {
-                hoverMods.Clear();
-            }
-        }
+
+        // The helper methods Checkbox, IntSlider, etc., are now in UiHelpers.cs
 
         public override void DrawSettings()
         {

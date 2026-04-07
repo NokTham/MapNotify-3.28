@@ -250,20 +250,6 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         }
         return result;
     }
-    private ExileCore.PoEMemory.Element FindItemsContainer(ExileCore.PoEMemory.Element root)
-    {
-        if (root == null)
-            return null;
-        if (root.ChildCount > 10)
-            return root;
-        foreach (var child in root.Children)
-        {
-            var found = FindItemsContainer(child);
-            if (found != null)
-                return found;
-        }
-        return null;
-    }
 
     public override bool Initialise()
     {
