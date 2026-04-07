@@ -118,6 +118,7 @@ namespace MapNotify_3_28
                 IsMavenMap = path.Contains("MavenMap") || path.Contains("Invitations/Maven");
                 
                 UpdateHeistDetails();
+                IsOriginatorMap = false;
 
                 var baseComponent = Entity.GetComponent<Base>();
                 NeedsPadding = Tier != -1 || IsMavenMap || IsFragment || !string.IsNullOrEmpty(HeistJob);
@@ -230,6 +231,10 @@ namespace MapNotify_3_28
                                 }
                             }
 
+                            // Optimization: Check for Originator/Uber status during the main mod pass
+                            if (!IsOriginatorMap && (mod.RawName == "IsUberMap" || mod.RawName.Contains("MapZanaInfluence")))
+                                IsOriginatorMap = true;
+
                             // Optimize Dictionary Search
                             foreach (var entry in GoodModsDictionary)
                             {
@@ -267,10 +272,6 @@ namespace MapNotify_3_28
                 OriginatorScarabs = originatorScarabs;
                 OriginatorCurrency = originatorCurrency;
                 OriginatorMaps = originatorMaps;
-                IsOriginatorMap =
-                    modsComponent?.ItemMods.Any(
-                        x => x.RawName == "IsUberMap" || x.RawName.Contains("MapZanaInfluence")
-                    ) == true;
                 {
                     var baseComp = Entity.GetComponent<Base>();
                     var mapTrim = baseComp != null ? baseComp.Name.Replace(" Map", "") : "Unknown";

@@ -226,10 +226,12 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         {
             // Safe chain prevents log spam when UI indices aren't fully loaded
             var tradeRoot = window.GetChildAtIndex(3)?.GetChildAtIndex(1)?.GetChildAtIndex(0)?.GetChildAtIndex(0);
-            var otherSide = tradeRoot?.GetChildAtIndex(1)?.GetChildAtIndex(1);
+            
+            // Target the side containers to scan all items in the trade
+            var otherSide = tradeRoot?.GetChildAtIndex(1);
             if (otherSide != null) FindMapsInElementRecursive(otherSide, result, seenAddresses, 0);
 
-            var selfSide = tradeRoot?.GetChildAtIndex(0)?.GetChildAtIndex(2);
+            var selfSide = tradeRoot?.GetChildAtIndex(0);
             if (selfSide != null) FindMapsInElementRecursive(selfSide, result, seenAddresses, 0);
         }
         else // PurchaseWindow, PurchaseWindowHideout, HaggleWindow
