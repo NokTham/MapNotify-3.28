@@ -1,5 +1,5 @@
-# MapNotify
-Notifications about map mods, quantity, packsize and other useful information for immediate parsing
+# MapNotify 3.28
+Notifications for Map modifiers, Heist requirements, and Atlas completion.
 
 ![hippo](https://i.imgur.com/6X2qUWh.gif)
 
@@ -11,23 +11,23 @@ Notifications about map mods, quantity, packsize and other useful information fo
 
 ![Image](https://i.imgur.com/Wzh48nV.png)
 
-![Image](https://i.imgur.com/JaMQjQZ.png)
+![Image](https://i.imgur.com/fSFfByJ.png)
 
 ![Image](https://i.imgur.com/5sdGnSM.png)
 
 ![Image](https://i.imgur.com/q4mYaWD.png)
 
-![Image](https://i.imgur.com/CnVX4KY.png)
+![Image](https://i.imgur.com/WU6phGx.png)
 
 ![Image](https://i.imgur.com/BsivXOE.png)
 
 # Includes
 ### 1. Enhanced Map Tooltips
-When hovering over a map, an overlay displays:
+When hovering over a map, contract, or blueprint, an overlay displays:
 *   **Map Tier & Name**: Colored by rarity (Normal, Magic, Rare).
-*   **Quantity & Pack Size**: Includes color-coded warnings if Item Quantity is below a user-defined threshold.
+*   **IIQ, IIR & Pack Size**: Compact display of Item Quantity, Rarity, and Pack Size with customizable thresholds.
 *   **Mod Count**: Displays the number of mods.
-*   **Specialized Quality**: Detects and displays specific chisel types (Quantity, Rarity, Pack Size, Scarab, etc.).
+*   **Specialized Quality**: Detects and displays specific chisel types (Quantity, Rarity, Pack Size, Scarab, Currency, etc.).
 *   **Originator/Nightmare Stats**: Shows bonus percentages (More Maps, Scarabs, or Currency).
 
 ### 2. Mod Alerts (Good vs. Bad)
@@ -39,7 +39,8 @@ The plugin parses item modifiers against your custom configuration files (`GoodM
 ### 3. Visual Inventory & Stash Highlights
 Instantly see which maps are worth running or avoiding via colored borders and highlights:
 *   Works across **Player Inventory**, **Standard Stash**, and **Map Stash Tabs**.
-*   Works in **Shops** and specialized windows like **Tujen's Haggle** or **Trade windows**.
+*   Supports **Heist Locker** and **Kingsmarch Offline Merchant**.
+*   Works in **Shops** and specialized windows like **Tujen's Haggle** or **Trade Windows** (both sides).
 *   Highlights use customizable colors and thickness settings.
 
 ### 4. Atlas Highlighter
@@ -49,7 +50,7 @@ Visual indicators directly on the Atlas for:
 *   **Maven Witness**: Highlights maps currently witnessed by the Maven.
 *   *Radius and colors are fully adjustable in settings.*
 
-### 6. Interactive Mod Preview & Configuration
+### 5. Interactive Mod Preview & Configuration
 Manage your mod lists without leaving the game:
 *   **Capture Hotkey**: Hover over any map and press your hotkey (default: customizable with Ctrl/Shift/Alt) to open the **Map Mod Preview** window.
 *   **On-the-fly Editing**: View the raw internal names of mods, set custom display names, pick colors, and toggle "Bricked" status.
