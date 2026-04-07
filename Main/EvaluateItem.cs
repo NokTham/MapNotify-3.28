@@ -7,12 +7,15 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using nuVector4 = System.Numerics.Vector4;
 
 namespace MapNotify_3_28
 {
     public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     {
+        private static readonly Regex TooltipTagsRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
+
         public static nuVector4 GetRarityColor(ItemRarity rarity)
         {
             switch (rarity)
@@ -71,9 +74,13 @@ namespace MapNotify_3_28
             public int Quantity { get; set; }
             public int Rarity { get; set; }
             public int ModCount { get; set; }
-            public string HeistJob { get; set; }
             public int HeistAreaLevel { get; set; }
-            public int HeistLevel { get; set; }
+            public class HeistJobLine
+            {
+                public string Text { get; set; }
+                public bool IsRevealed { get; set; }
+            }
+            public List<HeistJobLine> HeistJobLines { get; set; } = new List<HeistJobLine>();
             public bool NeedsPadding { get; set; }
             public bool Bricked { get; set; }
             public bool Corrupted { get; set; }
@@ -110,16 +117,18 @@ namespace MapNotify_3_28
                 var baseComponent = Entity.GetComponent<Base>();
                 var mapComponent = Entity.GetComponent<ExileCore.PoEMemory.Components.MapKey>();
                 var qualityComponent = Entity.GetComponent<Quality>();
+                var heistContract = Entity.GetComponent<HeistContract>();
+                var heistBlueprint = Entity.GetComponent<HeistBlueprint>();
 
                 Tier = mapComponent?.Tier ?? -1;
                 IsFragment = path.Contains("Fragments/") && !path.Contains("Maven");
                 IsMavenMap = path.Contains("MavenMap") || path.Contains("Invitations/Maven");
 
-                UpdateHeistDetails();
+                UpdateHeistDetails(heistContract, heistBlueprint, modsComponent);
                 IsOriginatorMap = false;
                 Bricked = false;
                 Corrupted = baseComponent?.isCorrupted ?? false;
-                NeedsPadding = Tier != -1 || IsMavenMap || IsFragment || !string.IsNullOrEmpty(HeistJob);
+                NeedsPadding = Tier != -1 || IsMavenMap || IsFragment || HeistJobLines.Count > 0;
 
                 // Get quality from component, or fallback to tooltip if memory returns 0
                 int quantity = qualityComponent?.ItemQuality ?? 0;
@@ -287,21 +296,22 @@ namespace MapNotify_3_28
 
             private int ParseTooltipQuality()
             {
-                if (Item?.Tooltip == null) return 0;
+                var tooltip = Item?.Tooltip;
+                if (tooltip == null) return 0;
                 string FindQualityText(ExileCore.PoEMemory.Element element)
                 {
                     if (element == null) return null;
                     if (!string.IsNullOrEmpty(element.Text) && element.Text.Contains("Quality"))
                         return element.Text;
-                    var children = element.Children;
-                    for (int i = 0; i < children.Count; i++)
+                    int count = (int)element.ChildCount;
+                    for (int i = 0; i < count; i++)
                     {
-                        var found = FindQualityText(children[i]);
+                        var found = FindQualityText(element.GetChildAtIndex(i));
                         if (found != null) return found;
                     }
                     return null;
                 }
-                var qualityLine = FindQualityText(Item.Tooltip);
+                var qualityLine = FindQualityText(tooltip);
                 if (string.IsNullOrEmpty(qualityLine)) return 0;
                 int start = -1;
                 for (int i = 0; i < qualityLine.Length; i++) { if (char.IsDigit(qualityLine[i])) { start = i; break; } }
@@ -311,24 +321,159 @@ namespace MapNotify_3_28
                 return 0;
             }
 
-            private void UpdateHeistDetails()
+            private int ParseTooltipWings()
             {
-                var heistContract = Entity.GetComponent<HeistContract>();
-                var heistBlueprint = Entity.GetComponent<HeistBlueprint>();
+                if (Item?.Tooltip == null) return 1;
+                string FindWingsText(ExileCore.PoEMemory.Element element)
+                {
+                    if (element == null) return null;
+                    if (!string.IsNullOrEmpty(element.Text) && element.Text.Contains("Wings Revealed"))
+                        return element.Text;
+                    
+                    int count = (int)element.ChildCount;
+                    for (int i = 0; i < count; i++)
+                    {
+                        var found = FindWingsText(element.GetChildAtIndex(i));
+                        if (found != null) return found;
+                    }
+                    return null;
+                }
+                var wingsLine = FindWingsText(Item.Tooltip);
+                if (string.IsNullOrEmpty(wingsLine)) return 1;
+                
+                // Use a robust digit scanner to ignore PoE markup tags (e.g., <white>{2}/4)
+                int colonIndex = wingsLine.IndexOf(':');
+                if (colonIndex == -1) return 1;
+
+                int start = -1;
+                for (int i = colonIndex + 1; i < wingsLine.Length; i++)
+                {
+                    if (char.IsDigit(wingsLine[i])) { start = i; break; }
+                }
+
+                if (start == -1) return 1;
+
+                int end = start;
+                while (end < wingsLine.Length && char.IsDigit(wingsLine[end])) end++;
+
+                if (int.TryParse(wingsLine.Substring(start, end - start), out var res)) 
+                    return res;
+
+                return 1;
+            }
+
+            private Dictionary<string, int> ParseSummaryRequirements()
+            {
+                var requirements = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                var tooltip = Item?.Tooltip;
+                if (tooltip == null) return requirements;
+
+                void FindRequirementsRecursive(ExileCore.PoEMemory.Element element)
+                {
+                    if (element == null) return;
+                    var text = element.Text;
+                    if (!string.IsNullOrEmpty(text) && text.Contains("Requires "))
+                    {
+                        // Strip markup tags and brackets: <white>{Requires Lockpicking} (Level 5) -> Requires Lockpicking (Level 5)
+                        var cleanText = TooltipTagsRegex.Replace(text, "").Replace("{", "").Replace("}", "");
+                        int reqIndex = cleanText.IndexOf("Requires ");
+                        int openParen = cleanText.IndexOf('(', reqIndex);
+                        int closeParen = cleanText.IndexOf(')', openParen);
+
+                        if (reqIndex != -1 && openParen > reqIndex + 8 && closeParen > openParen)
+                        {
+                            var jobName = cleanText.Substring(reqIndex + 9, openParen - (reqIndex + 9)).Trim();
+                            var levelPart = cleanText.Substring(openParen, closeParen - openParen);
+                            
+                            // Extract digit from "(Level 5)"
+                            int level = 0;
+                            for (int i = 0; i < levelPart.Length; i++)
+                                if (char.IsDigit(levelPart[i])) { level = (int)char.GetNumericValue(levelPart[i]); break; }
+                            
+                            if (!string.IsNullOrEmpty(jobName) && level > 0)
+                                requirements[jobName] = level;
+                        }
+                    }
+                    
+                    int count = (int)element.ChildCount;
+                    for (int i = 0; i < count; i++)
+                        FindRequirementsRecursive(element.GetChildAtIndex(i));
+                }
+
+                FindRequirementsRecursive(tooltip);
+                return requirements;
+            }
+
+            private void UpdateHeistDetails(HeistContract heistContract, HeistBlueprint heistBlueprint, Mods mods)
+            {
+                HeistJobLines.Clear();
+
                 if (heistContract != null)
                 {
-                    HeistAreaLevel = Entity.GetComponent<Mods>()?.ItemLevel ?? 0;
-                    HeistJob = heistContract.RequiredJob?.Name;
-                    HeistLevel = heistContract.RequiredJobLevel;
+                    HeistAreaLevel = mods?.ItemLevel ?? 0;
+                    var jobName = heistContract.RequiredJob?.Name ?? "Unknown Job";
+                    HeistJobLines.Add(new HeistJobLine
+                    {
+                        Text = $"{jobName} (Level {heistContract.RequiredJobLevel})",
+                        IsRevealed = true
+                    });
                 }
                 else if (heistBlueprint != null)
                 {
                     HeistAreaLevel = heistBlueprint.AreaLevel;
-                    HeistLevel = -1; // Use -1 to indicate it's a blueprint for the renderer
                     if (heistBlueprint.Wings != null)
                     {
-                        HeistJob = string.Join("\n", heistBlueprint.Wings
-                            .Select((w, i) => $"Wing {i + 1}: {string.Join(", ", w.Jobs.Where(j => j.Item1 != null).Select(j => $"{j.Item1.Name} {j.Item2}"))}"));
+                        var revealedWingsCount = ParseTooltipWings(); // Get the actual count from the tooltip
+                        var summaryRequirements = ParseSummaryRequirements(); // Still useful for job level checks
+                        int actuallyRevealed = 1; // Wing 1 is always revealed
+                        var wingReqs = new List<string>();
+                        for (int i = 0; i < heistBlueprint.Wings.Count; i++)
+                        {
+                            var w = heistBlueprint.Wings[i];
+                            wingReqs.Clear();
+                            bool fitsSummary = true;
+
+                            if (w.Jobs != null)
+                            {
+                                foreach (var job in w.Jobs)
+                                {
+                                    if (job.Item1 == null) continue;
+                                    var jobName = job.Item1.Name;
+                                    var jobLevel = job.Item2;
+                                    wingReqs.Add($"{jobName} {jobLevel}");
+
+                                    // Process of Elimination: 
+                                    // If a wing requires a job level HIGHER than what is shown on the item summary,
+                                    // or requires a job NOT shown on the summary, it is definitely unrevealed.
+                                    if (summaryRequirements.TryGetValue(jobName, out var maxLevel))
+                                    {
+                                        if (jobLevel > maxLevel) fitsSummary = false;
+                                    }
+                                    else
+                                    {
+                                        fitsSummary = false;
+                                    }
+                                }
+                            }
+
+                            HeistJobLines.Add(new HeistJobLine
+                            {
+                                Text = $"Wing {i + 1}: {string.Join(", ", wingReqs)}",
+                                // Optimized Reveal Logic:
+                                // 1. Wing 1 is always revealed.
+                                // 2. For others, if we haven't reached the count AND it fits the summary, it's revealed.
+                                // 3. If summary is empty (parser delay), fallback to sequential index.
+                                IsRevealed = i == 0 || (summaryRequirements.Count > 0 
+                                    ? (actuallyRevealed < revealedWingsCount && fitsSummary) 
+                                    : i < revealedWingsCount)
+                            });
+
+                            // Increment counter if we identified a revealed wing beyond the first
+                            if (i > 0 && (summaryRequirements.Count > 0 ? (actuallyRevealed < revealedWingsCount && fitsSummary) : i < revealedWingsCount))
+                            {
+                                actuallyRevealed++;
+                            }
+                        }
                     }
                 }
             }

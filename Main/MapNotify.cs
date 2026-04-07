@@ -430,18 +430,15 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                             ImGui.TextColored(Settings.ChiselColor, $"+{ItemDetails.ChiselValue}%% {ItemDetails.ChiselName}");
                         }
 
-                        if (Settings.ShowHeistInfo.Value && (ItemDetails.HeistAreaLevel > 0 || !string.IsNullOrEmpty(ItemDetails.HeistJob)))
+                        if (Settings.ShowHeistInfo.Value && (ItemDetails.HeistAreaLevel > 0 || ItemDetails.HeistJobLines.Count > 0))
                         {
                             var heistColor = new nuVector4(0.5f, 0.8f, 1f, 1f);
                             if (ItemDetails.HeistAreaLevel > 0)
                                 ImGui.TextColored(heistColor, $"Area Level: {ItemDetails.HeistAreaLevel}");
 
-                            if (!string.IsNullOrEmpty(ItemDetails.HeistJob))
+                            foreach (var line in ItemDetails.HeistJobLines)
                             {
-                                var jobText = ItemDetails.HeistLevel > 0
-                                    ? $"{ItemDetails.HeistJob} (Level {ItemDetails.HeistLevel})"
-                                    : ItemDetails.HeistJob;
-                                ImGui.TextColored(heistColor, jobText);
+                                ImGui.TextColored(line.IsRevealed ? heistColor : new nuVector4(0.5f, 0.8f, 1f, 0.5f), line.Text);
                             }
                         }
 
