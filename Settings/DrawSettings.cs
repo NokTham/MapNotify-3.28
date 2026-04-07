@@ -140,13 +140,13 @@ namespace MapNotify_3_28
 
                 Settings.BoxForBricked.Value = Checkbox("Mark Bricked", Settings.BoxForBricked.Value);
                 ImGui.SameLine();
-                HelpMarker("Marks bricked maps with a border. Configure color in the 'Borders and Colours' section.");
+                HelpMarker("Marks bricked maps with a border. Configure color in the 'Borders and Highlight Colours' section.");
                 Settings.BoxForMapWarnings.Value = Checkbox("Mark Bad Mods", Settings.BoxForMapWarnings.Value);
                 ImGui.SameLine();
-                HelpMarker("Highlights maps if there are bad mods. Configure color in the 'Borders and Colours' section.");
+                HelpMarker("Highlights maps if there are bad mods. Configure color in the 'Borders and Highlight Colours' section.");
                 Settings.BoxForMapBadWarnings.Value = Checkbox("Mark Good Mods", Settings.BoxForMapBadWarnings.Value);
                 ImGui.SameLine();
-                HelpMarker("Highlights maps if there are good mods. Configure color in the 'Borders and Colours' section.");
+                HelpMarker("Highlights maps if there are good mods. Configure color in the 'Borders and Highlight Colours' section.");
                 // ImGui.SameLine(); HelpMarker("Add ';true' after a line in the config files to mark it as a bricked mod.");
 
             }
@@ -246,7 +246,7 @@ namespace MapNotify_3_28
 * Hover a node or type 'a|e' in the Atlas Search Box to force the client to load all nodes data, this is only needed upon logging in, this will also highlight nodes that are not visible");
             }
 
-            if (ImGui.TreeNodeEx("Borders and Colours", ImGuiTreeNodeFlags.CollapsingHeader))
+            if (ImGui.TreeNodeEx("Borders and Highlight Colours", ImGuiTreeNodeFlags.CollapsingHeader))
             {
 
                 Settings.BorderDeflation.Value = IntSlider(
