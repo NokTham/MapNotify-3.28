@@ -176,17 +176,17 @@ namespace MapNotify_3_28
                     "Show Number of Mods",
                     Settings.ShowModCount.Value
                 );
-                Settings.ShowPackSizePercent.Value = Checkbox(
-                    "Show Pack Size %",
-                    Settings.ShowPackSizePercent.Value
-                );
-                Settings.ShowRarityPercent.Value = Checkbox(
-                    "Show Item Rarity %",
-                    Settings.ShowRarityPercent.Value
-                );
                 Settings.ShowQuantityPercent.Value = Checkbox(
                     "Show Item Quantity %",
                     Settings.ShowQuantityPercent.Value
+                );ImGui.SameLine(0f, 25f);
+                Settings.ShowPackSizePercent.Value = Checkbox(
+                    "Show Pack Size %",
+                    Settings.ShowPackSizePercent.Value
+                );ImGui.SameLine(0f, 25f);
+                Settings.ShowRarityPercent.Value = Checkbox(
+                    "Show Item Rarity %",
+                    Settings.ShowRarityPercent.Value
                 );
                 Settings.ColorQuantityPercent.Value = Checkbox(
                     "Warn Below Quantity Percentage",
