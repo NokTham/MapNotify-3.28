@@ -404,15 +404,16 @@ namespace MapNotify_3_28
             {
                 var tooltip = Item?.Tooltip;
                 if (tooltip == null) return 0;
-                string FindQualityText(ExileCore.PoEMemory.Element element)
+                string FindQualityText(ExileCore.PoEMemory.Element element, int depth = 0)
                 {
-                    if (element == null) return null;
+                    if (element == null || depth > 20) return null;
                     if (!string.IsNullOrEmpty(element.Text) && element.Text.Contains("Quality"))
                         return element.Text;
                     int count = (int)element.ChildCount;
+                    if (count <= 0 || count > 100) return null;
                     for (int i = 0; i < count; i++)
                     {
-                        var found = FindQualityText(element.GetChildAtIndex(i));
+                        var found = FindQualityText(element.GetChildAtIndex(i), depth + 1);
                         if (found != null) return found;
                     }
                     return null;
@@ -430,16 +431,17 @@ namespace MapNotify_3_28
             private int ParseTooltipWings()
             {
                 if (Item?.Tooltip == null) return 1;
-                string FindWingsText(ExileCore.PoEMemory.Element element)
+                string FindWingsText(ExileCore.PoEMemory.Element element, int depth = 0)
                 {
-                    if (element == null) return null;
+                    if (element == null || depth > 20) return null;
                     if (!string.IsNullOrEmpty(element.Text) && element.Text.Contains("Wings Revealed"))
                         return element.Text;
                     
                     int count = (int)element.ChildCount;
+                    if (count <= 0 || count > 100) return null;
                     for (int i = 0; i < count; i++)
                     {
-                        var found = FindWingsText(element.GetChildAtIndex(i));
+                        var found = FindWingsText(element.GetChildAtIndex(i), depth + 1);
                         if (found != null) return found;
                     }
                     return null;
@@ -474,9 +476,9 @@ namespace MapNotify_3_28
                 var tooltip = Item?.Tooltip;
                 if (tooltip == null) return requirements;
 
-                void FindRequirementsRecursive(ExileCore.PoEMemory.Element element)
+                void FindRequirementsRecursive(ExileCore.PoEMemory.Element element, int depth = 0)
                 {
-                    if (element == null) return;
+                    if (element == null || depth > 20) return;
                     var text = element.Text;
                     if (!string.IsNullOrEmpty(text) && text.Contains("Requires "))
                     {
@@ -502,8 +504,9 @@ namespace MapNotify_3_28
                     }
                     
                     int count = (int)element.ChildCount;
+                    if (count <= 0 || count > 100) return;
                     for (int i = 0; i < count; i++)
-                        FindRequirementsRecursive(element.GetChildAtIndex(i));
+                        FindRequirementsRecursive(element.GetChildAtIndex(i), depth + 1);
                 }
 
                 FindRequirementsRecursive(tooltip);
