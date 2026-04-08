@@ -96,6 +96,9 @@ namespace MapNotify_3_28
                     if (line.StartsWith("(") || line.StartsWith("{"))
                         continue;
 
+                if (line.Contains("Unscalable Value"))
+                    line = line.Replace("— Unscalable Value", "").Replace("- Unscalable Value", "").Trim();
+
                     cleanedLines.Add(line);
                 }
 
