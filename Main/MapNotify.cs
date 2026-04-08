@@ -388,7 +388,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 
                     if (!isFragment && (isInventory || Settings.ShowMapName.Value))
                     {
-                        ImGui.TextColored(ItemDetails.ItemColor, $"{ItemDetails.MapName}");
+                        ImGui.TextColored(ItemDetails.ItemColor, ItemDetails.MapName.Replace("%", "%%"));
                     }
 
                     // Quantity and Packsize for maps
@@ -488,14 +488,14 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                     {
                         if (ItemDetails.ActiveGoodMods.Count > 0)
                             foreach (var StyledText in ItemDetails.ActiveGoodMods)
-                                ImGui.TextColored(SharpToNu(StyledText.Color), $"{StyledText.Text}");
+                                ImGui.TextColored(SharpToNu(StyledText.Color), StyledText.Text.Replace("%", "%%"));
 
                         if (ItemDetails.ActiveGoodMods.Count > 0 && ItemDetails.ActiveBadMods.Count > 0)
                             ImGui.Dummy(new nuVector2(0, 5)); // Adds a 10-pixel vertical space
 
                         if (ItemDetails.ActiveBadMods.Count > 0)
                             foreach (var StyledText in ItemDetails.ActiveBadMods)
-                                ImGui.TextColored(SharpToNu(StyledText.Color), $"{(StyledText.Bricking ? "[B] " : "")}{StyledText.Text}");
+                                ImGui.TextColored(SharpToNu(StyledText.Color), $"{(StyledText.Bricking ? "[B] " : "")}{StyledText.Text.Replace("%", "%%")}");
                     }
                     ImGui.EndGroup();
 

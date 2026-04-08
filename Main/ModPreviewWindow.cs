@@ -31,7 +31,7 @@ namespace MapNotify_3_28
                             ImGui.SameLine();
                             var col = SharpToNu(mod.Value.Color);
                             string brickStatus = mod.Value.Bricking ? " [BRICKED]" : "";
-                            ImGui.TextColored(col, $"{mod.Value.Text} ({mod.Key}){brickStatus}");
+                            ImGui.TextColored(col, $"{mod.Value.Text.Replace("%", "%%")} ({mod.Key.Replace("%", "%%")}){brickStatus}");
                             ImGui.PopID();
                         }
                         ImGui.Unindent();
@@ -48,7 +48,7 @@ namespace MapNotify_3_28
                             ImGui.SameLine();
                             var col = SharpToNu(mod.Value.Color);
                             string brickPrefix = mod.Value.Bricking ? "[B] " : "";
-                            ImGui.TextColored(col, $"{brickPrefix}{mod.Value.Text} ({mod.Key})");
+                            ImGui.TextColored(col, $"{brickPrefix}{mod.Value.Text.Replace("%", "%%")} ({mod.Key.Replace("%", "%%")})");
                             ImGui.PopID();
                         }
                         ImGui.Unindent();
@@ -65,10 +65,16 @@ namespace MapNotify_3_28
                         ImGui.PushID(i);
                         if (!string.IsNullOrEmpty(mod.Description))
                         {
-                            HelpMarker(mod.Description);
-                            ImGui.SameLine();
+                            ImGui.PushStyleColor(ImGuiCol.Text, new nuVector4(1.0f, 1.0f, 1.0f, 1f));
+                            ImGui.TextWrapped(mod.Description.Replace("%", "%%"));
+                            ImGui.PopStyleColor();
                         }
-                        ImGui.TextWrapped($"Raw: {mod.RawName}");
+                        else
+                        {
+                            // Fallback: show the Raw name only if the description is missing
+                            ImGui.TextDisabled($"Raw: {mod.RawName.Replace("%", "%%")}");
+                        }
+
                         var dispName = mod.DisplayName;
                         if (ImGui.InputText("Tooltip Name", ref dispName, 100))
                         {
