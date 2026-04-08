@@ -38,8 +38,7 @@ The plugin parses item modifiers against your custom configuration files (`GoodM
 
 ### 3. Visual Inventory & Stash Highlights
 Instantly see which maps are worth running or avoiding via colored borders and highlights:
-*   Works across **Player Inventory**, **Standard Stash**, and **Map Stash Tabs**.
-*   Supports **Heist Locker** and **Kingsmarch Offline Merchant**.
+*   Works across **Player Inventory**, **Standard Stash**, **Map Stash Tabs** and **Heist Locker**.
 *   Works in **Shops** and specialized windows like **Tujen's Haggle** or **Trade Windows** (both sides).
 *   Highlights use customizable colors and thickness settings.
 
