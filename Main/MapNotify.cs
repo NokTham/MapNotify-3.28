@@ -14,6 +14,7 @@ using ExileCore.Shared.Helpers;
 using ImGuiNET;
 using SharpDX;
 using nuVector2 = System.Numerics.Vector2;
+using System.Text.RegularExpressions;
 using nuVector4 = System.Numerics.Vector4;
 
 namespace MapNotify_3_28;
@@ -48,6 +49,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     {
         public string RawName;
         public string DisplayName;
+        public string Description;
         public nuVector4 Color = new nuVector4(1, 0, 0, 1); // Default Red
         public bool IsBricking;
     }
@@ -226,7 +228,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         {
             // Safe chain prevents log spam when UI indices aren't fully loaded
             var tradeRoot = window.GetChildAtIndex(3)?.GetChildAtIndex(1)?.GetChildAtIndex(0)?.GetChildAtIndex(0);
-            
+
             // Target the side containers to scan all items in the trade
             var otherSide = tradeRoot?.GetChildAtIndex(1);
             if (otherSide != null) FindMapsInElementRecursive(otherSide, result, seenAddresses, 0);
@@ -624,8 +626,25 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                     if (mods != null)
                     {
                         _capturedMods.Clear();
+                        var descriptions = GetModDescriptionsFromTooltip(hoverItem.Tooltip);
+                        // LogMessage($"Render: GetModDescriptionsFromTooltip returned {descriptions.Count} descriptions for {hoverItem.Item.Path}.", 1);
+
+                        // Filter mods.ItemMods to only include explicit mods that are not blacklisted,
+                        // to match the descriptions list from the tooltip.
+                        var explicitModsFromItem = new List<ExileCore.PoEMemory.MemoryObjects.ItemMod>();
                         foreach (var mod in mods.ItemMods)
                         {
+                            bool blacklisted = ModNameBlacklist.Any(black => mod.RawName.Contains(black));
+                            if (!blacklisted)
+                            {
+                                explicitModsFromItem.Add(mod);
+                            }
+                        }
+
+                        // Now, iterate through the filtered explicit mods and assign descriptions
+                        for (int i = 0; i < explicitModsFromItem.Count; i++)
+                        {
+                            var mod = explicitModsFromItem[i];
                             var existingEntry = GoodModsDictionary.FirstOrDefault(x => mod.RawName.Contains(x.Key)).Value ??
                                                 BadModsDictionary.FirstOrDefault(x => mod.RawName.Contains(x.Key)).Value;
 
@@ -633,6 +652,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                             {
                                 RawName = mod.RawName,
                                 DisplayName = existingEntry?.Text ?? mod.Name,
+                                Description = i < descriptions.Count ? descriptions[i] : null, // Use 'i' directly for descriptions
                                 Color = existingEntry != null ? SharpToNu(existingEntry.Color) : new nuVector4(1, 1, 1, 1),
                                 IsBricking = existingEntry?.Bricking ?? false
                             });

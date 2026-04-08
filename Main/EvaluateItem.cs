@@ -15,22 +15,111 @@ namespace MapNotify_3_28
     public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     {
         private static readonly Regex TooltipTagsRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
+        private static readonly Regex ModHeaderRegex = new Regex(@"(Prefix|Suffix) Modifier\s+[""'].*?[""'](\s+—.*)?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private string GetCleanText(ExileCore.PoEMemory.Element element)
+        {
+            if (element == null) return null;
+            string rawText = null;
+
+            if (!string.IsNullOrEmpty(element.TextNoTags)) rawText = element.TextNoTags;
+            else if (!string.IsNullOrEmpty(element.Text)) rawText = TooltipTagsRegex.Replace(element.Text, "");
+            else return null;
+
+            return Regex.Replace(rawText, @"[ \t]+", " ").Trim();
+        }
+
+        private List<string> GetModDescriptionsFromTooltip(ExileCore.PoEMemory.Element tooltip)
+        {
+            var descriptions = new List<string>();
+            if (tooltip == null) return descriptions;
+
+            ExileCore.PoEMemory.Element FindModsContainer(ExileCore.PoEMemory.Element element, int depth = 0)
+            {
+                if (element == null || depth > 20) return null;
+                if (element.ChildCount >= 1)
+                {
+                    for (int i = 0; i < (int)element.ChildCount; i++)
+                    {
+                        var potentialModList = element.GetChildAtIndex(i);
+                        if (potentialModList != null && potentialModList.ChildCount > 0)
+                        {
+                            var firstModTextElement = potentialModList.GetChildAtIndex(0)?.GetChildAtIndex(0);
+                            string text = GetCleanText(firstModTextElement);
+                            if (!string.IsNullOrEmpty(text) && text.Contains("Modifier")) return element;
+                        }
+                    }
+                }
+
+                for (int i = 0; i < (int)element.ChildCount; i++)
+                {
+                    var found = FindModsContainer(element.GetChildAtIndex(i), depth + 1);
+                    if (found != null) return found;
+                }
+                return null;
+            }
+
+            var modsContainer = FindModsContainer(tooltip);
+            if (modsContainer == null) return descriptions;
+
+            for (int i = 0; i < (int)modsContainer.ChildCount; i++)
+            {
+                AddModDescriptionsFromList(modsContainer.GetChildAtIndex(i), descriptions);
+            }
+
+            return descriptions;
+        }
+
+        private void AddModDescriptionsFromList(ExileCore.PoEMemory.Element listElement, List<string> descriptions)
+        {
+            if (listElement == null) return;
+
+            for (int i = 0; i < (int)listElement.ChildCount; i++)
+            {
+                var rawModText = GetCleanText(listElement.GetChildAtIndex(i)?.GetChildAtIndex(0));
+                if (string.IsNullOrEmpty(rawModText)) continue;
+
+                var lines = rawModText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                if (lines.Length == 0) continue;
+
+                var cleanedLines = new List<string>();
+                for (int j = 0; j < lines.Length; j++)
+                {
+                    var line = lines[j].Trim();
+                    if (string.IsNullOrEmpty(line)) continue;
+
+                    // Skip the header line if it contains the "Modifier" keyword
+                    if (j == 0 && (line.Contains("Prefix Modifier") || line.Contains("Suffix Modifier")))
+                        continue;
+
+                    // Discard explanatory text lines starting with '(' or '{'
+                    if (line.StartsWith("(") || line.StartsWith("{"))
+                        continue;
+
+                    cleanedLines.Add(line);
+                }
+
+                if (cleanedLines.Count > 0)
+                {
+                    descriptions.Add(string.Join(Environment.NewLine, cleanedLines));
+                }
+            }
+        }
 
         public static nuVector4 GetRarityColor(ItemRarity rarity)
         {
             switch (rarity)
             {
                 case ItemRarity.Rare:
-                    return new nuVector4(0.99f, 0.99f, 0.46f, 1f);
+                    return new nuVector4(0.0f, 0.0f, 0.0f, 1f); // Placeholder, will be overwritten by actual color
                 case ItemRarity.Magic:
-                    return new nuVector4(0.68f, 0.68f, 1f, 1f); //0.52f, 0.52f, 0.99f, 1f
+                    return new nuVector4(0.0f, 0.0f, 0.0f, 1f); // Placeholder, will be overwritten by actual color
                 case ItemRarity.Unique:
-                    return new nuVector4(1f, 0.50f, 0.10f, 1f);
+                    return new nuVector4(0.0f, 0.0f, 0.0f, 1f); // Placeholder, will be overwritten by actual color
                 default:
                     return new nuVector4(1F, 1F, 1F, 1F);
             }
         }
-
         public static readonly string[] ModNameBlacklist = 
         {
             "AfflictionMapDeliriumStacks",
@@ -290,8 +379,25 @@ namespace MapNotify_3_28
                 #region Maven Regions & Areas
                 // All Maven-related logic for specific areas/invitations removed as it's no longer tied to map items.
                 #endregion
+
                 // evaluate rarity for colouring item name
-                ItemColor = GetRarityColor(modsComponent?.ItemRarity ?? ItemRarity.Normal);
+                // The actual colors are defined in the game's UI, so we'll use a default and let the game's rendering handle it.
+                // This method is primarily for consistency if we ever needed to override.
+                switch (modsComponent?.ItemRarity ?? ItemRarity.Normal)
+                {
+                    case ItemRarity.Rare:
+                        ItemColor = new nuVector4(0.99f, 0.99f, 0.46f, 1f); // Yellow
+                        break;
+                    case ItemRarity.Magic:
+                        ItemColor = new nuVector4(0.68f, 0.68f, 1f, 1f); // Blue
+                        break;
+                    case ItemRarity.Unique:
+                        ItemColor = new nuVector4(1f, 0.50f, 0.10f, 1f); // Orange
+                        break;
+                    default:
+                        ItemColor = new nuVector4(1F, 1F, 1F, 1F); // White
+                        break;
+                }
             }
 
             private int ParseTooltipQuality()

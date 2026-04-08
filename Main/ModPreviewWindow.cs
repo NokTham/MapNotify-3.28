@@ -63,6 +63,11 @@ namespace MapNotify_3_28
                     {
                         var mod = _capturedMods[i];
                         ImGui.PushID(i);
+                        if (!string.IsNullOrEmpty(mod.Description))
+                        {
+                            HelpMarker(mod.Description);
+                            ImGui.SameLine();
+                        }
                         ImGui.TextWrapped($"Raw: {mod.RawName}");
                         var dispName = mod.DisplayName;
                         if (ImGui.InputText("Tooltip Name", ref dispName, 100))
