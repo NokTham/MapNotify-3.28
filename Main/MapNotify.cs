@@ -45,16 +45,6 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 
     public new string ConfigDirectory => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "MapNotify-3.28");
 
-    public class CapturedMod
-    {
-        public string RawName;
-        public string DisplayName;
-        public string Description;
-        public string AffixType;
-        public nuVector4 Color = new nuVector4(1, 0, 0, 1); // Default Red
-        public bool IsBricking;
-    }
-
     private bool ItemIsMap(Entity entity)
     {
         if (entity == null || entity.Address == 0) return false;
@@ -613,121 +603,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                              (Settings.UseAlt == altHeld);
         if (modifiersMatch && Settings.CaptureHotkey.PressedOnce())
         {
-            // Force reload from files before capturing to ensure we have the latest settings
-            GoodModsDictionary = LoadConfigGoodMod();
-            BadModsDictionary = LoadConfigBadMod();
-
-            var captureHover = ingameState.UIHover;
-            if (captureHover?.IsVisible == true)
-            {
-                var hoverItem = captureHover.AsObject<NormalInventoryItem>();
-                if (hoverItem?.Item != null && ItemIsMap(hoverItem.Item))
-                {
-                    var mods = hoverItem.Item.GetComponent<Mods>();
-                    if (mods != null)
-                    {
-                        _capturedMods.Clear();
-                        var descriptions = GetModDescriptionsFromTooltip(hoverItem.Tooltip); // All lines from the visual tooltip
-                        var availableDescriptions = new List<string>(descriptions); // A mutable copy for matching
-
-                        // Filter, sort, and de-duplicate mods from memory.
-                        var explicitModsFromItem = mods.ItemMods
-                            .Where(m => m.ModRecord != null)
-                            .Where(m => m.ModRecord.AffixType.ToString().Contains("Prefix") || 
-                                        m.ModRecord.AffixType.ToString().Contains("Suffix") || 
-                                        m.ModRecord.AffixType.ToString().Contains("Implicit") || 
-                                        m.ModRecord.AffixType.ToString().Contains("Enchant"))
-                            .Where(m => !string.IsNullOrEmpty(m.Name))
-                            .Where(m => !ModNameBlacklist.Any(black => m.RawName.Contains(black)))
-                            .GroupBy(m => Regex.Replace(m.RawName, @"\s+", ""), StringComparer.OrdinalIgnoreCase) // Robust de-duplication
-                            .Select(g => g.First())
-                            .OrderBy(m => {
-                                var type = m.ModRecord.AffixType.ToString();
-                                if (type.Contains("Enchant")) return 0;
-                                if (type.Contains("Implicit")) return 1;
-                                if (type.Contains("Prefix")) return 2;
-                                if (type.Contains("Suffix")) return 3;
-                                return 4;
-                            })
-                            .ToList();
-
-                        // Now, iterate through the filtered explicit mods and assign descriptions
-                        foreach (var mod in explicitModsFromItem)
-                        {
-                            string matchedDescription = null;
-                            int descIndex = -1;
-
-                            // 1. Try to match using cleaned Template Fragments (Priority: Translation > Name)
-                            string nameToMatch = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
-                            if (!string.IsNullOrEmpty(nameToMatch))
-                            {
-                                // Clean memory string: handle escaped percents (%% -> %) and markup
-                                var cleanModName = TooltipTagsRegex.Replace(nameToMatch, "")
-                                                       .Replace("{", "").Replace("}", "")
-                                                       .Replace("%%", "%").Replace("..", ".").Trim();
-                                
-                                for (int k = 0; k < availableDescriptions.Count; k++)
-                                {
-                                    var fragments = cleanModName.Split('#', StringSplitOptions.RemoveEmptyEntries)
-                                                           .Select(f => f.Trim())
-                                                           .Where(f => f.Length > 1)
-                                                           .ToList();
-
-                                    // Clean UI text: remove ranges and normalize whitespace
-                                    var uiTextNoRanges = Regex.Replace(availableDescriptions[k], @"\(\d+-\d+\)", "").Trim();
-                                    uiTextNoRanges = Regex.Replace(uiTextNoRanges, @"\s+", " ");
-
-                                    if (fragments.Count > 0 && fragments.All(f => uiTextNoRanges.Contains(f, StringComparison.OrdinalIgnoreCase)) ||
-                                        (fragments.Count == 0 && uiTextNoRanges.Contains(cleanModName, StringComparison.OrdinalIgnoreCase)))
-                                    {
-                                        matchedDescription = availableDescriptions[k];
-                                        descIndex = k;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            // 2. Logic Fallback: Only use the first available description if this mod is NOT 
-                            // in the blacklist and we are reasonably sure it should have a description.
-                            if (matchedDescription == null && availableDescriptions.Count > 0)
-                            {
-                                // Only fallback if we can't find a better match elsewhere
-                                matchedDescription = availableDescriptions[0];
-                                descIndex = 0;
-                            }
-                            if (matchedDescription != null && (
-                                matchedDescription.Contains("CachedStatDescription") ||
-                                matchedDescription.Contains("System.Collections.Generic") ||
-                                matchedDescription.StartsWith("<unknown")))
-                            {
-                                if (descIndex != -1) availableDescriptions.RemoveAt(descIndex);
-                                matchedDescription = null;
-                                descIndex = -1;
-                            }
-
-                            if (descIndex != -1)
-                            {
-                                availableDescriptions.RemoveAt(descIndex); // Mark as used to prevent re-matching
-                            }
-
-                            var existingEntry = GoodModsDictionary.FirstOrDefault(x => mod.RawName.Contains(x.Key)).Value ??
-                                                BadModsDictionary.FirstOrDefault(x => mod.RawName.Contains(x.Key)).Value;
-
-                            _capturedMods.Add(new CapturedMod
-                            {
-                                RawName = mod.RawName.Trim(),
-                                AffixType = mod.ModRecord.AffixType.ToString(),
-                                DisplayName = existingEntry?.Text ?? (matchedDescription ?? mod.Name),
-                                // Priority: UI Scraped > API Translation > Template Name
-                                Description = matchedDescription ?? (!string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name),
-                                Color = existingEntry != null ? SharpToNu(existingEntry.Color) : new nuVector4(1, 1, 1, 1),
-                                IsBricking = existingEntry?.Bricking ?? false
-                            });
-                        }
-                        _showPreviewWindow = true;
-                    }
-                }
-            }
+            HandleCaptureHotkey();
         }
 
         if (_showPreviewWindow)
@@ -881,4 +757,109 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                 RenderItem(hoverItem, hoverItem.Item);
         }
     }
+
+    private void HandleCaptureHotkey()
+    {
+        // Force reload from files before capturing to ensure we have the latest settings
+        GoodModsDictionary = LoadConfigGoodMod();
+        BadModsDictionary = LoadConfigBadMod();
+
+        var captureHover = ingameState.UIHover;
+        if (captureHover?.IsVisible != true) return;
+
+        var hoverItem = captureHover.AsObject<NormalInventoryItem>();
+        if (hoverItem?.Item == null || !ItemIsMap(hoverItem.Item)) return;
+
+        var mods = hoverItem.Item.GetComponent<Mods>();
+        if (mods == null) return;
+
+        _capturedMods.Clear();
+        var descriptions = GetModDescriptionsFromTooltip(hoverItem.Tooltip);
+        var availableDescriptions = new List<string>(descriptions);
+
+        var explicitModsFromItem = mods.ItemMods
+            .Where(m => m.ModRecord != null)
+            .Where(m => m.ModRecord.AffixType.ToString().Contains("Prefix") || 
+                        m.ModRecord.AffixType.ToString().Contains("Suffix") || 
+                        m.ModRecord.AffixType.ToString().Contains("Implicit") || 
+                        m.ModRecord.AffixType.ToString().Contains("Enchant"))
+            .Where(m => !string.IsNullOrEmpty(m.Name))
+            .Where(m => !ModNameBlacklist.Any(black => m.RawName.Contains(black)))
+            .GroupBy(m => Regex.Replace(m.RawName, @"\s+", ""), StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.First())
+            .OrderBy(m => {
+                var type = m.ModRecord.AffixType.ToString();
+                if (type.Contains("Enchant")) return 0;
+                if (type.Contains("Implicit")) return 1;
+                if (type.Contains("Prefix")) return 2;
+                if (type.Contains("Suffix")) return 3;
+                return 4;
+            })
+            .ToList();
+
+        foreach (var mod in explicitModsFromItem)
+        {
+            string matchedDescription = null;
+            int descIndex = -1;
+            string nameToMatch = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
+            
+            if (!string.IsNullOrEmpty(nameToMatch))
+            {
+                var cleanModName = TooltipTagsRegex.Replace(nameToMatch, "").Replace("{", "").Replace("}", "").Replace("%%", "%").Replace("..", ".").Trim();
+                for (int k = 0; k < availableDescriptions.Count; k++)
+                {
+                    var fragments = cleanModName.Split('#', StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).Where(f => f.Length > 1).ToList();
+                    var uiTextNoRanges = Regex.Replace(availableDescriptions[k], @"\(\d+-\d+\)", "").Trim();
+                    uiTextNoRanges = Regex.Replace(uiTextNoRanges, @"\s+", " ");
+
+                    if (fragments.Count > 0 && fragments.All(f => uiTextNoRanges.Contains(f, StringComparison.OrdinalIgnoreCase)) ||
+                        (fragments.Count == 0 && uiTextNoRanges.Contains(cleanModName, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        matchedDescription = availableDescriptions[k];
+                        descIndex = k;
+                        break;
+                    }
+                }
+            }
+
+            if (matchedDescription == null && availableDescriptions.Count > 0)
+            {
+                matchedDescription = availableDescriptions[0];
+                descIndex = 0;
+            }
+
+            if (matchedDescription != null && (matchedDescription.Contains("CachedStatDescription") || matchedDescription.Contains("System.Collections.Generic") || matchedDescription.StartsWith("<unknown")))
+            {
+                if (descIndex != -1) availableDescriptions.RemoveAt(descIndex);
+                matchedDescription = null;
+                descIndex = -1;
+            }
+
+            if (descIndex != -1) availableDescriptions.RemoveAt(descIndex);
+
+            var existingEntry = GoodModsDictionary.FirstOrDefault(x => mod.RawName.Contains(x.Key)).Value ??
+                                BadModsDictionary.FirstOrDefault(x => mod.RawName.Contains(x.Key)).Value;
+
+            _capturedMods.Add(new CapturedMod
+            {
+                RawName = mod.RawName.Trim(),
+                AffixType = mod.ModRecord.AffixType.ToString(),
+                DisplayName = existingEntry?.Text ?? (matchedDescription ?? mod.Name),
+                Description = matchedDescription ?? (!string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name),
+                Color = existingEntry != null ? SharpToNu(existingEntry.Color) : new nuVector4(1, 1, 1, 1),
+                IsBricking = existingEntry?.Bricking ?? false
+            });
+        }
+        _showPreviewWindow = true;
+    }
+}
+
+public class CapturedMod
+{
+    public string RawName { get; set; }
+    public string DisplayName { get; set; }
+    public string Description { get; set; }
+    public string AffixType { get; set; }
+    public nuVector4 Color { get; set; } = new nuVector4(1, 1, 1, 1);
+    public bool IsBricking { get; set; }
 }
