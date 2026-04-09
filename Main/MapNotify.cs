@@ -782,6 +782,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             .Where(m => m.ModRecord.AffixType.ToString().Contains("Prefix") || 
                         m.ModRecord.AffixType.ToString().Contains("Suffix") || 
                         m.ModRecord.AffixType.ToString().Contains("Implicit") || 
+                        m.ModRecord.AffixType.ToString().Contains("Unique") || // Include Unique modifiers for Valdo maps
                         m.ModRecord.AffixType.ToString().Contains("Enchant"))
             .Where(m => !string.IsNullOrEmpty(m.Name))
             .Where(m => !ModNameBlacklist.Any(black => m.RawName.Contains(black)))
@@ -791,6 +792,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                 var type = m.ModRecord.AffixType.ToString();
                 if (type.Contains("Enchant")) return 0;
                 if (type.Contains("Implicit")) return 1;
+                if (type.Contains("Unique")) return 2; // Order Unique modifiers after Implicit
                 if (type.Contains("Prefix")) return 2;
                 if (type.Contains("Suffix")) return 3;
                 return 4;
