@@ -717,10 +717,9 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                             {
                                 RawName = mod.RawName.Trim(),
                                 AffixType = mod.ModRecord.AffixType.ToString(),
-                                DisplayName = existingEntry?.Text ?? mod.Name,
-                                // Priority: UI Scraped > Config Text > API Translation > Template Name
-                                Description = matchedDescription ?? (existingEntry?.Text ?? 
-                                              (!string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name)),
+                                DisplayName = existingEntry?.Text ?? (matchedDescription ?? mod.Name),
+                                // Priority: UI Scraped > API Translation > Template Name
+                                Description = matchedDescription ?? (!string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name),
                                 Color = existingEntry != null ? SharpToNu(existingEntry.Color) : new nuVector4(1, 1, 1, 1),
                                 IsBricking = existingEntry?.Bricking ?? false
                             });

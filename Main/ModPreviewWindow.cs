@@ -76,9 +76,9 @@ namespace MapNotify_3_28
                         }
 
                         ImGui.PushID(i);
+                        HelpMarker($"Internal Name: {mod.RawName}");
                         ImGui.SameLine();
                         string displayDesc = (string.IsNullOrEmpty(mod.Description) ? mod.RawName : mod.Description).Replace("%%", "%").Replace("%", "%%");
-                        ImGui.Dummy(new nuVector2(0, 5));
                         ImGui.TextWrapped(displayDesc);
 
                         var dispName = mod.DisplayName;
