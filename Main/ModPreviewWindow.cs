@@ -31,7 +31,8 @@ namespace MapNotify_3_28
                             ImGui.SameLine();
                             var col = SharpToNu(mod.Value.Color);
                             string brickStatus = mod.Value.Bricking ? " [BRICKED]" : "";
-                            ImGui.TextColored(col, $"{mod.Value.Text} ({mod.Key}){brickStatus}");
+                            string cleanText = mod.Value.Text.Replace("%%", "%").Replace("%", "%%");
+                            ImGui.TextColored(col, $"{cleanText} ({mod.Key}){brickStatus}");
                             ImGui.PopID();
                         }
                         ImGui.Unindent();
@@ -48,7 +49,8 @@ namespace MapNotify_3_28
                             ImGui.SameLine();
                             var col = SharpToNu(mod.Value.Color);
                             string brickPrefix = mod.Value.Bricking ? "[B] " : "";
-                            ImGui.TextColored(col, $"{brickPrefix}{mod.Value.Text} ({mod.Key})");
+                            string cleanText = mod.Value.Text.Replace("%%", "%").Replace("%", "%%");
+                            ImGui.TextColored(col, $"{brickPrefix}{cleanText} ({mod.Key})");
                             ImGui.PopID();
                         }
                         ImGui.Unindent();
@@ -59,16 +61,26 @@ namespace MapNotify_3_28
 
                 if (ImGui.BeginChild("ScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Border))
                 {
+                    string lastAffixType = null;
                     for (int i = 0; i < _capturedMods.Count; i++)
                     {
                         var mod = _capturedMods[i];
-                        ImGui.PushID(i);
-                        if (!string.IsNullOrEmpty(mod.Description))
+
+                        // Visual Headers for Hierarchy (Prefix/Suffix/Implicit)
+                        if (mod.AffixType != lastAffixType)
                         {
-                            HelpMarker(mod.Description);
-                            ImGui.SameLine();
+                            if (i > 0) ImGui.Dummy(new System.Numerics.Vector2(0, 10));
+                            ImGui.TextColored(new nuVector4(0.5f, 0.8f, 1f, 1f), $"--- {mod.AffixType}es ---");
+                            ImGui.Separator();
+                            lastAffixType = mod.AffixType;
                         }
-                        ImGui.TextWrapped($"Raw: {mod.RawName}");
+
+                        ImGui.PushID(i);
+                        ImGui.SameLine();
+                        string displayDesc = (string.IsNullOrEmpty(mod.Description) ? mod.RawName : mod.Description).Replace("%%", "%").Replace("%", "%%");
+                        ImGui.Dummy(new nuVector2(0, 5));
+                        ImGui.TextWrapped(displayDesc);
+
                         var dispName = mod.DisplayName;
                         if (ImGui.InputText("Tooltip Name", ref dispName, 100))
                         {

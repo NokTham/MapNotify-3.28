@@ -14,97 +14,90 @@ namespace MapNotify_3_28
 {
     public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     {
-        private static readonly Regex TooltipTagsRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
-        private static readonly Regex ModHeaderRegex = new Regex(@"(Prefix|Suffix) Modifier\s+[""'].*?[""'](\s+—.*)?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private string GetCleanText(ExileCore.PoEMemory.Element element)
-        {
-            if (element == null) return null;
-            string rawText = null;
-
-            if (!string.IsNullOrEmpty(element.TextNoTags)) rawText = element.TextNoTags;
-            else if (!string.IsNullOrEmpty(element.Text)) rawText = TooltipTagsRegex.Replace(element.Text, "");
-            else return null;
-
-            return Regex.Replace(rawText, @"[ \t]+", " ").Trim();
-        }
+        private static readonly Regex TooltipTagsRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled); // Used for cleaning text
 
         private List<string> GetModDescriptionsFromTooltip(ExileCore.PoEMemory.Element tooltip)
         {
             var descriptions = new List<string>();
             if (tooltip == null) return descriptions;
 
-            ExileCore.PoEMemory.Element FindModsContainer(ExileCore.PoEMemory.Element element, int depth = 0)
+            // --- Path-Based UI Traversal ---
+            // Logic: tooltip -> [0] (frame) -> [1] (content area)
+            // Index [0] of the frame contains rarity name/tier.
+            // Index [1] contains the actual item properties and mods.
+            var contentArea = tooltip.GetChildAtIndex(0)?.GetChildAtIndex(1);
+            if (contentArea != null)
             {
-                if (element == null || depth > 20) return null;
-                if (element.ChildCount >= 1)
+                // Search for the Advanced Mod container within the content area.
+                // As you noted, this is often an invisible element (index 14 in your example).
+                for (int i = 0; i < contentArea.ChildCount; i++)
                 {
-                    for (int i = 0; i < (int)element.ChildCount; i++)
+                    var container = contentArea.GetChildAtIndex(i);
+                    
+                    // Logic: The mod container is usually the only large, invisible child 
+                    // that contains the Advanced Mod headers.
+                    if (container == null || container.ChildCount < 1 || container.IsVisible) continue;
+
+                    bool isModContainer = false;
+                    for (int j = 0; j < container.ChildCount; j++)
                     {
-                        var potentialModList = element.GetChildAtIndex(i);
-                        if (potentialModList != null && potentialModList.ChildCount > 0)
+                        var headerElem = container.GetChildAtIndex(j)?.GetChildAtIndex(0);
+                        var headerText = headerElem?.TextNoTags ?? headerElem?.Text;
+                        if (headerText != null && (headerText.Contains("Modifier") || headerText.Contains("Prefix") || headerText.Contains("Suffix")))
                         {
-                            var firstModTextElement = potentialModList.GetChildAtIndex(0)?.GetChildAtIndex(0);
-                            string text = GetCleanText(firstModTextElement);
-                            if (!string.IsNullOrEmpty(text) && text.Contains("Modifier")) return element;
+                            isModContainer = true;
+                            break;
                         }
                     }
-                }
+                    if (!isModContainer) continue;
 
-                for (int i = 0; i < (int)element.ChildCount; i++)
-                {
-                    var found = FindModsContainer(element.GetChildAtIndex(i), depth + 1);
-                    if (found != null) return found;
+                    // Process Prefix and Suffix groups within the container
+                    for (int groupIdx = 0; groupIdx < container.ChildCount; groupIdx++)
+                    {
+                        var affixGroup = container.GetChildAtIndex(groupIdx);
+                        if (affixGroup == null || affixGroup.ChildCount == 0) continue;
+
+                        // Skip the header element itself if it's mixed into the child list
+                        var groupHeader = affixGroup.GetChildAtIndex(0);
+                        if ((groupHeader?.TextNoTags ?? groupHeader?.Text)?.Contains("Modifier") == true) continue;
+
+                        for (int modIdx = 0; modIdx < (int)affixGroup.ChildCount; modIdx++)
+                        {
+                            var modEntry = affixGroup.GetChildAtIndex(modIdx);
+                            if (modEntry == null) continue;
+
+                            var modLines = new List<string>();
+                            void ExtractModText(ExileCore.PoEMemory.Element el, int depth)
+                            {
+                                if (el == null || depth > 4) return;
+                                string text = el.TextNoTags ?? el.Text;
+                                if (!string.IsNullOrEmpty(text))
+                                    modLines.Add(text);
+
+                                for (int k = 0; k < (int)el.ChildCount; k++)
+                                    ExtractModText(el.GetChildAtIndex(k), depth + 1);
+                            }
+
+                            ExtractModText(modEntry, 0);
+                            if (modLines.Any())
+                            {
+                                var joined = string.Join("\n", modLines.Distinct());
+                                // Filter out internal technical/debug strings that sometimes leak from the API
+                                if (!joined.Contains("CachedStatDescription") && 
+                                    !joined.StartsWith("<unknownSection") && // Use StartsWith for better precision
+                                    !joined.Contains("System.Collections.Generic")) // Add this for robustness
+                                    descriptions.Add(joined);
+                            }
+                        }
+                    }
+                    break; // Stop after processing the primary mod container
                 }
-                return null;
             }
 
-            var modsContainer = FindModsContainer(tooltip);
-            if (modsContainer == null) return descriptions;
-
-            for (int i = 0; i < (int)modsContainer.ChildCount; i++)
-            {
-                AddModDescriptionsFromList(modsContainer.GetChildAtIndex(i), descriptions);
-            }
-
-            return descriptions;
+            return descriptions.Distinct().ToList();
         }
 
-        private void AddModDescriptionsFromList(ExileCore.PoEMemory.Element listElement, List<string> descriptions)
-        {
-            if (listElement == null) return;
-
-            for (int i = 0; i < (int)listElement.ChildCount; i++)
-            {
-                var rawModText = GetCleanText(listElement.GetChildAtIndex(i)?.GetChildAtIndex(0));
-                if (string.IsNullOrEmpty(rawModText)) continue;
-
-                var lines = rawModText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                if (lines.Length == 0) continue;
-
-                var cleanedLines = new List<string>();
-                for (int j = 0; j < lines.Length; j++)
-                {
-                    var line = lines[j].Trim();
-                    if (string.IsNullOrEmpty(line)) continue;
-
-                    // Skip the header line if it contains the "Modifier" keyword
-                    if (j == 0 && (line.Contains("Prefix Modifier") || line.Contains("Suffix Modifier")))
-                        continue;
-
-                    // Discard explanatory text lines starting with '(' or '{'
-                    if (line.StartsWith("(") || line.StartsWith("{"))
-                        continue;
-
-                    cleanedLines.Add(line);
-                }
-
-                if (cleanedLines.Count > 0)
-                {
-                    descriptions.Add(string.Join(Environment.NewLine, cleanedLines));
-                }
-            }
-        }
+        
 
         public static nuVector4 GetRarityColor(ItemRarity rarity)
         {
@@ -120,7 +113,7 @@ namespace MapNotify_3_28
                     return new nuVector4(1F, 1F, 1F, 1F);
             }
         }
-        public static readonly string[] ModNameBlacklist = 
+        public static readonly string[] ModNameBlacklist =
         {
             "AfflictionMapDeliriumStacks",
             "AfflictionMapReward",
@@ -234,11 +227,11 @@ namespace MapNotify_3_28
                     var qualityId = modsComponent.AlternateQualityType.Id;
 
                     if (qualityId == "MapRarityQuality") { ChiselName = "Rarity Chisel"; ChiselValue = 40; }
-                    else if (qualityId == "MapQuantityQuality") 
-                    { 
-                        ChiselName = "Quantity Chisel"; 
+                    else if (qualityId == "MapQuantityQuality")
+                    {
+                        ChiselName = "Quantity Chisel";
                         if (quantity == 0) quantity = ParseTooltipQuality();
-                        ChiselValue = quantity; 
+                        ChiselValue = quantity;
                     }
                     else if (qualityId == "MapPackSizeQuality") { ChiselName = "Pack Size Chisel"; ChiselValue = 10; }
                     else if (qualityId == "MapDivinationCardQuality") { ChiselName = "Divination Chisel"; ChiselValue = 50; }
@@ -399,7 +392,6 @@ namespace MapNotify_3_28
                         break;
                 }
             }
-
             private int ParseTooltipQuality()
             {
                 var tooltip = Item?.Tooltip;
@@ -436,7 +428,7 @@ namespace MapNotify_3_28
                     if (element == null || depth > 20) return null;
                     if (!string.IsNullOrEmpty(element.Text) && element.Text.Contains("Wings Revealed"))
                         return element.Text;
-                    
+
                     int count = (int)element.ChildCount;
                     if (count <= 0 || count > 100) return null;
                     for (int i = 0; i < count; i++)
@@ -448,7 +440,7 @@ namespace MapNotify_3_28
                 }
                 var wingsLine = FindWingsText(Item.Tooltip);
                 if (string.IsNullOrEmpty(wingsLine)) return 1;
-                
+
                 // Use a robust digit scanner to ignore PoE markup tags (e.g., <white>{2}/4)
                 int colonIndex = wingsLine.IndexOf(':');
                 if (colonIndex == -1) return 1;
@@ -464,7 +456,7 @@ namespace MapNotify_3_28
                 int end = start;
                 while (end < wingsLine.Length && char.IsDigit(wingsLine[end])) end++;
 
-                if (int.TryParse(wingsLine.Substring(start, end - start), out var res)) 
+                if (int.TryParse(wingsLine.Substring(start, end - start), out var res))
                     return res;
 
                 return 1;
@@ -492,17 +484,17 @@ namespace MapNotify_3_28
                         {
                             var jobName = cleanText.Substring(reqIndex + 9, openParen - (reqIndex + 9)).Trim();
                             var levelPart = cleanText.Substring(openParen, closeParen - openParen);
-                            
+
                             // Extract digit from "(Level 5)"
                             int level = 0;
                             for (int i = 0; i < levelPart.Length; i++)
                                 if (char.IsDigit(levelPart[i])) { level = (int)char.GetNumericValue(levelPart[i]); break; }
-                            
+
                             if (!string.IsNullOrEmpty(jobName) && level > 0)
                                 requirements[jobName] = level;
                         }
                     }
-                    
+
                     int count = (int)element.ChildCount;
                     if (count <= 0 || count > 100) return;
                     for (int i = 0; i < count; i++)
@@ -572,8 +564,8 @@ namespace MapNotify_3_28
                                 // 1. Wing 1 is always revealed.
                                 // 2. For others, if we haven't reached the count AND it fits the summary, it's revealed.
                                 // 3. If summary is empty (parser delay), fallback to sequential index.
-                                IsRevealed = i == 0 || (summaryRequirements.Count > 0 
-                                    ? (actuallyRevealed < revealedWingsCount && fitsSummary) 
+                                IsRevealed = i == 0 || (summaryRequirements.Count > 0
+                                    ? (actuallyRevealed < revealedWingsCount && fitsSummary)
                                     : i < revealedWingsCount)
                             });
 
