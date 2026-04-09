@@ -17,9 +17,9 @@ Notifications for Map modifiers, Heist requirements, and Atlas completion.
 
 ![Image](https://i.imgur.com/q4mYaWD.png)
 
-![Image](https://i.imgur.com/WU6phGx.png)
+![Image](https://i.imgur.com/3MjESIG.png)
 
-![Image](https://i.imgur.com/BsivXOE.png)
+![Image](https://i.imgur.com/lu73OA9.png)
 
 # Includes
 ### 1. Enhanced Map Tooltips
@@ -52,7 +52,7 @@ Visual indicators directly on the Atlas for:
 ### 5. Interactive Mod Preview & Configuration
 Manage your mod lists without leaving the game:
 *   **Capture Hotkey**: Hover over any map and press your hotkey (default: customizable with Ctrl/Shift/Alt) to open the **Map Mod Preview** window.
-*   **On-the-fly Editing**: View the raw internal names of mods, set custom display names, pick colors, and toggle "Bricked" status.
+*   **On-the-fly Editing**: View mods or raw names, set custom display names, pick colors, and toggle "Bricked" status.
 *   **Active Mods List**: View and quickly delete currently configured mods directly from the GUI.
 
 # Credits
