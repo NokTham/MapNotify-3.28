@@ -44,21 +44,35 @@ namespace MapNotify_3_28
 
             if (isRebinding)
             {
-                foreach (var key in System.Enum.GetValues<System.Windows.Forms.Keys>())
+                if (Input.GetKeyState(System.Windows.Forms.Keys.LButton) || Input.GetKeyState(System.Windows.Forms.Keys.RButton))
                 {
-                    if (IsModifierKey(key) || key == System.Windows.Forms.Keys.None) continue;
-                    if (Input.GetKeyState(key))
+                    _rebindingNodeName = null;
+                }
+                else if (Input.GetKeyState(System.Windows.Forms.Keys.Escape))
+                {
+                    node.Value = System.Windows.Forms.Keys.None;
+                    _rebindingNodeName = null;
+                }
+                else
+                {
+                    foreach (var key in System.Enum.GetValues<System.Windows.Forms.Keys>())
                     {
-                        node.Value = key;
-                        _rebindingNodeName = null;
-                        break;
+                        if (IsModifierKey(key) || key == System.Windows.Forms.Keys.None ||
+                            key == System.Windows.Forms.Keys.LButton || key == System.Windows.Forms.Keys.RButton)
+                        {
+                            continue;
+                        }
+
+                        if (Input.GetKeyState(key))
+                        {
+                            node.Value = key;
+                            _rebindingNodeName = null;
+                            break;
+                        }
                     }
                 }
-                if (Input.GetKeyState(System.Windows.Forms.Keys.Escape)) _rebindingNodeName = null;
             }
         }
-
-        // The helper methods Checkbox, IntSlider, etc., are now in UiHelpers.cs
 
         public override void DrawSettings()
         {
@@ -84,14 +98,13 @@ namespace MapNotify_3_28
                 });
             }
 
-
             ImGui.Separator();
 
             if (ImGui.TreeNodeEx("Core Settings", ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 DrawHotkeySelector("Capture Hotkey", Settings.CaptureHotkey, Settings.UseControl, Settings.UseShift, Settings.UseAlt);
                 ImGui.SameLine();
-                HelpMarker("The key used to open the Map Mod Preview window while hovering over a map.");
+                HelpMarker("Key used to open the Map Mod Preview window while hovering over a map.\nESC to clear");
                 Settings.InventoryCacheInterval.Value = IntSlider(
                     "Inventory Item Caching Interval in ms",
                     Settings.InventoryCacheInterval,
@@ -130,9 +143,7 @@ namespace MapNotify_3_28
                 Settings.FilterInventory.Value = Checkbox("Inventory", Settings.FilterInventory.Value); ImGui.SameLine(0f, 25f);
                 Settings.FilterStash.Value = Checkbox("Stash", Settings.FilterStash.Value); ImGui.SameLine(0f, 25f);
                 Settings.FilterMapStash.Value = Checkbox("Map Stash", Settings.FilterMapStash.Value); ImGui.SameLine(0f, 0f);
-                WarningMarker(
-      "Filtering Map Stash Tab is very resource intensive, use with caution."
-  ); ImGui.SameLine(0f, 25f);
+                WarningMarker("Filtering Map Stash Tab is very resource intensive, use with caution."); ImGui.SameLine(0f, 25f);
                 Settings.FilterShops.Value = Checkbox("Shops", Settings.FilterShops.Value); ImGui.SameLine(0f, 25f);
                 Settings.FilterTrade.Value = Checkbox("Trade", Settings.FilterTrade.Value);
 
@@ -147,8 +158,6 @@ namespace MapNotify_3_28
                 Settings.BoxForMapBadWarnings.Value = Checkbox("Mark Good Mods", Settings.BoxForMapBadWarnings.Value);
                 ImGui.SameLine();
                 HelpMarker("Highlights maps if there are good mods. Configure color in the 'Borders and Highlight Colours' section.");
-                // ImGui.SameLine(); HelpMarker("Add ';true' after a line in the config files to mark it as a bricked mod.");
-
             }
 
             if (ImGui.TreeNodeEx("Map Tooltip Settings", ImGuiTreeNodeFlags.CollapsingHeader))
