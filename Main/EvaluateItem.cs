@@ -15,6 +15,7 @@ namespace MapNotify_3_28
     public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     {
         private static readonly Regex TooltipTagsRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled); // Used for cleaning text
+        private static readonly Regex MapTierRegex = new Regex(@"\s*\(Tier\s+\d+\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private List<string> GetModDescriptionsFromTooltip(ExileCore.PoEMemory.Element tooltip)
         {
@@ -97,22 +98,6 @@ namespace MapNotify_3_28
             return descriptions.Distinct().ToList();
         }
 
-        
-
-        public static nuVector4 GetRarityColor(ItemRarity rarity)
-        {
-            switch (rarity)
-            {
-                case ItemRarity.Rare:
-                    return new nuVector4(0.0f, 0.0f, 0.0f, 1f); // Placeholder, will be overwritten by actual color
-                case ItemRarity.Magic:
-                    return new nuVector4(0.0f, 0.0f, 0.0f, 1f); // Placeholder, will be overwritten by actual color
-                case ItemRarity.Unique:
-                    return new nuVector4(0.0f, 0.0f, 0.0f, 1f); // Placeholder, will be overwritten by actual color
-                default:
-                    return new nuVector4(1F, 1F, 1F, 1F);
-            }
-        }
         public static readonly string[] ModNameBlacklist =
         {
             "AfflictionMapDeliriumStacks",
@@ -177,7 +162,6 @@ namespace MapNotify_3_28
             public int OriginatorCurrency { get; set; }
             public int OriginatorMaps { get; set; }
             public bool IsOriginatorMap { get; set; }
-            public bool IsFragment { get; set; }
             public bool IsMavenMap { get; set; }
             public string WindowID { get; private set; }
             public ItemDetails(NormalInventoryItem Item, Entity Entity)
@@ -205,7 +189,6 @@ namespace MapNotify_3_28
                 var heistBlueprint = Entity.GetComponent<HeistBlueprint>();
 
                 Tier = mapComponent?.Tier ?? -1;
-                IsFragment = path.Contains("Fragments/") && !path.Contains("Maven");
                 IsMavenMap = path.Contains("MavenMap") || path.Contains("Invitations/Maven");
 
                 UpdateHeistDetails(heistContract, heistBlueprint, modsComponent);
@@ -222,7 +205,9 @@ namespace MapNotify_3_28
                 IsOriginatorMap = false;
                 Bricked = false;
                 Corrupted = baseComponent?.isCorrupted ?? false;
-                NeedsPadding = Tier != -1 || IsMavenMap || IsFragment || HeistJobLines.Count > 0;
+                // NeedsPadding is primarily for UI compatibility with other plugins (like NinjaPricer)
+                // It ensures the tooltip offset is respected even for items without "Map Mods"
+                NeedsPadding = Tier != -1 || IsMavenMap || HeistJobLines.Count > 0 || ClassID.Contains("MiscMapItem");
             }
 
             private void ProcessQuality(Quality qualityComponent, Mods modsComponent)
@@ -350,23 +335,42 @@ namespace MapNotify_3_28
 
             private void ProcessMapName(ExileCore.PoEMemory.Components.MapKey mapComponent, Base baseComponent, Mods modsComponent, string path, string itemName)
             {
-                var mapTrim = baseComponent != null ? baseComponent.Name.Replace(" Map", "") : "Unknown";
+                // Prioritize the translated itemName (from BaseItemTypes) since modern maps 
+                // act as "Keys" and often lack traditional Area associations in memory.
+                var mapTrim = !string.IsNullOrEmpty(itemName) ? itemName : (baseComponent?.Name ?? "Unknown");
+                
                 if (modsComponent?.ItemRarity == ItemRarity.Unique)
                 {
-                    try
+                    // Prioritize the UniqueName property from the Mods component
+                    if (!string.IsNullOrEmpty(modsComponent.UniqueName))
                     {
-                        var addr = mapComponent?.Address ?? 0;
-                        if (addr == 0) addr = Entity.Address;
-                        var mapUnique = gameController.IngameState.M.Read<long>(addr + 0x10, 0x10, 0x20);
-                        var resolvedArea = gameController.Files.WorldAreas.GetByAddress(mapUnique);
-                        if (resolvedArea != null) mapTrim = resolvedArea.Name;
+                        mapTrim = modsComponent.UniqueName;
                     }
-                    catch { }
+                    else
+                    {
+                        try
+                        {
+                            var addr = mapComponent?.Address ?? 0;
+                            if (addr == 0) addr = Entity.Address;
+                            var mapUnique = gameController.IngameState.M.Read<long>(addr + 0x10, 0x10, 0x20);
+                            if (mapUnique != 0)
+                            {
+                                var resolvedArea = gameController.Files.WorldAreas.GetByAddress(mapUnique);
+                                if (resolvedArea != null) mapTrim = resolvedArea.Name;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                MapName = $"[T{mapComponent?.Tier ?? Tier}] {mapTrim}";
 
-                if (path.Contains("Maven") || path.Contains("Invitations")) MapName = itemName;
-                if (ClassID.Contains("MapFragment")) { MapName = itemName; NeedsPadding = true; }
+                // Clean the name of suffixes to prevent double-tiering
+                mapTrim = MapTierRegex.Replace(mapTrim, "");
+                mapTrim = mapTrim.Replace(" Map", "", StringComparison.OrdinalIgnoreCase);
+                mapTrim = mapTrim.Trim();
+
+                var displayTier = mapComponent?.Tier ?? Tier;
+                // Use the [TX] Name format
+                MapName = displayTier > 0 ? $"[T{displayTier}] {mapTrim}" : mapTrim;
             }
 
             private void ProcessItemColor(Mods modsComponent)

@@ -211,13 +211,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         {
             // Safe chain prevents log spam when UI indices aren't fully loaded
             var tradeRoot = window.GetChildAtIndex(3)?.GetChildAtIndex(1)?.GetChildAtIndex(0)?.GetChildAtIndex(0);
-
-            // Target the side containers to scan all items in the trade
-            var otherSide = tradeRoot?.GetChildAtIndex(1);
-            if (otherSide != null) FindMapsInElementRecursive(otherSide, result, seenAddresses, 0);
-
-            var selfSide = tradeRoot?.GetChildAtIndex(0);
-            if (selfSide != null) FindMapsInElementRecursive(selfSide, result, seenAddresses, 0);
+            if (tradeRoot != null)
+                FindMapsInElementRecursive(tradeRoot, result, seenAddresses, 0);
         }
         else // PurchaseWindow, PurchaseWindowHideout, HaggleWindow
         {
@@ -226,9 +221,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             {
                 foreach (var tab in currentTabContainer.Children)
                 {
-                    if (tab.IsVisible)
+                    if (tab.IsVisible && tab.ChildCount > 0)
                     {   // Assuming tab.GetChildAtIndex(0) is the inventory grid
-                        FindMapsInElementRecursive(tab.GetChildAtIndex(0), result, seenAddresses, 0);
+                        var grid = tab.GetChildAtIndex(0);
+                        if (grid != null) FindMapsInElementRecursive(grid, result, seenAddresses, 0);
                     }
                 }
             }
@@ -365,11 +361,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                 {
                     ImGui.BeginGroup();
 
-                    // Optimization: Check path once. 
-                    // Ideally, move this 'isFragment' check into the ItemDetails class constructor to cache it.
-                    bool isFragment = ItemDetails.IsFragment;
-
-                    if (!isFragment && (isInventory || Settings.ShowMapName.Value))
+                    if (isInventory || Settings.ShowMapName.Value)
                     {
                         ImGui.TextColored(ItemDetails.ItemColor, $"{ItemDetails.MapName}");
                     }
