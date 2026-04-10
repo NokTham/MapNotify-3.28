@@ -60,23 +60,26 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                path.Contains("Maven");
     }
 
-    private List<NormalInventoryItem> GetInventoryItems()
+    private List<NormalInventoryItem> GetItemsFromCollection(IEnumerable<NormalInventoryItem> items)
     {
         var result = new List<NormalInventoryItem>();
-        if (ingameState?.IngameUi?.InventoryPanel?.IsVisible == true)
+        if (items == null) return result;
+        var seenAddresses = new HashSet<long>();
+        foreach (var it in items)
         {
-            var playerInv = ingameState.IngameUi.InventoryPanel[InventoryIndex.PlayerInventory];
-            var visible = playerInv?.VisibleInventoryItems;
-            if (visible != null && visible.Count > 0)
-            {
-                foreach (var it in visible)
-                {
-                    if (it?.Item != null && ItemIsMap(it.Item))
-                        result.Add(it);
-                }
-            }
+            if (it?.Item != null && ItemIsMap(it.Item) && seenAddresses.Add(it.Item.Address))
+                result.Add(it);
         }
         return result;
+    }
+
+    private List<NormalInventoryItem> GetInventoryItems()
+    {
+        if (ingameState?.IngameUi?.InventoryPanel?.IsVisible == true)
+        {
+            return GetItemsFromCollection(ingameState.IngameUi.InventoryPanel[InventoryIndex.PlayerInventory]?.VisibleInventoryItems);
+        }
+        return new List<NormalInventoryItem>();
     }
 
     private void FindMapsInElementRecursive(Element element, List<NormalInventoryItem> result, HashSet<long> seenAddresses, int depth)
@@ -149,23 +152,12 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 
     private List<NormalInventoryItem> GetMerchantItems()
     {
-        var result = new List<NormalInventoryItem>();
-        var seenAddresses = new HashSet<long>();
         var merchantPanel = ingameState?.IngameUi?.OfflineMerchantPanel;
         if (merchantPanel != null && merchantPanel.IsVisible)
         {
-            // Use VisibleStash here as well, as OfflineMerchantPanel inherits from StashElement
-            var visibleInv = merchantPanel.VisibleStash?.VisibleInventoryItems;
-            if (visibleInv != null && visibleInv.Count > 0)
-            {
-                foreach (var it in visibleInv)
-                {
-                    if (it?.Item != null && ItemIsMap(it.Item) && seenAddresses.Add(it.Item.Address))
-                        result.Add(it);
-                }
-            }
+            return GetItemsFromCollection(merchantPanel.VisibleStash?.VisibleInventoryItems);
         }
-        return result;
+        return new List<NormalInventoryItem>();
     }
 
     private List<NormalInventoryItem> GetHeistLockerItems()

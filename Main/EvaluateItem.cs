@@ -133,12 +133,23 @@ namespace MapNotify_3_28
             "MavenInvitation",
         };
 
-        public class StyledText
-        {
-            public string Text { get; set; }
-            public Vector4 Color { get; set; }
-            public bool Bricking { get; set; }
-        }
+    }
+
+    public class StyledText
+    {
+        public string Text { get; set; }
+        public Vector4 Color { get; set; }
+        public bool Bricking { get; set; }
+    }
+
+    public class HeistJobLine
+    {
+        public string Text { get; set; }
+        public bool IsRevealed { get; set; }
+    }
+
+    public partial class MapNotify_3_28
+    {
 
         public class ItemDetails
         {
@@ -157,11 +168,6 @@ namespace MapNotify_3_28
             public int Rarity { get; set; }
             public int ModCount { get; set; }
             public int HeistAreaLevel { get; set; }
-            public class HeistJobLine
-            {
-                public string Text { get; set; }
-                public bool IsRevealed { get; set; }
-            }
             public List<HeistJobLine> HeistJobLines { get; set; } = new List<HeistJobLine>();
             public bool NeedsPadding { get; set; }
             public bool Bricked { get; set; }
@@ -186,14 +192,10 @@ namespace MapNotify_3_28
             public void Update()
             {
                 WindowID = $"##{Entity.Address}";
-                var path = Entity.Path ?? string.Empty;
+                string path = Entity.Path ?? string.Empty;
                 var BaseItem = gameController?.Files?.BaseItemTypes?.Translate(path);
-                var ItemName = BaseItem?.BaseName ?? "Unknown";
+                string itemName = BaseItem?.BaseName ?? "Unknown";
                 ClassID = BaseItem?.ClassName ?? string.Empty;
-                ChiselName = string.Empty;
-                ChiselValue = 0;
-                var packSize = 0;
-                var rarity = 0;
 
                 var modsComponent = Entity.GetComponent<Mods>();
                 var baseComponent = Entity.GetComponent<Base>();
@@ -207,25 +209,42 @@ namespace MapNotify_3_28
                 IsMavenMap = path.Contains("MavenMap") || path.Contains("Invitations/Maven");
 
                 UpdateHeistDetails(heistContract, heistBlueprint, modsComponent);
+
+                ProcessFlags(baseComponent);
+                ProcessQuality(qualityComponent, modsComponent);
+                ProcessMods(modsComponent, path);
+                ProcessMapName(mapComponent, baseComponent, modsComponent, path, itemName);
+                ProcessItemColor(modsComponent);
+            }
+
+            private void ProcessFlags(Base baseComponent)
+            {
                 IsOriginatorMap = false;
                 Bricked = false;
                 Corrupted = baseComponent?.isCorrupted ?? false;
                 NeedsPadding = Tier != -1 || IsMavenMap || IsFragment || HeistJobLines.Count > 0;
+            }
 
-                // Get quality from component, or fallback to tooltip if memory returns 0
-                int quantity = qualityComponent?.ItemQuality ?? 0;
+            private void ProcessQuality(Quality qualityComponent, Mods modsComponent)
+            {
+                ChiselName = string.Empty;
+                ChiselValue = 0;
+                int quality = qualityComponent?.ItemQuality ?? 0;
+                int quantity = 0;
+                int rarity = 0;
 
-                // If the map has Rarity quality, move the quality value to the rarity variable
                 if (modsComponent?.AlternateQualityType?.Id == "MapRarityQuality")
                 {
-                    rarity = quantity;
-                    quantity = 0;
+                    rarity = quality;
+                }
+                else
+                {
+                    quantity = quality;
                 }
 
                 if (modsComponent?.AlternateQualityType != null)
                 {
                     var qualityId = modsComponent.AlternateQualityType.Id;
-
                     if (qualityId == "MapRarityQuality") { ChiselName = "Rarity Chisel"; ChiselValue = 40; }
                     else if (qualityId == "MapQuantityQuality")
                     {
@@ -240,34 +259,36 @@ namespace MapNotify_3_28
                 }
                 else if (quantity == 0)
                 {
-                    // Fallback for standard Cartographer's Chisels
                     quantity = ParseTooltipQuality();
                 }
 
-                var originatorScarabs = 0;
-                var originatorCurrency = 0;
-                var originatorMaps = 0;
+                Quantity = quantity;
+                Rarity = rarity;
+            }
+
+            private void ProcessMods(Mods modsComponent, string path)
+            {
+                int packSize = 0;
+                int quantity = Quantity;
+                int rarity = Rarity;
+                int originatorScarabs = 0;
+                int originatorCurrency = 0;
+                int originatorMaps = 0;
+
                 var itemMods = modsComponent?.ItemMods;
                 ModCount = itemMods?.Count ?? 0;
 
                 if (modsComponent != null && itemMods != null && ModCount > 0)
                 {
-                    // Only evaluate mods for non-unique maps, but ALWAYS evaluate for Maven items and T17s
                     if (modsComponent.ItemRarity != ItemRarity.Unique || path.Contains("Maven") || Tier == 17)
                     {
                         foreach (var mod in itemMods)
                         {
                             if (string.IsNullOrEmpty(mod.RawName)) continue;
-
                             bool blacklisted = false;
                             foreach (var black in ModNameBlacklist) { if (mod.RawName.Contains(black)) { blacklisted = true; break; } }
-                            if (blacklisted)
-                            {
-                                ModCount--;
-                                continue;
-                            }
+                            if (blacklisted) { ModCount--; continue; }
 
-                            // Optimized: Process all stats for this mod in a single pass
                             var stats = mod.ModRecord?.StatNames;
                             var values = mod.Values;
                             if (stats != null && values != null)
@@ -276,33 +297,21 @@ namespace MapNotify_3_28
                                 {
                                     var key = stats[i].Key;
                                     if (string.IsNullOrEmpty(key)) continue;
-
                                     switch (key)
                                     {
-                                        case "map_pack_size_+%":
-                                            packSize += values[i]; break;
-                                        case "map_item_drop_quantity_+%":
-                                            quantity += values[i]; break;
-                                        case "map_item_drop_rarity_+%":
-                                            rarity += values[i]; break;
-                                        case "map_scarab_drop_chance_+%_final_from_uber_mod":
-                                            originatorScarabs += values[i];
-                                            IsOriginatorMap = true; break;
-                                        case "map_currency_drop_chance_+%_final_from_uber_mod":
-                                            originatorCurrency += values[i];
-                                            IsOriginatorMap = true; break;
-                                        case "map_map_item_drop_chance_+%_final_from_uber_mod":
-                                            originatorMaps += values[i];
-                                            IsOriginatorMap = true; break;
+                                        case "map_pack_size_+%": packSize += values[i]; break;
+                                        case "map_item_drop_quantity_+%": quantity += values[i]; break;
+                                        case "map_item_drop_rarity_+%": rarity += values[i]; break;
+                                        case "map_scarab_drop_chance_+%_final_from_uber_mod": originatorScarabs += values[i]; IsOriginatorMap = true; break;
+                                        case "map_currency_drop_chance_+%_final_from_uber_mod": originatorCurrency += values[i]; IsOriginatorMap = true; break;
+                                        case "map_map_item_drop_chance_+%_final_from_uber_mod": originatorMaps += values[i]; IsOriginatorMap = true; break;
                                     }
                                 }
                             }
 
-                            // Optimization: Check for Originator/Uber status during the main mod pass
                             if (!IsOriginatorMap && (mod.RawName == "IsUberMap" || mod.RawName.Contains("MapZanaInfluence")))
                                 IsOriginatorMap = true;
 
-                            // Optimized Dictionary Search: Early exit if mod is found in the first dictionary
                             bool foundMod = false;
                             foreach (var entry in GoodModsDictionary)
                             {
@@ -315,7 +324,6 @@ namespace MapNotify_3_28
                                     break;
                                 }
                             }
-
                             if (!foundMod)
                             {
                                 foreach (var entry in BadModsDictionary)
@@ -338,58 +346,37 @@ namespace MapNotify_3_28
                 OriginatorScarabs = originatorScarabs;
                 OriginatorCurrency = originatorCurrency;
                 OriginatorMaps = originatorMaps;
-                {
-                    var mapTrim = baseComponent != null ? baseComponent.Name.Replace(" Map", "") : "Unknown";
+            }
 
-                    if (modsComponent?.ItemRarity == ItemRarity.Unique)
+            private void ProcessMapName(ExileCore.PoEMemory.Components.MapKey mapComponent, Base baseComponent, Mods modsComponent, string path, string itemName)
+            {
+                var mapTrim = baseComponent != null ? baseComponent.Name.Replace(" Map", "") : "Unknown";
+                if (modsComponent?.ItemRarity == ItemRarity.Unique)
+                {
+                    try
                     {
-                        // For unique maps, try to resolve the real area name via memory read
-                        try
-                        {
-                            // Multi-level pointer read to get the WorldArea address for unique maps
-                            var addr = mapComponent?.Address ?? 0;
-                            if (addr == 0) addr = Entity.Address;
-
-                            var mapUnique = gameController.IngameState.M.Read<long>(addr + 0x10, 0x10, 0x20);
-                            var resolvedArea = gameController.Files.WorldAreas.GetByAddress(mapUnique);
-                            if (resolvedArea != null)
-                                mapTrim = resolvedArea.Name;
-                        }
-                        catch { }
+                        var addr = mapComponent?.Address ?? 0;
+                        if (addr == 0) addr = Entity.Address;
+                        var mapUnique = gameController.IngameState.M.Read<long>(addr + 0x10, 0x10, 0x20);
+                        var resolvedArea = gameController.Files.WorldAreas.GetByAddress(mapUnique);
+                        if (resolvedArea != null) mapTrim = resolvedArea.Name;
                     }
-                    MapName = $"[T{mapComponent?.Tier ?? Tier}] {mapTrim}";
+                    catch { }
                 }
+                MapName = $"[T{mapComponent?.Tier ?? Tier}] {mapTrim}";
 
-                if (path.Contains("Maven") || path.Contains("Invitations"))
-                {
-                    MapName = ItemName;
-                }
-                if (ClassID.Contains("MapFragment"))
-                {
-                    MapName = ItemName;
-                    NeedsPadding = true;
-                }
-                #region Maven Regions & Areas
-                // All Maven-related logic for specific areas/invitations removed as it's no longer tied to map items.
-                #endregion
+                if (path.Contains("Maven") || path.Contains("Invitations")) MapName = itemName;
+                if (ClassID.Contains("MapFragment")) { MapName = itemName; NeedsPadding = true; }
+            }
 
-                // evaluate rarity for colouring item name
-                // The actual colors are defined in the game's UI, so we'll use a default and let the game's rendering handle it.
-                // This method is primarily for consistency if we ever needed to override.
+            private void ProcessItemColor(Mods modsComponent)
+            {
                 switch (modsComponent?.ItemRarity ?? ItemRarity.Normal)
                 {
-                    case ItemRarity.Rare:
-                        ItemColor = new nuVector4(0.99f, 0.99f, 0.46f, 1f); // Yellow
-                        break;
-                    case ItemRarity.Magic:
-                        ItemColor = new nuVector4(0.68f, 0.68f, 1f, 1f); // Blue
-                        break;
-                    case ItemRarity.Unique:
-                        ItemColor = new nuVector4(1f, 0.50f, 0.10f, 1f); // Orange
-                        break;
-                    default:
-                        ItemColor = new nuVector4(1F, 1F, 1F, 1F); // White
-                        break;
+                    case ItemRarity.Rare: ItemColor = new nuVector4(0.99f, 0.99f, 0.46f, 1f); break;
+                    case ItemRarity.Magic: ItemColor = new nuVector4(0.68f, 0.68f, 1f, 1f); break;
+                    case ItemRarity.Unique: ItemColor = new nuVector4(1f, 0.50f, 0.10f, 1f); break;
+                    default: ItemColor = new nuVector4(1F, 1F, 1F, 1F); break;
                 }
             }
             private int ParseTooltipQuality()
