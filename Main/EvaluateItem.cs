@@ -17,87 +17,6 @@ namespace MapNotify_3_28
         private static readonly Regex TooltipTagsRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled); // Used for cleaning text
         private static readonly Regex MapTierRegex = new Regex(@"\s*\(Tier\s+\d+\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private List<string> GetModDescriptionsFromTooltip(ExileCore.PoEMemory.Element tooltip)
-        {
-            var descriptions = new List<string>();
-            if (tooltip == null) return descriptions;
-
-            // --- Path-Based UI Traversal ---
-            // Logic: tooltip -> [0] (frame) -> [1] (content area)
-            // Index [0] of the frame contains rarity name/tier.
-            // Index [1] contains the actual item properties and mods.
-            var contentArea = tooltip.GetChildAtIndex(0)?.GetChildAtIndex(1);
-            if (contentArea != null)
-            {
-                // Search for the Advanced Mod container within the content area.
-                // As you noted, this is often an invisible element (index 14 in your example).
-                for (int i = 0; i < contentArea.ChildCount; i++)
-                {
-                    var container = contentArea.GetChildAtIndex(i);
-                    
-                    // Logic: The mod container is usually the only large, invisible child 
-                    // that contains the Advanced Mod headers.
-                    if (container == null || container.ChildCount < 1 || container.IsVisible) continue;
-
-                    bool isModContainer = false;
-                    for (int j = 0; j < container.ChildCount; j++)
-                    {
-                        var headerElem = container.GetChildAtIndex(j)?.GetChildAtIndex(0);
-                        var headerText = headerElem?.TextNoTags ?? headerElem?.Text;
-                        if (headerText != null && (headerText.Contains("Modifier") || headerText.Contains("Prefix") || headerText.Contains("Suffix")))
-                        {
-                            isModContainer = true;
-                            break;
-                        }
-                    }
-                    if (!isModContainer) continue;
-
-                    // Process Prefix and Suffix groups within the container
-                    for (int groupIdx = 0; groupIdx < container.ChildCount; groupIdx++)
-                    {
-                        var affixGroup = container.GetChildAtIndex(groupIdx);
-                        if (affixGroup == null || affixGroup.ChildCount == 0) continue;
-
-                        // Skip the header element itself if it's mixed into the child list
-                        var groupHeader = affixGroup.GetChildAtIndex(0);
-                        if ((groupHeader?.TextNoTags ?? groupHeader?.Text)?.Contains("Modifier") == true) continue;
-
-                        for (int modIdx = 0; modIdx < (int)affixGroup.ChildCount; modIdx++)
-                        {
-                            var modEntry = affixGroup.GetChildAtIndex(modIdx);
-                            if (modEntry == null) continue;
-
-                            var modLines = new List<string>();
-                            void ExtractModText(ExileCore.PoEMemory.Element el, int depth)
-                            {
-                                if (el == null || depth > 4) return;
-                                string text = el.TextNoTags ?? el.Text;
-                                if (!string.IsNullOrEmpty(text))
-                                    modLines.Add(text);
-
-                                for (int k = 0; k < (int)el.ChildCount; k++)
-                                    ExtractModText(el.GetChildAtIndex(k), depth + 1);
-                            }
-
-                            ExtractModText(modEntry, 0);
-                            if (modLines.Any())
-                            {
-                                var joined = string.Join("\n", modLines.Distinct());
-                                // Filter out internal technical/debug strings that sometimes leak from the API
-                                if (!joined.Contains("CachedStatDescription") && 
-                                    !joined.StartsWith("<unknownSection") && // Use StartsWith for better precision
-                                    !joined.Contains("System.Collections.Generic")) // Add this for robustness
-                                    descriptions.Add(joined);
-                            }
-                        }
-                    }
-                    break; // Stop after processing the primary mod container
-                }
-            }
-
-            return descriptions.Distinct().ToList();
-        }
-
         public static readonly string[] ModNameBlacklist =
         {
             "AfflictionMapDeliriumStacks",
@@ -119,20 +38,6 @@ namespace MapNotify_3_28
         };
 
     }
-
-    public class StyledText
-    {
-        public string Text { get; set; }
-        public Vector4 Color { get; set; }
-        public bool Bricking { get; set; }
-    }
-
-    public class HeistJobLine
-    {
-        public string Text { get; set; }
-        public bool IsRevealed { get; set; }
-    }
-
     public partial class MapNotify_3_28
     {
 
@@ -234,7 +139,7 @@ namespace MapNotify_3_28
                     else if (qualityId == "MapQuantityQuality")
                     {
                         ChiselName = "Quantity Chisel";
-                        if (quantity == 0) quantity = ParseTooltipQuality();
+                        if (quantity == 0) quantity = ParseElementForQuality(Item?.Tooltip);
                         ChiselValue = quantity;
                     }
                     else if (qualityId == "MapPackSizeQuality") { ChiselName = "Pack Size Chisel"; ChiselValue = 10; }
@@ -244,7 +149,7 @@ namespace MapNotify_3_28
                 }
                 else if (quantity == 0)
                 {
-                    quantity = ParseTooltipQuality();
+                    quantity = ParseElementForQuality(Item?.Tooltip);
                 }
 
                 Quantity = quantity;
@@ -383,119 +288,6 @@ namespace MapNotify_3_28
                     default: ItemColor = new nuVector4(1F, 1F, 1F, 1F); break;
                 }
             }
-            private int ParseTooltipQuality()
-            {
-                var tooltip = Item?.Tooltip;
-                if (tooltip == null) return 0;
-                string FindQualityText(ExileCore.PoEMemory.Element element, int depth = 0)
-                {
-                    if (element == null || depth > 20) return null;
-                    if (!string.IsNullOrEmpty(element.Text) && element.Text.Contains("Quality"))
-                        return element.Text;
-                    int count = (int)element.ChildCount;
-                    if (count <= 0 || count > 100) return null;
-                    for (int i = 0; i < count; i++)
-                    {
-                        var found = FindQualityText(element.GetChildAtIndex(i), depth + 1);
-                        if (found != null) return found;
-                    }
-                    return null;
-                }
-                var qualityLine = FindQualityText(tooltip);
-                if (string.IsNullOrEmpty(qualityLine)) return 0;
-                int start = -1;
-                for (int i = 0; i < qualityLine.Length; i++) { if (char.IsDigit(qualityLine[i])) { start = i; break; } }
-                if (start == -1) return 0;
-                int end = qualityLine.IndexOf('%', start);
-                if (end != -1 && int.TryParse(qualityLine.Substring(start, end - start), out var res)) return res;
-                return 0;
-            }
-
-            private int ParseTooltipWings()
-            {
-                if (Item?.Tooltip == null) return 1;
-                string FindWingsText(ExileCore.PoEMemory.Element element, int depth = 0)
-                {
-                    if (element == null || depth > 20) return null;
-                    if (!string.IsNullOrEmpty(element.Text) && element.Text.Contains("Wings Revealed"))
-                        return element.Text;
-
-                    int count = (int)element.ChildCount;
-                    if (count <= 0 || count > 100) return null;
-                    for (int i = 0; i < count; i++)
-                    {
-                        var found = FindWingsText(element.GetChildAtIndex(i), depth + 1);
-                        if (found != null) return found;
-                    }
-                    return null;
-                }
-                var wingsLine = FindWingsText(Item.Tooltip);
-                if (string.IsNullOrEmpty(wingsLine)) return 1;
-
-                // Use a robust digit scanner to ignore PoE markup tags (e.g., <white>{2}/4)
-                int colonIndex = wingsLine.IndexOf(':');
-                if (colonIndex == -1) return 1;
-
-                int start = -1;
-                for (int i = colonIndex + 1; i < wingsLine.Length; i++)
-                {
-                    if (char.IsDigit(wingsLine[i])) { start = i; break; }
-                }
-
-                if (start == -1) return 1;
-
-                int end = start;
-                while (end < wingsLine.Length && char.IsDigit(wingsLine[end])) end++;
-
-                if (int.TryParse(wingsLine.Substring(start, end - start), out var res))
-                    return res;
-
-                return 1;
-            }
-
-            private Dictionary<string, int> ParseSummaryRequirements()
-            {
-                var requirements = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-                var tooltip = Item?.Tooltip;
-                if (tooltip == null) return requirements;
-
-                void FindRequirementsRecursive(ExileCore.PoEMemory.Element element, int depth = 0)
-                {
-                    if (element == null || depth > 20) return;
-                    var text = element.Text;
-                    if (!string.IsNullOrEmpty(text) && text.Contains("Requires "))
-                    {
-                        // Strip markup tags and brackets: <white>{Requires Lockpicking} (Level 5) -> Requires Lockpicking (Level 5)
-                        var cleanText = TooltipTagsRegex.Replace(text, "").Replace("{", "").Replace("}", "");
-                        int reqIndex = cleanText.IndexOf("Requires ");
-                        int openParen = cleanText.IndexOf('(', reqIndex);
-                        int closeParen = cleanText.IndexOf(')', openParen);
-
-                        if (reqIndex != -1 && openParen > reqIndex + 8 && closeParen > openParen)
-                        {
-                            var jobName = cleanText.Substring(reqIndex + 9, openParen - (reqIndex + 9)).Trim();
-                            var levelPart = cleanText.Substring(openParen, closeParen - openParen);
-
-                            // Extract digit from "(Level 5)"
-                            int level = 0;
-                            for (int i = 0; i < levelPart.Length; i++)
-                                if (char.IsDigit(levelPart[i])) { level = (int)char.GetNumericValue(levelPart[i]); break; }
-
-                            if (!string.IsNullOrEmpty(jobName) && level > 0)
-                                requirements[jobName] = level;
-                        }
-                    }
-
-                    int count = (int)element.ChildCount;
-                    if (count <= 0 || count > 100) return;
-                    for (int i = 0; i < count; i++)
-                        FindRequirementsRecursive(element.GetChildAtIndex(i), depth + 1);
-                }
-
-                FindRequirementsRecursive(tooltip);
-                return requirements;
-            }
-
             private void UpdateHeistDetails(HeistContract heistContract, HeistBlueprint heistBlueprint, Mods mods)
             {
                 HeistJobLines.Clear();
@@ -515,8 +307,8 @@ namespace MapNotify_3_28
                     HeistAreaLevel = heistBlueprint.AreaLevel;
                     if (heistBlueprint.Wings != null)
                     {
-                        var revealedWingsCount = ParseTooltipWings(); // Get the actual count from the tooltip
-                        var summaryRequirements = ParseSummaryRequirements(); // Still useful for job level checks
+                        var revealedWingsCount = ParseElementForWings(Item?.Tooltip); // Get the actual count from the tooltip
+                        var summaryRequirements = ParseElementForRequirements(Item?.Tooltip); // Still useful for job level checks
                         int actuallyRevealed = 1; // Wing 1 is always revealed
                         var wingReqs = new List<string>();
                         for (int i = 0; i < heistBlueprint.Wings.Count; i++)

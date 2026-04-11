@@ -152,7 +152,7 @@ namespace MapNotify_3_28
                 if (line.Length > 3)
                     bool.TryParse(line[3] ?? null, out bricking);
 
-                dict[line[0]] = new StyledText { Text = line[1], Color = HexToSDXVector4(line[2]), Bricking = bricking };
+                dict[line[0]] = new StyledText { Text = line[1], Color = SharpToNu(HexToSDXVector4(line[2])), Bricking = bricking };
             }
             return dict;
         }

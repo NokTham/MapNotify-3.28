@@ -17,21 +17,27 @@ namespace MapNotify_3_28
                 ImGui.TextColored(new nuVector4(0.5f, 1f, 0.5f, 1f), "Captured Mods from Hovered Map:");
                 ImGui.TextDisabled("Drag the bottom-right corner to resize.");
                 ImGui.Separator();
+                ImGui.InputTextWithHint("##modfilter", "Filter Mods...", ref _modFilter, 100);
+                ImGui.Separator();
 
                 if (ImGui.TreeNodeEx("Active Mods", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     if (GoodModsDictionary != null && GoodModsDictionary.Count > 0)
                     {
+                        var filteredGood = GoodModsDictionary
+                            .Where(m => string.IsNullOrEmpty(_modFilter) || m.Key.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) || m.Value.Text.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+
                         ImGui.TextColored(new nuVector4(0.4f, 1f, 0.4f, 1f), "Good Mods:");
                         ImGui.Indent();
-                        foreach (var mod in GoodModsDictionary)
+                        foreach (var mod in filteredGood)
                         {
                             ImGui.PushID($"active_good_{mod.Key}");
                             if (ImGui.Button("X")) DeleteModFromConfig(mod.Key);
                             ImGui.SameLine();
-                            var col = SharpToNu(mod.Value.Color);
+                            var col = mod.Value.Color;
                             string brickStatus = mod.Value.Bricking ? " [BRICKED]" : "";
-                            string cleanText = mod.Value.Text.Replace("%%", "%").Replace("%", "%%");
+                            string cleanText = EscapeImGui(mod.Value.Text);
                             ImGui.TextColored(col, $"{cleanText} ({mod.Key}){brickStatus}");
                             ImGui.PopID();
                         }
@@ -40,16 +46,20 @@ namespace MapNotify_3_28
 
                     if (BadModsDictionary != null && BadModsDictionary.Count > 0)
                     {
+                        var filteredBad = BadModsDictionary
+                            .Where(m => string.IsNullOrEmpty(_modFilter) || m.Key.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) || m.Value.Text.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+
                         ImGui.TextColored(new nuVector4(1f, 0.4f, 0.4f, 1f), "Bad Mods:");
                         ImGui.Indent();
-                        foreach (var mod in BadModsDictionary)
+                        foreach (var mod in filteredBad)
                         {
                             ImGui.PushID($"active_bad_{mod.Key}");
                             if (ImGui.Button("X")) DeleteModFromConfig(mod.Key);
                             ImGui.SameLine();
-                            var col = SharpToNu(mod.Value.Color);
+                            var col = mod.Value.Color;
                             string brickPrefix = mod.Value.Bricking ? "[B] " : "";
-                            string cleanText = mod.Value.Text.Replace("%%", "%").Replace("%", "%%");
+                            string cleanText = EscapeImGui(mod.Value.Text);
                             ImGui.TextColored(col, $"{brickPrefix}{cleanText} ({mod.Key})");
                             ImGui.PopID();
                         }
@@ -65,6 +75,10 @@ namespace MapNotify_3_28
                     for (int i = 0; i < _capturedMods.Count; i++)
                     {
                         var mod = _capturedMods[i];
+                        if (!string.IsNullOrEmpty(_modFilter) && 
+                            !mod.RawName.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) && 
+                            !mod.Description.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) &&
+                            !mod.DisplayName.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase)) continue;
 
                         // Visual Headers for Hierarchy (Prefix/Suffix/Implicit)
                         if (mod.AffixType != lastAffixType)
@@ -78,7 +92,7 @@ namespace MapNotify_3_28
                         ImGui.PushID(i);
                         HelpMarker($"Internal Name: {mod.RawName}");
                         ImGui.SameLine();
-                        string displayDesc = (string.IsNullOrEmpty(mod.Description) ? mod.RawName : mod.Description).Replace("%%", "%").Replace("%", "%%");
+                        string displayDesc = EscapeImGui(string.IsNullOrEmpty(mod.Description) ? mod.RawName : mod.Description);
                         ImGui.TextWrapped(displayDesc);
 
                         var dispName = mod.DisplayName;

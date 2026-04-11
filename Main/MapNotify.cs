@@ -36,6 +36,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     private CachedValue<List<NormalInventoryItem>> _purchaseWindowItems;
     private CachedValue<List<NormalInventoryItem>> _heistLockerItems;
     private bool _showPreviewWindow;
+    private string _modFilter = string.Empty;
     private List<CapturedMod> _capturedMods = new List<CapturedMod>();
 
     public MapNotify_3_28()
@@ -44,193 +45,6 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     }
 
     public new string ConfigDirectory => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "MapNotify-3.28");
-
-    private bool ItemIsMap(Entity entity)
-    {
-        if (entity == null || entity.Address == 0) return false;
-        if (entity.HasComponent<ExileCore.PoEMemory.Components.MapKey>()) return true;
-        if (entity.HasComponent<HeistContract>() || entity.HasComponent<HeistBlueprint>()) return true;
-
-        var path = entity.Path;
-        if (string.IsNullOrEmpty(path)) return false;
-
-        return path.StartsWith("Metadata/Items/Maps/MavenMap", StringComparison.Ordinal) ||
-               path.StartsWith("Metadata/Items/Heist/HeistContract", StringComparison.Ordinal) ||
-               path.StartsWith("Metadata/Items/Heist/HeistBlueprint", StringComparison.Ordinal) ||
-               path.Contains("Maven");
-    }
-
-    private List<NormalInventoryItem> GetItemsFromCollection(IEnumerable<NormalInventoryItem> items)
-    {
-        var result = new List<NormalInventoryItem>();
-        if (items == null) return result;
-        var seenAddresses = new HashSet<long>();
-        foreach (var it in items)
-        {
-            if (it?.Item != null && ItemIsMap(it.Item) && seenAddresses.Add(it.Item.Address))
-                result.Add(it);
-        }
-        return result;
-    }
-
-    private List<NormalInventoryItem> GetInventoryItems()
-    {
-        if (ingameState?.IngameUi?.InventoryPanel?.IsVisible == true)
-        {
-            return GetItemsFromCollection(ingameState.IngameUi.InventoryPanel[InventoryIndex.PlayerInventory]?.VisibleInventoryItems);
-        }
-        return new List<NormalInventoryItem>();
-    }
-
-    private void FindMapsInElementRecursive(Element element, List<NormalInventoryItem> result, HashSet<long> seenAddresses, int depth)
-    {
-        if (element == null || !element.IsVisible || depth > 20) return;
-
-        // ExileAPI's NormalInventoryItem check
-        // Sometimes elements are both an Element and a NormalInventoryItem
-        var item = element.AsObject<NormalInventoryItem>();
-        if (item?.Item != null && item.Address != 0)
-        {
-            if (ItemIsMap(item.Item) && seenAddresses.Add(item.Address))
-            {
-                result.Add(item); // Add only if not already seen
-            }
-        }
-
-        // If this wasn't an item, check all of its children (Recursion)
-        int childCount = (int)element.ChildCount;
-        if (childCount > 0 && childCount < 1000)
-        {
-            for (int i = 0; i < childCount; i++)
-            {
-                var child = element.GetChildAtIndex(i);
-                if (child != null) FindMapsInElementRecursive(child, result, seenAddresses, depth + 1);
-            }
-        }
-    }
-
-    private (int stashIndex, List<NormalInventoryItem>) GetRegularStashItems()
-    {
-        var result = new List<NormalInventoryItem>();
-        var stashElement = ingameState?.IngameUi?.StashElement;
-
-        if (stashElement?.IsVisible == true && stashElement.VisibleStash != null &&
-            stashElement.VisibleStash.InvType != InventoryType.MapStash && Settings.FilterStash.Value)
-        {
-            FindMapsInElement(stashElement, result);
-        }
-
-        int index = stashElement != null ? (int)stashElement.IndexVisibleStash : -1;
-        return (index, result);
-    }
-
-    private (int stashIndex, List<NormalInventoryItem>) GetMapStashItems()
-    {
-        var result = new List<NormalInventoryItem>();
-        var stashElement = ingameState?.IngameUi?.StashElement;
-
-        if (stashElement?.IsVisible == true && stashElement.VisibleStash != null &&
-            stashElement.VisibleStash.InvType == InventoryType.MapStash && Settings.FilterMapStash.Value)
-        {
-            // Jump closer to the items container using indices provided: 2->0->0->1->1->2->0->4
-            var mapContainer = stashElement.GetChildAtIndex(2)?.GetChildAtIndex(0)?.GetChildAtIndex(0)?
-                                            .GetChildAtIndex(1)?.GetChildAtIndex(1)?.GetChildAtIndex(2)?
-                                            .GetChildAtIndex(0)?.GetChildAtIndex(4);
-            FindMapsInElement(mapContainer ?? stashElement, result);
-        }
-
-        int index = stashElement != null ? (int)stashElement.IndexVisibleStash : -1;
-        return (index, result);
-    }
-
-    private void FindMapsInElement(Element element, List<NormalInventoryItem> result)
-    { // This overload is called by GetRegularStashItems and GetMapStashItems.
-        // It needs to create its own HashSet for uniqueness.
-        var seenAddresses = new HashSet<long>();
-        FindMapsInElementRecursive(element, result, seenAddresses, 0);
-    }
-
-    private List<NormalInventoryItem> GetMerchantItems()
-    {
-        var merchantPanel = ingameState?.IngameUi?.OfflineMerchantPanel;
-        if (merchantPanel != null && merchantPanel.IsVisible)
-        {
-            return GetItemsFromCollection(merchantPanel.VisibleStash?.VisibleInventoryItems);
-        }
-        return new List<NormalInventoryItem>();
-    }
-
-    private List<NormalInventoryItem> GetHeistLockerItems()
-    {
-        var result = new List<NormalInventoryItem>();
-        var ui = ingameState?.IngameUi;
-        if (ui == null || ui.ChildCount <= 98) return result;
-
-        var heistLocker = ui.GetChildAtIndex(98);
-        if (heistLocker?.IsVisible == true && Settings.FilterStash.Value)
-        {
-            var seenAddresses = new HashSet<long>();
-            // Iterate through category containers (indices 7 to 24) to find items in all tabs
-            for (int i = 7; i <= 24; i++)
-            {
-                var container = heistLocker.GetChildAtIndex(i);
-                if (container != null && container.IsVisible)
-                {
-                    FindMapsInElementRecursive(container, result, seenAddresses, 0);
-                }
-            }
-        }
-        return result;
-    }
-
-    private List<NormalInventoryItem> GetPurchaseWindowItems()
-    {
-        var ui = ingameState?.IngameUi;
-        if (ui == null)
-            return new List<NormalInventoryItem>();
-        ExileCore.PoEMemory.Element window = null;
-        if (ui.PurchaseWindow?.IsVisible == true)
-            window = ui.PurchaseWindow;
-        else if (ui.PurchaseWindowHideout?.IsVisible == true)
-            window = ui.PurchaseWindowHideout;
-        else if (ui.HaggleWindow?.IsVisible == true)
-            window = ui.HaggleWindow;
-
-        var tradeWindow = ui.ChildCount > 108 ? ui.GetChildAtIndex(108) : null;
-        if (window == null && tradeWindow?.IsVisible == true)
-            window = tradeWindow;
-
-        if (window == null)
-            return new List<NormalInventoryItem>();
-
-        var result = new List<NormalInventoryItem>();
-        var seenAddresses = new HashSet<long>(); // New HashSet for uniqueness
-        bool isTradeWindow = (window == tradeWindow); // Determine if it's the TradeWindow
-
-        if (isTradeWindow)
-        {
-            // Safe chain prevents log spam when UI indices aren't fully loaded
-            var tradeRoot = window.GetChildAtIndex(3)?.GetChildAtIndex(1)?.GetChildAtIndex(0)?.GetChildAtIndex(0);
-            if (tradeRoot != null)
-                FindMapsInElementRecursive(tradeRoot, result, seenAddresses, 0);
-        }
-        else // PurchaseWindow, PurchaseWindowHideout, HaggleWindow
-        {
-            var currentTabContainer = window.GetChildAtIndex(8)?.GetChildAtIndex(1);
-            if (currentTabContainer != null)
-            {
-                foreach (var tab in currentTabContainer.Children)
-                {
-                    if (tab.IsVisible && tab.ChildCount > 0)
-                    {   // Assuming tab.GetChildAtIndex(0) is the inventory grid
-                        var grid = tab.GetChildAtIndex(0);
-                        if (grid != null) FindMapsInElementRecursive(grid, result, seenAddresses, 0);
-                    }
-                }
-            }
-        }
-        return result;
-    }
 
     public override bool Initialise()
     {
@@ -275,6 +89,11 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     public static float maxSize;
     public static float rowSize;
     public static int lastCol;
+
+    public static string EscapeImGui(string text)
+    {
+        return text?.Replace("%%", "%").Replace("%", "%%") ?? string.Empty;
+    }
 
     public void RenderItem(
         NormalInventoryItem Item,
@@ -409,6 +228,9 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 
                         if (Settings.ShowHeistInfo.Value && (ItemDetails.HeistAreaLevel > 0 || ItemDetails.HeistJobLines.Count > 0))
                         {
+                            if (Settings.HorizontalLines.Value)
+                                ImGui.Separator();
+
                             var heistColor = new nuVector4(0.5f, 0.8f, 1f, 1f);
                             if (ItemDetails.HeistAreaLevel > 0)
                                 ImGui.TextColored(heistColor, $"Area Level: {ItemDetails.HeistAreaLevel}");
@@ -463,14 +285,14 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                     {
                         if (ItemDetails.ActiveGoodMods.Count > 0)
                             foreach (var StyledText in ItemDetails.ActiveGoodMods)
-                                ImGui.TextColored(SharpToNu(StyledText.Color), StyledText.Text.Replace("%%", "%").Replace("%", "%%"));
+                                ImGui.TextColored(StyledText.Color, EscapeImGui(StyledText.Text));
 
                         if (ItemDetails.ActiveGoodMods.Count > 0 && ItemDetails.ActiveBadMods.Count > 0)
                             ImGui.Dummy(new nuVector2(0, 5)); // Adds a 10-pixel vertical space
 
                         if (ItemDetails.ActiveBadMods.Count > 0)
                             foreach (var StyledText in ItemDetails.ActiveBadMods)
-                                ImGui.TextColored(SharpToNu(StyledText.Color), $"{(StyledText.Bricking ? "[B] " : "")}{StyledText.Text.Replace("%%", "%").Replace("%", "%%")}");
+                                ImGui.TextColored(StyledText.Color, $"{(StyledText.Bricking ? "[B] " : "")}{EscapeImGui(StyledText.Text)}");
                     }
                     ImGui.EndGroup();
 
@@ -832,20 +654,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                 AffixType = mod.ModRecord.AffixType.ToString(),
                 DisplayName = existingEntry?.Text ?? (matchedDescription ?? mod.Name),
                 Description = matchedDescription ?? (!string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name),
-                Color = existingEntry != null ? SharpToNu(existingEntry.Color) : new nuVector4(1, 1, 1, 1),
+                Color = existingEntry != null ? existingEntry.Color : new nuVector4(1, 1, 1, 1),
                 IsBricking = existingEntry?.Bricking ?? false
             });
         }
         _showPreviewWindow = true;
     }
-}
-
-public class CapturedMod
-{
-    public string RawName { get; set; }
-    public string DisplayName { get; set; }
-    public string Description { get; set; }
-    public string AffixType { get; set; }
-    public nuVector4 Color { get; set; } = new nuVector4(1, 1, 1, 1);
-    public bool IsBricking { get; set; }
 }
