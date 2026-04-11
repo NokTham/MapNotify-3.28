@@ -237,7 +237,7 @@ namespace MapNotify_3_28
 - Haven't been completed yet
 - Have missing bonus objectives
 - Are currently witnessed by the Maven
-* Type 'a|e' in the Atlas Search Box to force the client to load all nodes data.");
+* Type 'a|e' in the Atlas Search Box to force the client to load all nodes data, this is only needed upon logging in.");
 
             if (atlasHeaderOpen)
             {
