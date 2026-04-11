@@ -13,10 +13,10 @@ namespace MapNotify_3_28;
 public partial class MapNotify_3_28
 {
     private static readonly Regex MapNameRegex = new Regex(@"<[^>]*>{([^}]*)}", RegexOptions.Compiled);
+    private static readonly int[] AtlasNodeOffsets = { 0x120, 0x110, 0x118, 0x128 };
 
     private static readonly Dictionary<string, string> SpecialNodeMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
-        // These nodes have different names in the Atlas UI vs ServerData, so we need to check both.
         { "Moment of Loneliness", "IgnoranceBoss" },
         { "Eye of the Storm", "SirusBoss" },
         { "The Shaper's Realm", "ShaperBoss" },
@@ -31,12 +31,15 @@ public partial class MapNotify_3_28
         { "Crux of Nothingness", "KingInTheMistsBoss" },
         { "The Apex of Sacrifice", "AtziriBoss" }
     };
+
     private CachedValue<HashSet<long>> _cachedDiscoveryAddresses;
     private CachedValue<Dictionary<string, long>> _cachedNameToNodeAddress;
     private CachedValue<HashSet<string>> _completedNames;
     private CachedValue<HashSet<string>> _bonusNames;
     private CachedValue<HashSet<string>> _witnessedNames;
     private int _discoveredAtlasOffset = -1;
+    private System.Reflection.PropertyInfo _elemProp;
+    private System.Reflection.FieldInfo _flagsField;
 
     private void InitializeAtlasHighlighter()
     {
@@ -54,7 +57,7 @@ public partial class MapNotify_3_28
                     map[id] = node.Address;
             }
             return map;
-        }, 5000); // Refresh every 5 seconds, or when Atlas is opened/closed.
+        }, 5000);
 
         _cachedDiscoveryAddresses = new TimeCache<HashSet<long>>(() =>
         {
@@ -111,13 +114,23 @@ public partial class MapNotify_3_28
         var nodesContainer = atlasPanel.GetChildAtIndex(0);
         if (nodesContainer == null || nodesContainer.ChildCount == 0) return;
 
-        // Use Cached HashSets to prevent rebuilding collections every single frame (Performance Fix)
+        // Initialize reflection cache once
+        if (_elemProp == null)
+        {
+            var firstChild = nodesContainer.GetChildAtIndex(0);
+            if (firstChild != null)
+            {
+                _elemProp = firstChild.GetType().GetProperty("Elem");
+                var elem = _elemProp?.GetValue(firstChild);
+                _flagsField = elem?.GetType().GetField("Flags");
+            }
+        }
+
         var completedNames = _completedNames.Value;
         var bonusNames = _bonusNames.Value;
         var witnessedNames = _witnessedNames.Value;
         var nameToNodeAddress = _cachedNameToNodeAddress.Value;
 
-        // Performance: Fetch settings once outside the loop
         var showAtlas = Settings.ShowAtlasHighlight.Value;
         var showBonus = Settings.ShowAtlasBonusHighlight.Value;
         var showMaven = Settings.ShowMavenWitnessHighlight.Value;
@@ -136,6 +149,12 @@ public partial class MapNotify_3_28
             var element = nodesContainer.GetChildAtIndex(i);
             if (element == null || element.Address == 0) continue;
 
+            // Skip hidden/fogged nodes via Flag19
+            var elem = _elemProp?.GetValue(element);
+            var flagsValue = _flagsField?.GetValue(elem);
+            ulong flags = flagsValue == null ? 0ul : Convert.ToUInt64(flagsValue);
+            if ((flags & 0x80000ul) == 0) continue;
+
             long atlasNodePtr = 0;
             string areaName = null;
             string nodeId = null;
@@ -143,7 +162,6 @@ public partial class MapNotify_3_28
             bool isBonusCompleted = false;
             bool isWitnessedByMemory = false;
 
-            // Verify or discover the memory offset
             if (_discoveredAtlasOffset != -1)
             {
                 atlasNodePtr = gameController.IngameState.M.Read<long>(element.Address + _discoveredAtlasOffset);
@@ -159,7 +177,6 @@ public partial class MapNotify_3_28
                 else _discoveredAtlasOffset = -1;
             }
 
-            // Lazy Tooltip Access: Only fetch if memory identification failed or we are in discovery
             string uiMapName = null;
             if (atlasNodePtr == 0 || _discoveredAtlasOffset == -1)
             {
@@ -167,18 +184,14 @@ public partial class MapNotify_3_28
                 if (tooltip != null && tooltip.Address != 0)
                 {
                     var nameElement = tooltip.GetChildAtIndex(1)?.GetChildAtIndex(0);
-                    uiMapName = nameElement?.Text;
-
-                    if (nameElement != null) {
+                    if (nameElement != null)
+                    {
                         uiMapName = nameElement.Text;
                         if (string.IsNullOrEmpty(uiMapName) && nameElement.ChildCount > 0)
                             uiMapName = nameElement.GetChildAtIndex(0)?.Text;
                     }
-
                     if (uiMapName != null && uiMapName.Length > 0 && uiMapName[0] == '<')
-                    {
                         uiMapName = MapNameRegex.Replace(uiMapName, "$1");
-                    }
                 }
             }
 
@@ -186,8 +199,7 @@ public partial class MapNotify_3_28
             {
                 if (nameToNodeAddress.TryGetValue(uiMapName, out var targetAddress))
                 {
-                    int[] offsets = { 0x120, 0x110, 0x118, 0x128 };
-                    foreach (var off in offsets)
+                    foreach (var off in AtlasNodeOffsets)
                     {
                         if (gameController.IngameState.M.Read<long>(element.Address + off) == targetAddress)
                         {
@@ -205,14 +217,13 @@ public partial class MapNotify_3_28
                 areaName = node?.Area?.Name;
                 nodeId = node?.Id;
 
-                isCompleted = (!string.IsNullOrEmpty(areaName) && completedNames.Contains(areaName)) || 
-                             (!string.IsNullOrEmpty(nodeId) && completedNames.Contains(nodeId));
-                isBonusCompleted = (!string.IsNullOrEmpty(areaName) && bonusNames.Contains(areaName)) || 
-                                  (!string.IsNullOrEmpty(nodeId) && bonusNames.Contains(nodeId));
-                isWitnessedByMemory = (!string.IsNullOrEmpty(areaName) && witnessedNames.Contains(areaName));
+                isCompleted = (!string.IsNullOrEmpty(areaName) && completedNames.Contains(areaName)) ||
+                              (!string.IsNullOrEmpty(nodeId) && completedNames.Contains(nodeId));
+                isBonusCompleted = (!string.IsNullOrEmpty(areaName) && bonusNames.Contains(areaName)) ||
+                                   (!string.IsNullOrEmpty(nodeId) && bonusNames.Contains(nodeId));
+                isWitnessedByMemory = !string.IsNullOrEmpty(areaName) && witnessedNames.Contains(areaName);
             }
 
-            // Fallback for UI tooltips
             if (!string.IsNullOrEmpty(uiMapName))
             {
                 if (completedNames.Contains(uiMapName)) isCompleted = true;
@@ -228,25 +239,23 @@ public partial class MapNotify_3_28
             }
 
             string checkName = uiMapName ?? areaName;
-            bool isWhitelisted = (!string.IsNullOrEmpty(checkName) && ExpectedNodes.Contains(checkName)) || 
-                                (!string.IsNullOrEmpty(nodeId) && ExpectedNodes.Contains(nodeId));
+            bool isWhitelisted = (!string.IsNullOrEmpty(checkName) && ExpectedNodes.Contains(checkName)) ||
+                                 (!string.IsNullOrEmpty(nodeId) && ExpectedNodes.Contains(nodeId));
             if (!isWhitelisted && !string.IsNullOrEmpty(uiMapName) && SpecialNodeMapping.TryGetValue(uiMapName, out var sId))
                 isWhitelisted = ExpectedNodes.Contains(sId);
 
             if (!isWhitelisted) continue;
 
-            bool isBonusPossible = (!string.IsNullOrEmpty(checkName) && ExpectedBonusNodes.Contains(checkName)) || 
-                                  (!string.IsNullOrEmpty(nodeId) && ExpectedBonusNodes.Contains(nodeId));
+            bool isBonusPossible = (!string.IsNullOrEmpty(checkName) && ExpectedBonusNodes.Contains(checkName)) ||
+                                   (!string.IsNullOrEmpty(nodeId) && ExpectedBonusNodes.Contains(nodeId));
             if (!isBonusPossible && !string.IsNullOrEmpty(uiMapName) && SpecialNodeMapping.TryGetValue(uiMapName, out var bId))
                 isBonusPossible = ExpectedBonusNodes.Contains(bId);
 
             var center = element.GetClientRect().Center.ToVector2Num();
             if (showAtlas && !isCompleted)
                 Graphics.DrawCircle(center, atlasRadius, atlasColor, thickness, 30);
-
             if (showBonus && isBonusPossible && !isBonusCompleted)
                 Graphics.DrawCircle(center, bonusRadius, bonusColor, thickness, 30);
-
             if (showMaven && isWitnessedByMemory)
                 Graphics.DrawCircle(center, mavenRadius, mavenColor, thickness, 30);
         }
