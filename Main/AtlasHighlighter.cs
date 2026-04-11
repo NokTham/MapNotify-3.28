@@ -109,8 +109,11 @@ public partial class MapNotify_3_28
     private void DrawAtlasHighlights()
     {
         var atlasPanel = ingameState?.IngameUi?.Atlas ?? ingameState?.IngameUi?.GetChildAtIndex(29);
-        if (atlasPanel == null || !atlasPanel.IsVisible || atlasPanel.Address == 0) return;
-
+        if (atlasPanel == null || !atlasPanel.IsVisible || atlasPanel.Address == 0)
+        {
+            _discoveredAtlasOffset = -1; // Reset discovery on close to handle relogs/memory shifts
+            return;
+        }
         var nodesContainer = atlasPanel.GetChildAtIndex(0);
         if (nodesContainer == null || nodesContainer.ChildCount == 0) return;
 
@@ -149,11 +152,14 @@ public partial class MapNotify_3_28
             var element = nodesContainer.GetChildAtIndex(i);
             if (element == null || element.Address == 0) continue;
 
-            // Skip hidden/fogged nodes via Flag19
-            var elem = _elemProp?.GetValue(element);
-            var flagsValue = _flagsField?.GetValue(elem);
-            ulong flags = flagsValue == null ? 0ul : Convert.ToUInt64(flagsValue);
-            if ((flags & 0x80000ul) == 0) continue;
+            if (_elemProp != null && _flagsField != null)
+            {
+                var elem = _elemProp.GetValue(element);
+                if (elem == null) continue;
+                var flagsValue = _flagsField.GetValue(elem);
+                if (flagsValue != null && (Convert.ToUInt64(flagsValue) & 0x80000ul) == 0)
+                    continue;
+            }
 
             long atlasNodePtr = 0;
             string areaName = null;
