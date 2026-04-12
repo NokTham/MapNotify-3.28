@@ -5,6 +5,7 @@ namespace MapNotify_3_28
     public class StyledText
     {
         public string Text { get; set; }
+        public string EscapedText { get; set; }
         public System.Numerics.Vector4 Color { get; set; }
         public bool Bricking { get; set; }
     }

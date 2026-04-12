@@ -21,6 +21,28 @@ namespace MapNotify_3_28;
 
 public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 {
+    private static readonly Regex TooltipTagsRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
+
+    public static readonly string[] ModNameBlacklist =
+    {
+        "AfflictionMapDeliriumStacks",
+        "AfflictionMapReward",
+        "InfectedMap",
+        "MapForceCorruptedSideArea",
+        "MapGainsRandomZanaMod",
+        "MapDoesntConsumeSextantCharge",
+        "MapEnchant",
+        "Enchantment",
+        "MapBossSurroundedByTormentedSpirits",
+        "MapZanaSubAreaMissionDetails",
+        "MapZanaInfluence",
+        "IsUberMap",
+        "MapConqueror",
+        "MapElder",
+        "MapVaalTempleContainsVaalVessels",
+        "MavenInvitation",
+    };
+
     private RectangleF windowArea;
     private static GameController gameController;
     private static IngameState ingameState;
@@ -32,9 +54,12 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     private CachedValue<List<NormalInventoryItem>> _inventoryItems;
     private CachedValue<(int stashIndex, List<NormalInventoryItem>)> _stashItems;
     private CachedValue<(int stashIndex, List<NormalInventoryItem>)> _mapStashItems;
+    private CachedValue<List<NormalInventoryItem>> _mapDeviceItems;
     private CachedValue<List<NormalInventoryItem>> _merchantItems;
     private CachedValue<List<NormalInventoryItem>> _purchaseWindowItems;
     private CachedValue<List<NormalInventoryItem>> _heistLockerItems;
+    private CachedValue<List<NormalInventoryItem>> _expeditionLockerItems;
+
     private bool _showPreviewWindow;
     private string _modFilter = string.Empty;
     private List<CapturedMod> _capturedMods = new List<CapturedMod>();
@@ -69,6 +94,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             GetMapStashItems,
             Settings.MapStashCacheInterval.Value
         );
+        _mapDeviceItems = new TimeCache<List<NormalInventoryItem>>(
+            GetMapDeviceItems,
+            Settings.InventoryCacheInterval.Value
+        );
         _merchantItems = new TimeCache<List<NormalInventoryItem>>(
             GetMerchantItems,
             Settings.InventoryCacheInterval.Value
@@ -79,6 +108,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         );
         _heistLockerItems = new TimeCache<List<NormalInventoryItem>>(
             GetHeistLockerItems,
+            Settings.StashCacheInterval.Value
+        );
+        _expeditionLockerItems = new TimeCache<List<NormalInventoryItem>>(
+            GetExpeditionLockerItems,
             Settings.StashCacheInterval.Value
         );
         InitializeAtlasHighlighter(); // Call the new method to initialize Atlas-related caches
@@ -95,306 +128,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         return text?.Replace("%%", "%").Replace("%", "%%") ?? string.Empty;
     }
 
-    public void RenderItem(
-        NormalInventoryItem Item,
-        Entity Entity,
-        bool isInventory = false,
-        int mapNum = 0
-    )
-    {
-        var pushedColors = 0;
-        var entity = Entity;
-        if (entity != null && entity.Address != 0 && entity.IsValid)
-        {
-            // Evaluate
-            var ItemDetails = Entity.GetHudComponent<ItemDetails>();
-            if (ItemDetails == null)
-            {
-                ItemDetails = new ItemDetails(Item, Entity);
-                Entity.SetHudComponent(ItemDetails);
-            }
-
-            // Fail-safe: if ItemDetails couldn't be created or retrieved, skip rendering this frame
-            if (ItemDetails == null) return;
-
-            var alwaysShow = Settings.AlwaysShowTooltip.Value;
-            if (alwaysShow || ItemDetails.ActiveGoodMods.Count > 0 || ItemDetails.ActiveBadMods.Count > 0)
-            {
-                // Get mouse position
-                var mousePos = MouseLite.GetCursorPositionVector();
-                var boxOrigin = new nuVector2(mousePos.X + 25, mousePos.Y);
-
-                // Pad horizontally if using big cursor and the cursor overlaps the tooltip
-                if (Settings.PadForBigCursor.Value && ItemDetails.NeedsPadding)
-                    boxOrigin = new nuVector2(mousePos.X + 45, mousePos.Y + 35);
-
-                // Pad vertically as well if using ninja pricer tooltip
-                if (Settings.PadForNinjaPricer.Value && ItemDetails.NeedsPadding)
-                    boxOrigin = new nuVector2(mousePos.X + 25, mousePos.Y + 56);
-
-                // Pad vertically as well if using ninja pricer tooltip 2nd padding
-                if (Settings.PadForNinjaPricer2.Value && ItemDetails.NeedsPadding)
-                    boxOrigin = new nuVector2(mousePos.X + 25, mousePos.Y + 114);
-
-                // Personal pricer
-                if (Settings.PadForAltPricer.Value && ItemDetails.NeedsPadding)
-                    boxOrigin = new nuVector2(mousePos.X + 25, mousePos.Y + 30);
-
-                // Use cached window ID to avoid per-frame string allocations
-                var windowId = ItemDetails.WindowID;
-
-                // Parsing inventory, don't use boxOrigin
-                if (isInventory)
-                {
-                    // wrap on fourth
-                    if (mapNum < lastCol) //((float)mapNum % (float)4 == (float)0)
-                    {
-                        boxSize = new nuVector2(0, 0);
-                        rowSize += maxSize + 2;
-                        maxSize = 0;
-                    }
-                    var framePos = ingameState.UIHover.Parent.GetClientRect().TopRight;
-                    framePos.X += 10 + boxSize.X;
-                    framePos.Y -= 200;
-                    boxOrigin = new nuVector2(framePos.X, framePos.Y + rowSize);
-                }
-                // create the imgui faux tooltip
-                var _opened = true;
-                // Color background
-                pushedColors += 1;
-                ImGui.PushStyleColor(ImGuiCol.WindowBg, 0xFF3F3F3F);
-                if (
-                    ImGui.Begin(
-                        windowId,
-                        ref _opened,
-                        ImGuiWindowFlags.NoScrollbar
-                            | ImGuiWindowFlags.AlwaysAutoResize
-                            | ImGuiWindowFlags.NoMove
-                            | ImGuiWindowFlags.NoResize
-                            | ImGuiWindowFlags.NoInputs
-                            | ImGuiWindowFlags.NoSavedSettings
-                            | ImGuiWindowFlags.NoTitleBar
-                            | ImGuiWindowFlags.NoNavInputs
-                    )
-                )
-                {
-                    ImGui.BeginGroup();
-
-                    if (isInventory || Settings.ShowMapName.Value)
-                    {
-                        ImGui.TextColored(ItemDetails.ItemColor, $"{ItemDetails.MapName}");
-                    }
-
-                    // Quantity and Packsize for maps
-                    {
-                        var qCol = new nuVector4(1f, 1f, 1f, 1f);
-                        if (Settings.ColorQuantityPercent.Value)
-                        {
-                            if (ItemDetails.Quantity < Settings.ColorQuantity.Value)
-                                qCol = new nuVector4(1f, 0.4f, 0.4f, 1f);
-                            else
-                                qCol = new nuVector4(0.4f, 1f, 0.4f, 1f);
-                        }
-
-                        var showQuant = Settings.ShowQuantityPercent.Value;
-                        var showPack = Settings.ShowPackSizePercent.Value;
-                        var showRarity = Settings.ShowRarityPercent.Value;
-
-                        if (showQuant && ItemDetails.Quantity != 0 && showPack && ItemDetails.PackSize != 0)
-                        {
-                            ImGui.TextColored(qCol, $"{ItemDetails.Quantity}%% IIQ");
-                            ImGui.SameLine();
-                            ImGui.TextColored(new nuVector4(1f, 1f, 1f, 1f), $"{ItemDetails.PackSize}%% PS");
-                        }
-                        else if (showQuant && ItemDetails.Quantity != 0)
-                        {
-                            ImGui.TextColored(qCol, $"{ItemDetails.Quantity}%% IIQ");
-                        }
-                        else if (showPack && ItemDetails.PackSize != 0)
-                        {
-                            ImGui.TextColored(new nuVector4(1f, 1f, 1f, 1f), $"{ItemDetails.PackSize}%% PS");
-                        }
-
-                        if (showRarity && ItemDetails.Rarity != 0)
-                        {
-                            if ((showQuant && ItemDetails.Quantity != 0) || (showPack && ItemDetails.PackSize != 0)) ImGui.SameLine();
-                            ImGui.TextColored(new nuVector4(1f, 1f, 1f, 1f), $"{ItemDetails.Rarity}%% IIR");
-                        }
-
-                        if (Settings.ShowChisel.Value && !string.IsNullOrEmpty(ItemDetails.ChiselName))
-                        {
-                            ImGui.TextColored(Settings.ChiselColor, $"+{ItemDetails.ChiselValue}%% {ItemDetails.ChiselName}");
-                        }
-
-                        if (Settings.ShowHeistInfo.Value && (ItemDetails.HeistAreaLevel > 0 || ItemDetails.HeistJobLines.Count > 0))
-                        {
-                            if (Settings.HorizontalLines.Value)
-                                ImGui.Separator();
-
-                            var heistColor = new nuVector4(0.5f, 0.8f, 1f, 1f);
-                            if (ItemDetails.HeistAreaLevel > 0)
-                                ImGui.TextColored(heistColor, $"Area Level: {ItemDetails.HeistAreaLevel}");
-
-                            foreach (var line in ItemDetails.HeistJobLines)
-                            {
-                                ImGui.TextColored(line.IsRevealed ? heistColor : new nuVector4(0.5f, 0.8f, 1f, 0.5f), line.Text);
-                            }
-                        }
-
-                        var showOMaps = Settings.ShowOriginatorMaps.Value;
-                        var showOScarabs = Settings.ShowOriginatorScarabs.Value;
-                        var showOCurrency = Settings.ShowOriginatorCurrency.Value;
-
-                        if (ItemDetails.IsOriginatorMap && (showOMaps || showOScarabs || showOCurrency))
-                        {
-                            if (Settings.HorizontalLines.Value)
-                                ImGui.Separator();
-                            if (showOMaps)
-                                ImGui.TextColored(
-                                    new nuVector4(0.5f, 0.85f, 1f, 1f),
-                                    $"+{ItemDetails.OriginatorMaps}%% Maps"
-                                );
-                            if (showOScarabs)
-                                ImGui.TextColored(
-                                    new nuVector4(0.85f, 0.45f, 0.85f, 1f),
-                                    $"+{ItemDetails.OriginatorScarabs}%% Scarabs"
-                                );
-                            if (showOCurrency)
-                                ImGui.TextColored(
-                                    new nuVector4(0.0f, 1.0f, 0.0f, 1.0f),
-                                    $"+{ItemDetails.OriginatorCurrency}%% Currency"
-                                );
-                        }
-
-                        if (Settings.HorizontalLines.Value)
-                            ImGui.Separator();
-                    }
-
-                    if (Settings.ShowModCount.Value && ItemDetails.ModCount != 0)
-                        if (entity.GetComponent<Base>().isCorrupted)
-                            ImGui.TextColored(new nuVector4(1f, 0f, 0f, 1f), $"{(isInventory ? ItemDetails.ModCount - 1 : ItemDetails.ModCount)} Mods, Corrupted"
-                            );
-                        else
-                            ImGui.TextColored(
-                                new nuVector4(1f, 1f, 1f, 1f),
-                                $"{(isInventory ? ItemDetails.ModCount - 1 : ItemDetails.ModCount)} Mods"
-                            );
-
-                    // Mod StyledTexts
-                    if (Settings.ShowModWarnings.Value)
-                    {
-                        if (ItemDetails.ActiveGoodMods.Count > 0)
-                            foreach (var StyledText in ItemDetails.ActiveGoodMods)
-                                ImGui.TextColored(StyledText.Color, EscapeImGui(StyledText.Text));
-
-                        if (ItemDetails.ActiveGoodMods.Count > 0 && ItemDetails.ActiveBadMods.Count > 0)
-                            ImGui.Dummy(new nuVector2(0, 5)); // Adds a 10-pixel vertical space
-
-                        if (ItemDetails.ActiveBadMods.Count > 0)
-                            foreach (var StyledText in ItemDetails.ActiveBadMods)
-                                ImGui.TextColored(StyledText.Color, $"{(StyledText.Bricking ? "[B] " : "")}{EscapeImGui(StyledText.Text)}");
-                    }
-                    ImGui.EndGroup();
-
-                    // border for most notable maps in inventory
-                    if (
-                        ItemDetails.Bricked
-                        || (ItemIsMap(entity) && isInventory)
-                    )
-                    {
-                        var min = ImGui.GetItemRectMin();
-                        min.X -= 8;
-                        min.Y -= 8;
-                        var max = ImGui.GetItemRectMax();
-                        max.X += 8;
-                        max.Y += 8;
-
-                        if (ItemDetails.Bricked)
-                            ImGui
-                                .GetForegroundDrawList()
-                                .AddRect(
-                                    min,
-                                    max,
-                                    ColorToUint(Settings.Bricked),
-                                    0f,
-                                    0,
-                                    Settings.BorderThickness.Value
-                                );
-                        else if (isInventory)
-                            ImGui.GetForegroundDrawList().AddRect(min, max, 0xFF4A4A4A);
-                    }
-
-                    // Detect and adjust for edges
-                    var size = ImGui.GetWindowSize();
-                    var pos = ImGui.GetWindowPos();
-                    if (boxOrigin.X + size.X > windowArea.Width)
-                        ImGui.SetWindowPos(
-                            new nuVector2(
-                                boxOrigin.X - (boxOrigin.X + size.X - windowArea.Width) - 4,
-                                boxOrigin.Y + 24
-                            ),
-                            ImGuiCond.Always
-                        );
-                    else
-                        ImGui.SetWindowPos(boxOrigin, ImGuiCond.Always);
-
-                    // padding when parsing an inventory
-                    if (isInventory)
-                    {
-                        boxSize.X += (int)size.X + 2;
-                        if (maxSize < size.Y)
-                            maxSize = size.Y;
-                        lastCol = mapNum;
-                    }
-                }
-                ImGui.End();
-                ImGui.PopStyleColor(pushedColors);
-            }
-        }
-    }
-
-    private void DrawMapBorders(NormalInventoryItem item, Entity entity, RectangleF? rectOverride = null)
-    {
-        var rect = rectOverride ?? item.GetClientRect();
-        double deflatePercent = Settings.BorderDeflation;
-        var deflateWidth = (int)(rect.Width * (deflatePercent / 100.0));
-        var deflateHeight = (int)(rect.Height * (deflatePercent / 100.0));
-        rect.Inflate(-deflateWidth, -deflateHeight);
-        var itemDetails = entity.GetHudComponent<ItemDetails>() ?? new ItemDetails(item, entity);
-        entity.SetHudComponent(itemDetails);
-
-        // Bricked highlight (High priority frame)
-        if (Settings.BoxForBricked && itemDetails.Bricked)
-        {
-            Graphics.DrawFrame(rect, Settings.Bricked.ToSharpColor(), Settings.BorderThicknessMap);
-        }
-
-        // Mapping logic to match UI labels:
-        var hasBadMod = Settings.BoxForMapWarnings && itemDetails.ActiveBadMods.Count > 0;
-        var hasGoodMod = Settings.BoxForMapBadWarnings && itemDetails.ActiveGoodMods.Count > 0;
-
-        if (hasGoodMod && hasBadMod)
-        {
-            // Both good and bad mods: multi-color filled rectangle for a diagonal gradient effect
-            Graphics.DrawRectFilledMultiColor(
-                rect.TopLeft.ToVector2Num(),
-                rect.BottomRight.ToVector2Num(),
-                Settings.MapBorderBad.ToSharpColor(),  // TopLeft
-                Settings.MapBorderGood.ToSharpColor(), // TopRight
-                Settings.MapBorderBad.ToSharpColor(),  // BottomRight
-                Settings.MapBorderGood.ToSharpColor()  // BottomLeft
-            );
-        }
-        else if (hasBadMod)
-        {
-            Graphics.DrawBox(rect, Settings.MapBorderBad.ToSharpColor());
-        }
-        else if (hasGoodMod)
-        {
-            Graphics.DrawBox(rect, Settings.MapBorderGood.ToSharpColor());
-        }
-    }
-
+    /// <summary>
+    /// Main rendering entry point called every frame.
+    /// Iterates through visible UI panels (Inventory, Stash, Shops) and applies highlights.
+    /// </summary>
     public override void Render()
     {
         // Update window area every frame in case the game window was moved or resized
@@ -448,7 +185,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         var stashUI = ui.StashElement;
         if (stashUI.IsVisible && stashUI.VisibleStash != null)
         {
+            // Synchronized detection: Rely on InventoryType. Fallback checks for ChildIndex(3) 
+            // often cause conflicts with other specialized stash tabs (Blight, etc.).
             var isMapStash = stashUI.VisibleStash.InvType == InventoryType.MapStash;
+
             var cache = isMapStash ? _mapStashItems.Value : _stashItems.Value;
             if (stashUI.IndexVisibleStash == cache.stashIndex)
             {
@@ -468,8 +208,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         }
 
         // 2.5 Heist Locker
-        var heistLocker = ui.ChildCount > 98 ? ui.GetChildAtIndex(98) : null;
-        if (Settings.FilterStash.Value && heistLocker?.IsVisible == true)
+        // We remove the hardcoded index check for rendering and rely on the cached item's own visibility.
+        if (Settings.ShowHeistLockerHighlights.Value)
         {
             foreach (var item in _heistLockerItems.Value)
             {
@@ -481,6 +221,23 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                 catch (Exception ex)
                 {
                     LogError($"Error drawing heist locker borders: {ex.Message}", 10);
+                }
+            }
+        }
+
+        // 2.6 Expedition Locker (Logbooks)
+        if (Settings.ShowExpeditionLockerHighlights.Value)
+        {
+            foreach (var item in _expeditionLockerItems.Value)
+            {
+                if (item?.Item == null) continue;
+                try
+                {
+                    DrawMapBorders(item, item.Item);
+                }
+                catch (Exception ex)
+                {
+                    LogError($"Error drawing expedition locker borders: {ex.Message}", 10);
                 }
             }
         }
@@ -507,8 +264,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             ui.PurchaseWindow?.IsVisible == true
             || ui.PurchaseWindowHideout?.IsVisible == true
             || ui.HaggleWindow?.IsVisible == true;
-        var tradeWindow = ui.ChildCount > 108 ? ui.GetChildAtIndex(108) : null;
-        bool isTradeWindowVisible = tradeWindow?.IsVisible == true;
+
+        // Use the specialized TradeWindow property for more robust detection
+        var tradeWindow = ui.TradeWindow;
+        bool isTradeWindowVisible = tradeWindow != null && tradeWindow.IsVisible;
 
         if (Settings.FilterTrade && (isShopVisible || isTradeWindowVisible))
         {
@@ -532,28 +291,33 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             }
         }
 
-        // 4.5. Maven Invitation (Fixed UI Element at 67->8->1)
-        if (Settings.ShowForInvitations.Value)
+        // 4.5. Map Device & Maven Invitations
+        // Using MapReceptacleWindow to replace hardcoded paths (67->8->1)
+        if (Settings.ShowForInvitations.Value || Settings.FilterTrade.Value)
         {
-            if (ui != null && ui.Address != 0 && ui.ChildCount > 67)
+            var deviceItems = _mapDeviceItems.Value;
+            foreach (var item in deviceItems)
             {
-                var root = ui.GetChildAtIndex(67);
-                if (root != null && root.IsVisible && root.ChildCount > 8)
+                if (item?.Item == null || !item.IsVisible) continue;
+
+                // Separate logic for invitation slot vs regular map pieces in the device
+                var path = item.Item.Path;
+                bool isInvitation = path != null && (path.Contains("MavenMap") || path.Contains("Invitations/Maven") || path.Contains("MavenInvitation"));
+                
+                if (isInvitation && !Settings.ShowForInvitations.Value) continue;
+                if (!isInvitation && !Settings.FilterTrade.Value) continue;
+
+                try
                 {
-                    var mid = root.GetChildAtIndex(8);
-                    var mavenInvitationElement = mid?.ChildCount > 1 ? mid.GetChildAtIndex(1) : null;
-                    if (mavenInvitationElement != null && mavenInvitationElement.IsVisible)
-                    {
-                        var invItem = mavenInvitationElement.AsObject<NormalInventoryItem>();
-                        if (invItem?.Item != null)
-                        {
-                            DrawMapBorders(invItem, invItem.Item, mavenInvitationElement.GetClientRect());
-                        }
-                    }
+                    DrawMapBorders(item, item.Item);
+                }
+                catch (Exception ex)
+                {
+                    LogError($"Error drawing map device borders: {ex.Message}", 10);
                 }
             }
         }
-
+        
         // 5. Hovered Item
         var uiHover = ingameState.UIHover;
         if (uiHover?.IsVisible == true)
@@ -564,6 +328,11 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         }
     }
 
+    /// <summary>
+    /// Orchestrates the "Capture Mod" logic. 
+    /// Extracts raw mod data and tooltip descriptions from the hovered item 
+    /// to prepare the Mod Preview window.
+    /// </summary>
     private void HandleCaptureHotkey()
     {
         // Force reload from files before capturing to ensure we have the latest settings
@@ -658,6 +427,40 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                 IsBricking = existingEntry?.Bricking ?? false
             });
         }
+
+        // Capture Logbook Implicits from ExpeditionSaga
+        var saga = hoverItem.Item.GetComponent<ExpeditionSaga>();
+        if (saga != null && saga.Areas != null)
+        {
+            foreach (var area in saga.Areas)
+            {
+                if (area?.ImplicitMods == null) continue;
+                foreach (var mod in area.ImplicitMods)
+                {
+                    if (string.IsNullOrEmpty(mod.RawName)) continue;
+                    // Avoid duplicates if multiple areas have the same mod type
+                    if (_capturedMods.Any(m => m.RawName == mod.RawName)) continue;
+
+                    var existingEntry = GoodModsDictionary.FirstOrDefault(x => mod.RawName.Contains(x.Key)).Value ??
+                                        BadModsDictionary.FirstOrDefault(x => mod.RawName.Contains(x.Key)).Value;
+
+                    var modText = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
+                    var cleanDesc = TooltipTagsRegex.Replace(modText, "").Replace("{", "").Replace("}", "").Trim();
+
+                    _capturedMods.Add(new CapturedMod
+                    {
+                        RawName = mod.RawName.Trim(),
+                        AffixType = "Logbook Implicit",
+                        DisplayName = existingEntry?.Text ?? cleanDesc,
+                        Description = cleanDesc,
+                        Color = existingEntry != null ? existingEntry.Color : new nuVector4(1, 1, 1, 1),
+                        IsBricking = existingEntry?.Bricking ?? false
+                    });
+                }
+            }
+        }
+
+        _modFilter = string.Empty;
         _showPreviewWindow = true;
     }
 }

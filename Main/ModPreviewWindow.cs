@@ -8,15 +8,17 @@ namespace MapNotify_3_28
 {
     partial class MapNotify_3_28
     {
+        /// <summary>
+        /// Renders the ImGui interface for the Map Mod Preview window.
+        /// This allows users to filter, categorize, and save captured mods to config files.
+        /// </summary>
         private void DrawPreviewWindow()
         {
             ImGui.SetNextWindowSize(new nuVector2(450, 600), ImGuiCond.FirstUseEver);
 
             if (ImGui.Begin("Map Mod Preview", ref _showPreviewWindow, ImGuiWindowFlags.NoCollapse))
             {
-                ImGui.TextColored(new nuVector4(0.5f, 1f, 0.5f, 1f), "Captured Mods from Hovered Map:");
-                ImGui.TextDisabled("Drag the bottom-right corner to resize.");
-                ImGui.Separator();
+                
                 ImGui.InputTextWithHint("##modfilter", "Filter Mods...", ref _modFilter, 100);
                 ImGui.Separator();
 
@@ -84,7 +86,9 @@ namespace MapNotify_3_28
                         if (mod.AffixType != lastAffixType)
                         {
                             if (i > 0) ImGui.Dummy(new System.Numerics.Vector2(0, 10));
-                            ImGui.TextColored(new nuVector4(0.5f, 0.8f, 1f, 1f), $"--- {mod.AffixType}es ---");
+                            ImGui.SetWindowFontScale(1.2f);
+                            ImGui.TextColored(new nuVector4(1f, 0.8f, 0.2f, 1f), mod.AffixType.ToUpper());
+                            ImGui.SetWindowFontScale(1.0f);
                             ImGui.Separator();
                             lastAffixType = mod.AffixType;
                         }
@@ -124,7 +128,12 @@ namespace MapNotify_3_28
                     ImGui.EndChild();
                 }
 
-                if (ImGui.Button("Close Window", new nuVector2(-1, 0))) _showPreviewWindow = false;
+                if (ImGui.Button("Close Window", new nuVector2(-1, 0)))
+                {
+                    _showPreviewWindow = false;
+                    _modFilter = string.Empty;
+                }
+
                 ImGui.End();
             }
         }
@@ -137,6 +146,10 @@ namespace MapNotify_3_28
                 SaveModToConfig(mod, "BadMods.txt");
         }
 
+        /// <summary>
+        /// Writes a captured mod entry to the specified configuration file.
+        /// Automatically handles moving mods between Good and Bad lists if they already exist.
+        /// </summary>
         private void SaveModToConfig(CapturedMod mod, string fileName)
         {
             string otherFile = fileName == "GoodMods.txt" ? "BadMods.txt" : "GoodMods.txt";

@@ -14,7 +14,7 @@ namespace MapNotify_3_28
     partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     {
         private string _rebindingNodeName = null;
-        
+
         public void DrawHotkeySelector(string label, HotkeyNode node, ToggleNode ctrl, ToggleNode shift, ToggleNode alt)
         {
             ImGui.Text(label);
@@ -136,16 +136,17 @@ namespace MapNotify_3_28
                 ImGui.Dummy(new nuVector2(0, 5));
 
                 ImGui.Text("Show Highlights:");
-                Settings.ShowForInvitations.Value = Checkbox(
-                    "Maven Invitations",
-                    Settings.ShowForInvitations.Value
-                );
+
                 Settings.FilterInventory.Value = Checkbox("Inventory", Settings.FilterInventory.Value); ImGui.SameLine(0f, 25f);
                 Settings.FilterStash.Value = Checkbox("Stash", Settings.FilterStash.Value); ImGui.SameLine(0f, 25f);
                 Settings.FilterMapStash.Value = Checkbox("Map Stash", Settings.FilterMapStash.Value); ImGui.SameLine(0f, 0f);
                 WarningMarker("Filtering Map Stash Tab is very resource intensive, use with caution."); ImGui.SameLine(0f, 25f);
                 Settings.FilterShops.Value = Checkbox("Shops", Settings.FilterShops.Value); ImGui.SameLine(0f, 25f);
                 Settings.FilterTrade.Value = Checkbox("Trade", Settings.FilterTrade.Value);
+
+                Settings.ShowForInvitations.Value = Checkbox("Maven Invitations", Settings.ShowForInvitations.Value); ImGui.SameLine(0f, 25f);
+                Settings.ShowHeistLockerHighlights.Value = Checkbox("Heist Locker", Settings.ShowHeistLockerHighlights.Value); ImGui.SameLine(0f, 25f);
+                Settings.ShowExpeditionLockerHighlights.Value = Checkbox("Expedition Locker", Settings.ShowExpeditionLockerHighlights.Value);
 
                 ImGui.Dummy(new nuVector2(0, 5));
 
@@ -188,11 +189,11 @@ namespace MapNotify_3_28
                 Settings.ShowQuantityPercent.Value = Checkbox(
                     "Show Item Quantity %",
                     Settings.ShowQuantityPercent.Value
-                );ImGui.SameLine(0f, 25f);
+                ); ImGui.SameLine(0f, 25f);
                 Settings.ShowPackSizePercent.Value = Checkbox(
                     "Show Pack Size %",
                     Settings.ShowPackSizePercent.Value
-                );ImGui.SameLine(0f, 25f);
+                ); ImGui.SameLine(0f, 25f);
                 Settings.ShowRarityPercent.Value = Checkbox(
                     "Show Item Rarity %",
                     Settings.ShowRarityPercent.Value
@@ -214,6 +215,9 @@ namespace MapNotify_3_28
                 Settings.ShowHeistInfo.Value = Checkbox("Show Heist Job Info", Settings.ShowHeistInfo.Value);
                 ImGui.SameLine();
                 HelpMarker("Show Job type and Level for Contracts and Blueprints.");
+                Settings.ShowLogbookInfo.Value = Checkbox("Show Logbook Faction Info", Settings.ShowLogbookInfo.Value);
+                ImGui.SameLine();
+                HelpMarker("Show Area names, Factions and Implicit mods for Expedition Logbooks.");
 
                 Settings.ShowOriginatorMaps.Value = Checkbox(
                     "Show More Maps %",

@@ -41,6 +41,8 @@ namespace MapNotify_3_28
         public ToggleNode FilterStash { get; set; } = new(true);
         public ToggleNode FilterMapStash { get; set; } = new(true);
         public ToggleNode FilterShops { get; set; } = new(true);
+        public ToggleNode ShowHeistLockerHighlights { get; set; } = new(true);
+        public ToggleNode ShowExpeditionLockerHighlights { get; set; } = new(true);
         public ToggleNode FilterTrade { get; set; } = new(true);
         public ToggleNode BoxForBricked { get; set; } = new(true);
         public ToggleNode BoxForMapWarnings { get; set; } = new(true);
@@ -52,6 +54,7 @@ namespace MapNotify_3_28
         public ToggleNode ShowOriginatorMaps { get; set; } = new(true);
         public ToggleNode ShowChisel { get; set; } = new(true);
         public ToggleNode ShowHeistInfo { get; set; } = new(true);
+        public ToggleNode ShowLogbookInfo { get; set; } = new(true);
         public Vector4 ChiselColor { get; set; } = new(1f, 0.80f, 0.30f, 1f);
 
         public Vector4 Bricked { get; set; } = new(1f, 0f, 0f, 1f);

@@ -3,6 +3,7 @@ using System.Linq;
 using System;
 using System.Text.RegularExpressions;
 using ExileCore.PoEMemory.Elements;
+using System.Linq.Expressions;
 using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared.Cache;
 using ExileCore.Shared.Helpers;
@@ -40,7 +41,12 @@ public partial class MapNotify_3_28
     private int _discoveredAtlasOffset = -1;
     private System.Reflection.PropertyInfo _elemProp;
     private System.Reflection.FieldInfo _flagsField;
+    private static Func<object, ulong> _getFlagsDelegate;
 
+    /// <summary>
+    /// Initializes the caches required for Atlas highlighting, including completion status 
+    /// and the mapping of map names to their internal AtlasNode memory addresses.
+    /// </summary>
     private void InitializeAtlasHighlighter()
     {
         _cachedNameToNodeAddress = new TimeCache<Dictionary<string, long>>(() =>
@@ -106,6 +112,11 @@ public partial class MapNotify_3_28
         }, 5000);
     }
 
+    /// <summary>
+    /// Renders visual indicators on the Atlas panel.
+    /// Uses reflection to verify element visibility and memory offsets to correlate 
+    /// UI elements with Atlas data files.
+    /// </summary>
     private void DrawAtlasHighlights()
     {
         var atlasPanel = ingameState?.IngameUi?.Atlas ?? ingameState?.IngameUi?.GetChildAtIndex(29);
@@ -126,6 +137,16 @@ public partial class MapNotify_3_28
                 _elemProp = firstChild.GetType().GetProperty("Elem");
                 var elem = _elemProp?.GetValue(firstChild);
                 _flagsField = elem?.GetType().GetField("Flags");
+
+                // Optimize property and field access via compiled expressions
+                if (_flagsField != null)
+                {
+                    var param = Expression.Parameter(typeof(object), "obj");
+                    var cast = Expression.Convert(param, _flagsField.DeclaringType);
+                    var field = Expression.Field(cast, _flagsField);
+                    var convert = Expression.Convert(field, typeof(ulong));
+                    _getFlagsDelegate = Expression.Lambda<Func<object, ulong>>(convert, param).Compile();
+                }
             }
         }
 
@@ -156,9 +177,11 @@ public partial class MapNotify_3_28
             {
                 var elem = _elemProp.GetValue(element);
                 if (elem == null) continue;
-                var flagsValue = _flagsField.GetValue(elem);
-                if (flagsValue != null && (Convert.ToUInt64(flagsValue) & 0x80000ul) == 0)
-                    continue;
+                if (_getFlagsDelegate != null)
+                {
+                    if ((_getFlagsDelegate(elem) & 0x80000ul) == 0)
+                        continue;
+                }
             }
 
             long atlasNodePtr = 0;
