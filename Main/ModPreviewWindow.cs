@@ -86,8 +86,8 @@ namespace MapNotify_3_28
                         if (mod.AffixType != lastAffixType)
                         {
                             if (i > 0) ImGui.Dummy(new System.Numerics.Vector2(0, 10));
-                            ImGui.SetWindowFontScale(1.2f);
-                            ImGui.TextColored(new nuVector4(1f, 0.8f, 0.2f, 1f), mod.AffixType.ToUpper());
+                            ImGui.SetWindowFontScale(1.0f);
+                            ImGui.TextColored(new nuVector4(0.502f, 0.8f, 1f, 1f), $"--- {mod.AffixType} ---");
                             ImGui.SetWindowFontScale(1.0f);
                             ImGui.Separator();
                             lastAffixType = mod.AffixType;
