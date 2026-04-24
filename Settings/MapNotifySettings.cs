@@ -23,6 +23,10 @@ namespace MapNotify_3_28
         public ToggleNode ShowRarityPercent { get; set; } = new(true);
         public ToggleNode ColorQuantityPercent { get; set; } = new(true);
           public RangeNode<int> ColorQuantity { get; set; } = new(100, 0, 220);
+        public ToggleNode ColorPackSizePercent { get; set; } = new(true);
+        public RangeNode<int> ColorPackSize { get; set; } = new(25, 0, 100);
+        public ToggleNode ColorRarityPercent { get; set; } = new(true);
+        public RangeNode<int> ColorRarity { get; set; } = new(100, 0, 500);
         public RangeNode<int> BorderDeflation { get; set; } = new(4, 0, 50);
         public RangeNode<int> BorderThickness { get; set; } = new(1, 1, 6);
         public RangeNode<int> MapQuantSetting { get; set; } = new(100, 0, 220);

@@ -207,6 +207,24 @@ namespace MapNotify_3_28
                 HelpMarker(
                     "The colour of the quantity text will be red below this amount and green above it."
                 );
+                Settings.ColorPackSizePercent.Value = Checkbox(
+                    "Warn Below Pack Size Percentage",
+                    Settings.ColorPackSizePercent.Value
+                );
+                Settings.ColorPackSize.Value = IntSlider("##ColorPackSize", Settings.ColorPackSize, 400f);
+                ImGui.SameLine(0f, 10f);
+                HelpMarker(
+                    "The colour of the pack size text will be red below this amount and green above it."
+                );
+                Settings.ColorRarityPercent.Value = Checkbox(
+                    "Warn Below Rarity Percentage",
+                    Settings.ColorRarityPercent.Value
+                );
+                Settings.ColorRarity.Value = IntSlider("##ColorRarity", Settings.ColorRarity, 400f);
+                ImGui.SameLine(0f, 10f);
+                HelpMarker(
+                    "The colour of the rarity text will be red below this amount and green above it."
+                );
                 Settings.ShowChisel.Value = Checkbox("Show Chisel %", Settings.ShowChisel.Value);
                 ImGui.SameLine();
                 HelpMarker(

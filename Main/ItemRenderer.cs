@@ -68,23 +68,34 @@ namespace MapNotify_3_28
                             var qCol = new nuVector4(1f, 1f, 1f, 1f);
                             if (Settings.ColorQuantityPercent.Value) qCol = ItemDetails.Quantity < Settings.ColorQuantity.Value ? new nuVector4(1f, 0.4f, 0.4f, 1f) : new nuVector4(0.4f, 1f, 0.4f, 1f);
 
+                            var pCol = new nuVector4(1f, 1f, 1f, 1f);
+                            if (Settings.ColorPackSizePercent.Value) pCol = ItemDetails.PackSize < Settings.ColorPackSize.Value ? new nuVector4(1f, 0.4f, 0.4f, 1f) : new nuVector4(0.4f, 1f, 0.4f, 1f);
+
+                            var rCol = new nuVector4(1f, 1f, 1f, 1f);
+                            if (Settings.ColorRarityPercent.Value) rCol = ItemDetails.Rarity < Settings.ColorRarity.Value ? new nuVector4(1f, 0.4f, 0.4f, 1f) : new nuVector4(0.4f, 1f, 0.4f, 1f);
+
                             var showQuant = Settings.ShowQuantityPercent.Value;
                             var showPack = Settings.ShowPackSizePercent.Value;
                             var showRarity = Settings.ShowRarityPercent.Value;
 
-                            if (showQuant && ItemDetails.Quantity != 0 && showPack && ItemDetails.PackSize != 0)
+                            bool drawnSomething = false;
+                            if (showQuant && ItemDetails.Quantity != 0)
                             {
                                 ImGui.TextColored(qCol, $"{ItemDetails.Quantity}%% IIQ");
-                                ImGui.SameLine();
-                                ImGui.TextColored(new nuVector4(1f, 1f, 1f, 1f), $"{ItemDetails.PackSize}%% PS");
+                                drawnSomething = true;
                             }
-                            else if (showQuant && ItemDetails.Quantity != 0) ImGui.TextColored(qCol, $"{ItemDetails.Quantity}%% IIQ");
-                            else if (showPack && ItemDetails.PackSize != 0) ImGui.TextColored(new nuVector4(1f, 1f, 1f, 1f), $"{ItemDetails.PackSize}%% PS");
+
+                            if (showPack && ItemDetails.PackSize != 0)
+                            {
+                                if (drawnSomething) ImGui.SameLine();
+                                ImGui.TextColored(pCol, $"{ItemDetails.PackSize}%% PS");
+                                drawnSomething = true;
+                            }
 
                             if (showRarity && ItemDetails.Rarity != 0)
                             {
-                                if ((showQuant && ItemDetails.Quantity != 0) || (showPack && ItemDetails.PackSize != 0)) ImGui.SameLine();
-                                ImGui.TextColored(new nuVector4(1f, 1f, 1f, 1f), $"{ItemDetails.Rarity}%% IIR");
+                                if (drawnSomething) ImGui.SameLine();
+                                ImGui.TextColored(rCol, $"{ItemDetails.Rarity}%% IIR");
                             }
                             if (Settings.ShowChisel.Value && !string.IsNullOrEmpty(ItemDetails.ChiselName)) ImGui.TextColored(Settings.ChiselColor, $"+{ItemDetails.ChiselValue}%% {ItemDetails.ChiselName}");
                         }
