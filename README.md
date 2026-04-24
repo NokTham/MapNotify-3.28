@@ -17,7 +17,7 @@ Notifications for Map modifiers, Heist requirements, and Atlas completion.
 
 ![Image](https://i.imgur.com/q4mYaWD.png)
 
-![Image](https://i.imgur.com/3MjESIG.png)
+![Image](https://i.imgur.com/XNtwxUc.png)
 
 ![Image](https://i.imgur.com/lu73OA9.png)
 
