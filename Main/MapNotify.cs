@@ -41,6 +41,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         "MapElder",
         "MapVaalTempleContainsVaalVessels",
         "MavenInvitation",
+        "MapCorruptionRandomAtlasNotables",
+        "MapCorruptionAtlasEffect",
+        "MapCorruptionBossCorruption",
+        "MapCorruptionSoulGainPrevention"
     };
 
     private RectangleF windowArea;
