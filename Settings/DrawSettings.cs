@@ -169,7 +169,7 @@ namespace MapNotify_3_28
                 );
                 ImGui.SameLine();
                 HelpMarker(
-                    "Show tooltip even if there are no mods to warn you about on the map.\nThis means you will always be able to see tier, quantity, mod count, etc."
+                    "Show tooltip even if there are no mods to warn you about on the map.\nYou'll always be able to see tier, quantity, mod count, etc."
                 );
                 Settings.HorizontalLines.Value = Checkbox(
                     "Show Horizontal Lines",
