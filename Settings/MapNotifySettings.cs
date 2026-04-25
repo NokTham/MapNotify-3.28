@@ -22,7 +22,8 @@ namespace MapNotify_3_28
         public ToggleNode ShowQuantityPercent { get; set; } = new(true);
         public ToggleNode ShowRarityPercent { get; set; } = new(true);
         public ToggleNode ColorQuantityPercent { get; set; } = new(true);
-          public RangeNode<int> ColorQuantity { get; set; } = new(100, 0, 220);
+        public ToggleNode ShowPrefixSuffixStats { get; set; } = new(false);
+        public RangeNode<int> ColorQuantity { get; set; } = new(100, 0, 220);
         public ToggleNode ColorPackSizePercent { get; set; } = new(true);
         public RangeNode<int> ColorPackSize { get; set; } = new(25, 0, 100);
         public ToggleNode ColorRarityPercent { get; set; } = new(true);

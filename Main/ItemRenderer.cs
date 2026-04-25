@@ -64,6 +64,30 @@ namespace MapNotify_3_28
                         if (isInventory || Settings.ShowMapName.Value) ImGui.TextColored(ItemDetails.ItemColor, ItemDetails.EscapedMapName);
 
                         // Map Stats Block
+                        var prefixSuffixLines = ItemDetails.GetPrefixSuffixLines();
+                        if (Settings.ShowPrefixSuffixStats.Value && prefixSuffixLines.Count > 0)
+                        {
+                            for (int lineIdx = 0; lineIdx < prefixSuffixLines.Count; lineIdx++)
+                            {
+                                var line = prefixSuffixLines[lineIdx];
+                                var startX = ImGui.GetCursorPosX();
+                                for (int i = 0; i < line.Count; i++)
+                                {
+                                    var text = line[i].EscapedText;
+                                    if (i > 0)
+                                    {
+                                        ImGui.SameLine();
+                                        if (text.Contains("IIQ")) ImGui.SetCursorPosX(startX + 20); 
+                                        else if (text.Contains("PS")) ImGui.SetCursorPosX(startX + 87); 
+                                        else if (text.Contains("IIR")) ImGui.SetCursorPosX(startX + 152); 
+                                    }
+                                    ImGui.TextColored(line[i].Color, text);
+                                }
+                                if (lineIdx == 0) ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 1f);
+                            }
+                            if (Settings.ShowChisel.Value && !string.IsNullOrEmpty(ItemDetails.ChiselName)) ImGui.TextColored(Settings.ChiselColor, $"+{ItemDetails.ChiselValue}%% {ItemDetails.ChiselName}");
+                        }
+                        else
                         {
                             var qCol = new nuVector4(1f, 1f, 1f, 1f);
                             if (Settings.ColorQuantityPercent.Value) qCol = ItemDetails.Quantity < Settings.ColorQuantity.Value ? new nuVector4(1f, 0.4f, 0.4f, 1f) : new nuVector4(0.4f, 1f, 0.4f, 1f);
@@ -125,12 +149,38 @@ namespace MapNotify_3_28
                         }
 
                         // Originator Stats
-                        if (ItemDetails.IsOriginatorMap && (Settings.ShowOriginatorMaps.Value || Settings.ShowOriginatorScarabs.Value || Settings.ShowOriginatorCurrency.Value))
+                        if (ItemDetails.IsOriginatorMap)
                         {
-                            if (Settings.HorizontalLines.Value) ImGui.Separator();
-                            if (Settings.ShowOriginatorMaps.Value) ImGui.TextColored(new nuVector4(0.5f, 0.85f, 1f, 1f), $"+{ItemDetails.OriginatorMaps}%% Maps");
-                            if (Settings.ShowOriginatorScarabs.Value) ImGui.TextColored(new nuVector4(0.85f, 0.45f, 0.85f, 1f), $"+{ItemDetails.OriginatorScarabs}%% Scarabs");
-                            if (Settings.ShowOriginatorCurrency.Value) ImGui.TextColored(new nuVector4(0.0f, 1.0f, 0.0f, 1.0f), $"+{ItemDetails.OriginatorCurrency}%% Currency");
+                            if (Settings.ShowPrefixSuffixStats.Value)
+                            {
+                                var originatorLines = ItemDetails.GetOriginatorBreakdownLines();
+                                if (originatorLines.Count > 0)
+                                {
+                                    if (Settings.HorizontalLines.Value) ImGui.Separator();
+                                    foreach (var line in originatorLines)
+                                    {
+                                        var startX = ImGui.GetCursorPosX();
+                                        for (int i = 0; i < line.Count; i++)
+                                        {
+                                            var text = line[i].EscapedText;
+                                            if (i > 0)
+                                            {
+                                                ImGui.SameLine();
+                                                if (text.Contains("P:")) ImGui.SetCursorPosX(startX + 102); 
+                                                else if (text.Contains("S:")) ImGui.SetCursorPosX(startX + 172); 
+                                            }
+                                            ImGui.TextColored(line[i].Color, text);
+                                        }
+                                    }
+                                }
+                            }
+                            else if (Settings.ShowOriginatorMaps.Value || Settings.ShowOriginatorScarabs.Value || Settings.ShowOriginatorCurrency.Value)
+                            {
+                                if (Settings.HorizontalLines.Value) ImGui.Separator();
+                                if (Settings.ShowOriginatorMaps.Value) ImGui.TextColored(new nuVector4(0.5f, 0.85f, 1f, 1f), $"+{ItemDetails.OriginatorMaps}%% Maps");
+                                if (Settings.ShowOriginatorScarabs.Value) ImGui.TextColored(new nuVector4(0.85f, 0.45f, 0.85f, 1f), $"+{ItemDetails.OriginatorScarabs}%% Scarabs");
+                                if (Settings.ShowOriginatorCurrency.Value) ImGui.TextColored(new nuVector4(0.0f, 1.0f, 0.0f, 1.0f), $"+{ItemDetails.OriginatorCurrency}%% Currency");
+                            }
                         }
 
                         if (Settings.HorizontalLines.Value) ImGui.Separator();

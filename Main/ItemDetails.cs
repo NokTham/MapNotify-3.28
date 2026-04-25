@@ -21,6 +21,16 @@ namespace MapNotify_3_28
         /// </summary>
         public class ItemDetails
         {
+            public class MapModStats
+            {
+                public int Quantity { get; set; }
+                public int Rarity { get; set; }
+                public int PackSize { get; set; }
+                public int MoreMaps { get; set; }
+                public int MoreScarabs { get; set; }
+                public int MoreCurrency { get; set; }
+            }
+
             public NormalInventoryItem Item { get; }
             public Entity Entity { get; }
             public List<StyledText> ActiveGoodMods { get; set; }
@@ -52,9 +62,12 @@ namespace MapNotify_3_28
             public int OriginatorScarabs { get; set; }
             public int OriginatorCurrency { get; set; }
             public int OriginatorMaps { get; set; }
+            public MapModStats PrefixStats { get; set; } = new MapModStats();
+            public MapModStats SuffixStats { get; set; } = new MapModStats();
             public bool IsOriginatorMap { get; set; }
             public bool IsMavenMap { get; set; }
             public bool IsLogbook { get; set; }
+            public bool IsHeist { get; set; }
             public string WindowID { get; private set; }
             public ItemDetails(NormalInventoryItem Item, Entity Entity)
             {
@@ -64,7 +77,7 @@ namespace MapNotify_3_28
                 ActiveBadMods = new List<StyledText>();
                 Update();
             }
-            
+
             /// <summary>
             /// Refreshes all item properties by retrieving data from game components.
             /// </summary>
@@ -74,7 +87,7 @@ namespace MapNotify_3_28
                 ActiveGoodMods.Clear();
                 ActiveBadMods.Clear();
                 string path = Entity.Path ?? string.Empty;
-                
+
                 var BaseItem = gameController?.Files?.BaseItemTypes?.Translate(path);
                 string itemName = BaseItem?.BaseName ?? "Unknown";
                 ClassID = BaseItem?.ClassName ?? string.Empty;
@@ -90,7 +103,7 @@ namespace MapNotify_3_28
                 Tier = mapComponent?.Tier ?? -1;
                 IsMavenMap = path.Contains("MavenMap") || path.Contains("Invitations/Maven") || path.Contains("MavenInvitation");
                 IsLogbook = path.Contains("ExpeditionLogbook");
-                
+
                 ProcessFlags(baseComponent);
 
                 LogbookAreaLevel = IsLogbook ? (expeditionSaga?.AreaLevel ?? (Tier > 0 ? Tier : 0)) : 0;
@@ -155,13 +168,108 @@ namespace MapNotify_3_28
                 ProcessItemColor(modsComponent);
             }
 
+            /// <summary>
+            /// Generates the formatted Prefix/Suffix breakdown lines for the tooltip.
+            /// Highlights the higher value between Prefix and Suffix in green.
+            /// </summary>
+            public List<List<StyledText>> GetPrefixSuffixLines()
+            {
+                var lines = new List<List<StyledText>>();
+
+                var mods = Entity?.GetComponent<Mods>();
+                bool isUnique = mods?.ItemRarity == ItemRarity.Unique;
+                bool isSpecial = (Entity?.Path?.Contains("Maven") ?? false) || Tier == 17;
+                if (ModCount <= 0 || (isUnique && !isSpecial) || IsLogbook || IsHeist) return lines;
+
+                var green = new nuVector4(0f, 1f, 0f, 1f);
+                var red = new nuVector4(1f, 0.4f, 0.4f, 1f);
+                var lime = new nuVector4(0.4f, 1f, 0.4f, 1f);
+                var white = new nuVector4(1f, 1f, 1f, 1f);
+
+                var qCol = white;
+                if (pluginSettings.ColorQuantityPercent.Value) qCol = Quantity < pluginSettings.ColorQuantity.Value ? red : lime;
+                var pCol = white;
+                if (pluginSettings.ColorPackSizePercent.Value) pCol = PackSize < pluginSettings.ColorPackSize.Value ? red : lime;
+                var rCol = white;
+                if (pluginSettings.ColorRarityPercent.Value) rCol = Rarity < pluginSettings.ColorRarity.Value ? red : lime;
+
+                bool showQuant = pluginSettings.ShowQuantityPercent.Value && Quantity != 0;
+                bool showPack = pluginSettings.ShowPackSizePercent.Value && PackSize != 0;
+                bool showRarity = pluginSettings.ShowRarityPercent.Value && Rarity != 0;
+
+                var tLine = new List<StyledText> { new StyledText { Text = string.Empty, Color = white, EscapedText = string.Empty } };
+                if (showQuant) tLine.Add(new StyledText { Text = $"{Quantity}% IIQ", Color = qCol, EscapedText = $"{Quantity}%% IIQ" });
+                if (showPack) tLine.Add(new StyledText { Text = $"{PackSize}% PS", Color = pCol, EscapedText = $"{PackSize}%% PS" });
+                if (showRarity) tLine.Add(new StyledText { Text = $"{Rarity}% IIR", Color = rCol, EscapedText = $"{Rarity}%% IIR" });
+                lines.Add(tLine);
+
+                // P: % IIQ % PS % IIR
+                var pLine = new List<StyledText> { new StyledText { Text = "P: ", Color = white, EscapedText = "P: " } };
+                if (showQuant) pLine.Add(new StyledText { Text = $"{PrefixStats.Quantity}% IIQ", Color = PrefixStats.Quantity > SuffixStats.Quantity ? green : white, EscapedText = $"{PrefixStats.Quantity}%% IIQ" });
+                if (showPack) pLine.Add(new StyledText { Text = $"{PrefixStats.PackSize}% PS", Color = PrefixStats.PackSize > SuffixStats.PackSize ? green : white, EscapedText = $"{PrefixStats.PackSize}%% PS" });
+                if (showRarity) pLine.Add(new StyledText { Text = $"{PrefixStats.Rarity}% IIR", Color = PrefixStats.Rarity > SuffixStats.Rarity ? green : white, EscapedText = $"{PrefixStats.Rarity}%% IIR" });
+                lines.Add(pLine);
+
+                // S: % IIQ % PS % IIR
+                var sLine = new List<StyledText> { new StyledText { Text = "S: ", Color = white, EscapedText = "S: " } };
+                if (showQuant) sLine.Add(new StyledText { Text = $"{SuffixStats.Quantity}% IIQ", Color = SuffixStats.Quantity > PrefixStats.Quantity ? green : white, EscapedText = $"{SuffixStats.Quantity}%% IIQ" });
+                if (showPack) sLine.Add(new StyledText { Text = $"{SuffixStats.PackSize}% PS", Color = SuffixStats.PackSize > PrefixStats.PackSize ? green : white, EscapedText = $"{SuffixStats.PackSize}%% PS" });
+                if (showRarity) sLine.Add(new StyledText { Text = $"{SuffixStats.Rarity}% IIR", Color = SuffixStats.Rarity > PrefixStats.Rarity ? green : white, EscapedText = $"{SuffixStats.Rarity}%% IIR" });
+                lines.Add(sLine);
+
+                return lines;
+            }
+
+            /// <summary>
+            /// Generates the Originator (Nightmare) stat breakdown lines.
+            /// </summary>
+            public List<List<StyledText>> GetOriginatorBreakdownLines()
+            {
+                var lines = new List<List<StyledText>>();
+                var white = new nuVector4(1f, 1f, 1f, 1f);
+                var mapsColor = new nuVector4(0.5f, 0.85f, 1f, 1f);
+                var scarabsColor = new nuVector4(0.85f, 0.45f, 0.85f, 1f);
+                var currencyColor = new nuVector4(0.0f, 1.0f, 0.0f, 1.0f);
+
+                if (IsLogbook || IsHeist) return lines;
+
+                if (pluginSettings.ShowOriginatorMaps.Value)
+                {
+                    lines.Add(new List<StyledText> {
+                        new StyledText { Text = $"{OriginatorMaps}% Maps", Color = mapsColor, EscapedText = $"{OriginatorMaps}%% Maps" },
+                        new StyledText { Text = PrefixStats.MoreMaps == 0 ? "P: " : $"P: {PrefixStats.MoreMaps}%", Color = white, EscapedText = PrefixStats.MoreMaps == 0 ? "P: " : $"P: {PrefixStats.MoreMaps}%%" },
+                        new StyledText { Text = SuffixStats.MoreMaps == 0 ? "S: " : $"S: {SuffixStats.MoreMaps}%", Color = white, EscapedText = SuffixStats.MoreMaps == 0 ? "S: " : $"S: {SuffixStats.MoreMaps}%%" }
+                    });
+                }
+
+                if (pluginSettings.ShowOriginatorScarabs.Value)
+                {
+                    lines.Add(new List<StyledText> {
+                        new StyledText { Text = $"{OriginatorScarabs}% Scarabs", Color = scarabsColor, EscapedText = $"{OriginatorScarabs}%% Scarabs" },
+                        new StyledText { Text = PrefixStats.MoreScarabs == 0 ? "P: " : $"P: {PrefixStats.MoreScarabs}%", Color = white, EscapedText = PrefixStats.MoreScarabs == 0 ? "P: " : $"P: {PrefixStats.MoreScarabs}%%" },
+                        new StyledText { Text = SuffixStats.MoreScarabs == 0 ? "S: " : $"S: {SuffixStats.MoreScarabs}%", Color = white, EscapedText = SuffixStats.MoreScarabs == 0 ? "S: " : $"S: {SuffixStats.MoreScarabs}%%" }
+                    });
+                }
+
+                if (pluginSettings.ShowOriginatorCurrency.Value)
+                {
+                    lines.Add(new List<StyledText> {
+                        new StyledText { Text = $"{OriginatorCurrency}% Currency", Color = currencyColor, EscapedText = $"{OriginatorCurrency}%% Currency" },
+                        new StyledText { Text = PrefixStats.MoreCurrency == 0 ? "P: " : $"P: {PrefixStats.MoreCurrency}%", Color = white, EscapedText = PrefixStats.MoreCurrency == 0 ? "P: " : $"P: {PrefixStats.MoreCurrency}%%" },
+                        new StyledText { Text = SuffixStats.MoreCurrency == 0 ? "S: " : $"S: {SuffixStats.MoreCurrency}%", Color = white, EscapedText = SuffixStats.MoreCurrency == 0 ? "S: " : $"S: {SuffixStats.MoreCurrency}%%" }
+                    });
+                }
+
+                return lines;
+            }
+
             private void ProcessFlags(Base baseComponent)
             {
                 IsOriginatorMap = false;
                 Bricked = false;
                 Corrupted = baseComponent?.isCorrupted ?? false;
-                bool isHeist = Entity.HasComponent<HeistContract>() || Entity.HasComponent<HeistBlueprint>();
-                NeedsPadding = Tier != -1 || IsMavenMap || IsLogbook || isHeist || ClassID.Contains("MiscMapItem");
+                IsHeist = Entity.HasComponent<HeistContract>() || Entity.HasComponent<HeistBlueprint>();
+                NeedsPadding = Tier != -1 || IsMavenMap || IsLogbook || IsHeist || ClassID.Contains("MiscMapItem");
             }
 
             private void ProcessQuality(Quality qualityComponent, Mods modsComponent)
@@ -187,7 +295,11 @@ namespace MapNotify_3_28
 
             private void ProcessMods(Mods modsComponent, string path)
             {
-                int packSize = 0, quantity = Quantity, rarity = Rarity, originatorScarabs = 0, originatorCurrency = 0, originatorMaps = 0;
+                int packSize = 0, quantity = Quantity, rarity = Rarity;
+                int originatorScarabs = 0, originatorCurrency = 0, originatorMaps = 0;
+                PrefixStats = new MapModStats();
+                SuffixStats = new MapModStats();
+
                 var itemMods = modsComponent?.ItemMods;
                 ModCount = itemMods?.Count ?? 0;
                 if (modsComponent != null && itemMods != null && ModCount > 0)
@@ -198,20 +310,49 @@ namespace MapNotify_3_28
                         {
                             if (string.IsNullOrEmpty(mod.RawName)) continue;
                             if (ModNameBlacklist.Any(black => mod.RawName.Contains(black))) { ModCount--; continue; }
+
+                            var type = mod.ModRecord?.AffixType.ToString() ?? "";
+                            bool isPrefix = type.Contains("Prefix");
+                            bool isSuffix = type.Contains("Suffix");
+
                             var stats = mod.ModRecord?.StatNames; var values = mod.Values;
                             if (stats != null && values != null)
                             {
                                 for (int i = 0; i < stats.Length && i < values.Count; i++)
                                 {
                                     var key = stats[i].Key; if (string.IsNullOrEmpty(key)) continue;
-                                    switch (key)
+                                    int val = values[i];
+                                    string lowerKey = key.ToLower();
+
+                                    if (lowerKey.Contains("quantity"))
                                     {
-                                        case "map_pack_size_+%": packSize += values[i]; break;
-                                        case "map_item_drop_quantity_+%": quantity += values[i]; break;
-                                        case "map_item_drop_rarity_+%": rarity += values[i]; break;
-                                        case "map_scarab_drop_chance_+%_final_from_uber_mod": originatorScarabs += values[i]; IsOriginatorMap = true; break;
-                                        case "map_currency_drop_chance_+%_final_from_uber_mod": originatorCurrency += values[i]; IsOriginatorMap = true; break;
-                                        case "map_map_item_drop_chance_+%_final_from_uber_mod": originatorMaps += values[i]; IsOriginatorMap = true; break;
+                                        quantity += val;
+                                        if (isPrefix) PrefixStats.Quantity += val; else if (isSuffix) SuffixStats.Quantity += val;
+                                    }
+                                    else if (lowerKey.Contains("rarity"))
+                                    {
+                                        rarity += val;
+                                        if (isPrefix) PrefixStats.Rarity += val; else if (isSuffix) SuffixStats.Rarity += val;
+                                    }
+                                    else if (lowerKey.Contains("pack_size"))
+                                    {
+                                        packSize += val;
+                                        if (isPrefix) PrefixStats.PackSize += val; else if (isSuffix) SuffixStats.PackSize += val;
+                                    }
+                                    else if (lowerKey.Contains("scarab_drop_chance"))
+                                    {
+                                        originatorScarabs += val; IsOriginatorMap = true;
+                                        if (isPrefix) PrefixStats.MoreScarabs += val; else if (isSuffix) SuffixStats.MoreScarabs += val;
+                                    }
+                                    else if (lowerKey.Contains("currency_drop_chance"))
+                                    {
+                                        originatorCurrency += val; IsOriginatorMap = true;
+                                        if (isPrefix) PrefixStats.MoreCurrency += val; else if (isSuffix) SuffixStats.MoreCurrency += val;
+                                    }
+                                    else if (lowerKey.Contains("map_item_drop_chance"))
+                                    {
+                                        originatorMaps += val; IsOriginatorMap = true;
+                                        if (isPrefix) PrefixStats.MoreMaps += val; else if (isSuffix) SuffixStats.MoreMaps += val;
                                     }
                                 }
                             }
@@ -256,7 +397,8 @@ namespace MapNotify_3_28
                             var addr = mapComponent?.Address ?? 0; if (addr == 0) addr = Entity.Address;
                             var mapUnique = gameController.IngameState.M.Read<long>(addr + 0x10, 0x10, 0x20);
                             if (mapUnique != 0) { var resolvedArea = gameController.Files.WorldAreas.GetByAddress(mapUnique); if (resolvedArea != null) mapTrim = resolvedArea.Name; }
-                        } catch { }
+                        }
+                        catch { }
                     }
                 }
                 mapTrim = MapTierRegex.Replace(mapTrim, "").Replace(" Map", "", StringComparison.OrdinalIgnoreCase).Trim();
@@ -275,7 +417,7 @@ namespace MapNotify_3_28
                     default: ItemColor = new nuVector4(1F, 1F, 1F, 1F); break;
                 }
             }
-            
+
             private void UpdateHeistDetails(HeistContract heistContract, HeistBlueprint heistBlueprint, Mods mods)
             {
                 HeistJobLines.Clear();

@@ -251,6 +251,12 @@ namespace MapNotify_3_28
                 ); ImGui.SameLine(); HelpMarker(
                     "Originator/Nightmare Map Bonus Stats"
                 );
+                Settings.ShowPrefixSuffixStats.Value = Checkbox(
+                    "Show Prefix/Suffix Stats",
+                    Settings.ShowPrefixSuffixStats.Value
+                );
+                ImGui.SameLine();
+                HelpMarker("Displays detailed breakdown of stats contributed by Prefixes and Suffixes on the tooltip.");
             }
 
             bool atlasHeaderOpen = ImGui.TreeNodeEx("Atlas Highlights", ImGuiTreeNodeFlags.CollapsingHeader);
