@@ -237,8 +237,8 @@ namespace MapNotify_3_28
                 {
                     lines.Add(new List<StyledText> {
                         new StyledText { Text = $"{OriginatorMaps}% Maps", Color = mapsColor, EscapedText = $"{OriginatorMaps}%% Maps" },
-                        new StyledText { Text = PrefixStats.MoreMaps == 0 ? "P: " : $"P: {PrefixStats.MoreMaps}%", Color = white, EscapedText = PrefixStats.MoreMaps == 0 ? "P: " : $"P: {PrefixStats.MoreMaps}%%" },
-                        new StyledText { Text = SuffixStats.MoreMaps == 0 ? "S: " : $"S: {SuffixStats.MoreMaps}%", Color = white, EscapedText = SuffixStats.MoreMaps == 0 ? "S: " : $"S: {SuffixStats.MoreMaps}%%" }
+                        new StyledText { Text = PrefixStats.MoreMaps == 0 ? "P: --" : $"P: {PrefixStats.MoreMaps}%", Color = white, EscapedText = PrefixStats.MoreMaps == 0 ? "P: --" : $"P: {PrefixStats.MoreMaps}%%" },
+                        new StyledText { Text = SuffixStats.MoreMaps == 0 ? "S: --" : $"S: {SuffixStats.MoreMaps}%", Color = white, EscapedText = SuffixStats.MoreMaps == 0 ? "S: --" : $"S: {SuffixStats.MoreMaps}%%" }
                     });
                 }
 
@@ -246,8 +246,8 @@ namespace MapNotify_3_28
                 {
                     lines.Add(new List<StyledText> {
                         new StyledText { Text = $"{OriginatorScarabs}% Scarabs", Color = scarabsColor, EscapedText = $"{OriginatorScarabs}%% Scarabs" },
-                        new StyledText { Text = PrefixStats.MoreScarabs == 0 ? "P: " : $"P: {PrefixStats.MoreScarabs}%", Color = white, EscapedText = PrefixStats.MoreScarabs == 0 ? "P: " : $"P: {PrefixStats.MoreScarabs}%%" },
-                        new StyledText { Text = SuffixStats.MoreScarabs == 0 ? "S: " : $"S: {SuffixStats.MoreScarabs}%", Color = white, EscapedText = SuffixStats.MoreScarabs == 0 ? "S: " : $"S: {SuffixStats.MoreScarabs}%%" }
+                        new StyledText { Text = PrefixStats.MoreScarabs == 0 ? "P: --" : $"P: {PrefixStats.MoreScarabs}%", Color = white, EscapedText = PrefixStats.MoreScarabs == 0 ? "P: --" : $"P: {PrefixStats.MoreScarabs}%%" },
+                        new StyledText { Text = SuffixStats.MoreScarabs == 0 ? "S: --" : $"S: {SuffixStats.MoreScarabs}%", Color = white, EscapedText = SuffixStats.MoreScarabs == 0 ? "S: --" : $"S: {SuffixStats.MoreScarabs}%%" }
                     });
                 }
 
@@ -255,8 +255,8 @@ namespace MapNotify_3_28
                 {
                     lines.Add(new List<StyledText> {
                         new StyledText { Text = $"{OriginatorCurrency}% Currency", Color = currencyColor, EscapedText = $"{OriginatorCurrency}%% Currency" },
-                        new StyledText { Text = PrefixStats.MoreCurrency == 0 ? "P: " : $"P: {PrefixStats.MoreCurrency}%", Color = white, EscapedText = PrefixStats.MoreCurrency == 0 ? "P: " : $"P: {PrefixStats.MoreCurrency}%%" },
-                        new StyledText { Text = SuffixStats.MoreCurrency == 0 ? "S: " : $"S: {SuffixStats.MoreCurrency}%", Color = white, EscapedText = SuffixStats.MoreCurrency == 0 ? "S: " : $"S: {SuffixStats.MoreCurrency}%%" }
+                        new StyledText { Text = PrefixStats.MoreCurrency == 0 ? "P: --" : $"P: {PrefixStats.MoreCurrency}%", Color = white, EscapedText = PrefixStats.MoreCurrency == 0 ? "P: --" : $"P: {PrefixStats.MoreCurrency}%%" },
+                        new StyledText { Text = SuffixStats.MoreCurrency == 0 ? "S: --" : $"S: {SuffixStats.MoreCurrency}%", Color = white, EscapedText = SuffixStats.MoreCurrency == 0 ? "S: --" : $"S: {SuffixStats.MoreCurrency}%%" }
                     });
                 }
 
