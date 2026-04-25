@@ -77,9 +77,9 @@ namespace MapNotify_3_28
                                     if (i > 0)
                                     {
                                         ImGui.SameLine();
-                                        if (text.Contains("IIQ")) ImGui.SetCursorPosX(startX + 20); 
-                                        else if (text.Contains("PS")) ImGui.SetCursorPosX(startX + 87); 
-                                        else if (text.Contains("IIR")) ImGui.SetCursorPosX(startX + 152); 
+                                        if (i == 1) ImGui.SetCursorPosX(startX + 20); 
+                                        else if (i == 2) ImGui.SetCursorPosX(startX + 87); 
+                                        else if (i == 3) ImGui.SetCursorPosX(startX + 152); 
                                     }
                                     ImGui.TextColored(line[i].Color, text);
                                 }
