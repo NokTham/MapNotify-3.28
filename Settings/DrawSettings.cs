@@ -256,7 +256,7 @@ namespace MapNotify_3_28
                     Settings.ShowPrefixSuffixStats.Value
                 );
                 ImGui.SameLine();
-                HelpMarker("Displays detailed breakdown of stats contributed by Prefixes and Suffixes on the tooltip.");
+                HelpMarker("Displays detailed breakdown of stats contributed by Prefixes and Suffixes on the tooltip.\nHighest value is highlighted in green.");
             }
 
             bool atlasHeaderOpen = ImGui.TreeNodeEx("Atlas Highlights", ImGuiTreeNodeFlags.CollapsingHeader);
