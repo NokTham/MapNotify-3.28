@@ -351,16 +351,12 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         RefreshProfileList();
 
         var hoverItem = ingameState.UIHover?.AsObject<NormalInventoryItem>();
-        if (hoverItem?.Item == null || !ItemIsMap(hoverItem.Item))
-        {
-            _showPreviewWindow = !_showPreviewWindow;
-            return;
-        }
+        var mods = hoverItem?.Item?.GetComponent<Mods>();
 
-        var mods = hoverItem.Item.GetComponent<Mods>();
-        if (mods == null)
+        if (hoverItem?.Item == null || !ItemIsMap(hoverItem.Item) || mods == null)
         {
             _showPreviewWindow = !_showPreviewWindow;
+            if (_showPreviewWindow) _capturedMods.Clear();
             return;
         }
 

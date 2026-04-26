@@ -120,6 +120,13 @@ namespace MapNotify_3_28
 
                 if (ImGui.BeginChild("ScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Border))
                 {
+                    if (_capturedMods.Count == 0)
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new nuVector4(0.7f, 0.7f, 0.7f, 1f));
+                        ImGui.TextWrapped("No mods captured. Hover over a map and press your hotkey to see and configure its modifiers.");
+                        ImGui.PopStyleColor();
+                    }
+
                     string lastAffixType = null;
                     for (int i = 0; i < _capturedMods.Count; i++)
                     {
