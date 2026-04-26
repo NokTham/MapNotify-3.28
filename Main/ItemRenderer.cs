@@ -151,26 +151,23 @@ namespace MapNotify_3_28
                         // Originator Stats
                         if (ItemDetails.IsOriginatorMap)
                         {
-                            if (Settings.ShowPrefixSuffixStats.Value)
+                            var originatorLines = Settings.ShowPrefixSuffixStats.Value ? ItemDetails.GetOriginatorBreakdownLines() : null;
+                            if (Settings.ShowPrefixSuffixStats.Value && originatorLines?.Count > 0)
                             {
-                                var originatorLines = ItemDetails.GetOriginatorBreakdownLines();
-                                if (originatorLines.Count > 0)
+                                if (Settings.HorizontalLines.Value) ImGui.Separator();
+                                foreach (var line in originatorLines)
                                 {
-                                    if (Settings.HorizontalLines.Value) ImGui.Separator();
-                                    foreach (var line in originatorLines)
+                                    var startX = ImGui.GetCursorPosX();
+                                    for (int i = 0; i < line.Count; i++)
                                     {
-                                        var startX = ImGui.GetCursorPosX();
-                                        for (int i = 0; i < line.Count; i++)
+                                        var text = line[i].EscapedText;
+                                        if (i > 0)
                                         {
-                                            var text = line[i].EscapedText;
-                                            if (i > 0)
-                                            {
-                                                ImGui.SameLine();
-                                                if (text.Contains("P:")) ImGui.SetCursorPosX(startX + 102); 
-                                                else if (text.Contains("S:")) ImGui.SetCursorPosX(startX + 172); 
-                                            }
-                                            ImGui.TextColored(line[i].Color, text);
+                                            ImGui.SameLine();
+                                            if (text.Contains("P:")) ImGui.SetCursorPosX(startX + 102); 
+                                            else if (text.Contains("S:")) ImGui.SetCursorPosX(startX + 172); 
                                         }
+                                        ImGui.TextColored(line[i].Color, text);
                                     }
                                 }
                             }

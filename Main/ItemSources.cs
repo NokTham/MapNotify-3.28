@@ -24,8 +24,9 @@ namespace MapNotify_3_28
             return path.StartsWith("Metadata/Items/Maps/MavenMap", StringComparison.Ordinal) ||
                    path.StartsWith("Metadata/Items/Heist/HeistContract", StringComparison.Ordinal) ||
                    path.StartsWith("Metadata/Items/Heist/HeistBlueprint", StringComparison.Ordinal) ||
-                   path.Contains("ExpeditionLogbook") ||
-                   path.Contains("Maven");
+                   path.Contains("ExpeditionLogbook", StringComparison.OrdinalIgnoreCase) ||
+                   path.Contains("Maven", StringComparison.OrdinalIgnoreCase) ||
+                   path.Contains("Valdo", StringComparison.OrdinalIgnoreCase);
         }
 
         private List<NormalInventoryItem> GetItemsFromCollection(IEnumerable<NormalInventoryItem> items)
@@ -53,21 +54,28 @@ namespace MapNotify_3_28
         private void FindMapsInElementRecursive(Element element, List<NormalInventoryItem> result, HashSet<long> seenAddresses, int depth)
         {
             if (element == null || !element.IsVisible || depth > 20) return;
-            var item = element.AsObject<NormalInventoryItem>();
-            if (item?.Item != null && item.Address != 0)
+            try
             {
-                if (ItemIsMap(item.Item) && seenAddresses.Add(item.Address))
-                    result.Add(item);
-            }
-
-            int childCount = (int)element.ChildCount;
-            if (childCount > 0 && childCount < 1000)
-            {
-                for (int i = 0; i < childCount; i++)
+                var item = element.AsObject<NormalInventoryItem>();
+                if (item?.Item != null && item.Address != 0)
                 {
-                    var child = element.GetChildAtIndex(i);
-                    if (child != null) FindMapsInElementRecursive(child, result, seenAddresses, depth + 1);
+                    if (ItemIsMap(item.Item) && seenAddresses.Add(item.Address))
+                        result.Add(item);
                 }
+
+                int count = (int)element.ChildCount;
+                if (count > 0 && count < 500)
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        var child = element.GetChildAtIndex(i);
+                        if (child != null) FindMapsInElementRecursive(child, result, seenAddresses, depth + 1);
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore errors from specific UI elements that might be in an invalid state during recursion
             }
         }
 
@@ -128,7 +136,8 @@ namespace MapNotify_3_28
                     // Maven Invitation Slot (Path: 67 -> 8 -> 1)
                     if (mapDeviceRoot.ChildCount > 8)
                     {
-                        var invitationSlot = mapDeviceRoot.GetChildAtIndex(8)?.GetChildAtIndex(1);
+                        var slot8 = mapDeviceRoot.GetChildAtIndex(8);
+                        var invitationSlot = slot8 != null && slot8.ChildCount > 1 ? slot8.GetChildAtIndex(1) : null;
                         var item = invitationSlot?.AsObject<NormalInventoryItem>();
                         if (item?.Item != null && ItemIsMap(item.Item))
                             result.Add(item);
@@ -174,19 +183,31 @@ namespace MapNotify_3_28
             var heistLocker = ui.ChildCount > 98 ? ui.GetChildAtIndex(98) : null;
             if (heistLocker == null || !heistLocker.IsVisible || heistLocker.ChildCount < 10)
             {
-                // Search for a visible child that has the expected category/tab structure (Heist usually has 24-45 children)
-                heistLocker = ui.Children.FirstOrDefault(x => x.IsVisible && x.ChildCount >= 24 && x.ChildCount <= 45);
+                for (int i = 0; i < ui.ChildCount; i++)
+                {
+                    var child = ui.GetChildAtIndex(i);
+                    if (child != null && child.IsVisible && child.ChildCount >= 24 && child.ChildCount <= 45)
+                    {
+                        heistLocker = child;
+                        break;
+                    }
+                }
             }
 
             if (heistLocker != null && heistLocker.IsVisible)
             {
                 var seenAddresses = new HashSet<long>();
-                // Contracts are stored in sub-containers (indices 7-24 represent the job tabs)
-                for (int i = 7; i <= 24; i++)
+                try
                 {
-                    var container = heistLocker.GetChildAtIndex(i);
-                    if (container != null && container.IsVisible) FindMapsInElementRecursive(container, result, seenAddresses, 0);
+                    var count = heistLocker.ChildCount;
+                    for (int i = 7; i <= 24; i++)
+                    {
+                        if (i >= count) break;
+                        var container = heistLocker.GetChildAtIndex(i);
+                        if (container != null && container.IsVisible) FindMapsInElementRecursive(container, result, seenAddresses, 0);
+                    }
                 }
+                catch { }
                 if (result.Count == 0) FindMapsInElementRecursive(heistLocker, result, seenAddresses, 0);
             }
 
@@ -211,19 +232,33 @@ namespace MapNotify_3_28
                                    (ui.ChildCount > 104 && ui.GetChildAtIndex(104).IsVisible) ? ui.GetChildAtIndex(104) : null;
             
             if (expeditionLocker == null || !expeditionLocker.IsVisible) // Expedition Locker usually has 10-30 children
-                expeditionLocker = ui.Children.FirstOrDefault(x => x.IsVisible && x.ChildCount >= 10 && x.ChildCount <= 35);
+            {
+                for (int i = 0; i < ui.ChildCount; i++)
+                {
+                    var child = ui.GetChildAtIndex(i);
+                    if (child != null && child.IsVisible && child.ChildCount >= 10 && child.ChildCount <= 35)
+                    {
+                        expeditionLocker = child;
+                        break;
+                    }
+                }
+            }
             
             if (expeditionLocker != null && expeditionLocker.IsVisible)
             {
                 var seenAddresses = new HashSet<long>();
-                // The Logbook tab index can vary. Based on input, check index 26 and fallback to index 5.
-                var logbookTab = expeditionLocker.ChildCount > 26 ? expeditionLocker.GetChildAtIndex(26) : 
-                                 expeditionLocker.ChildCount > 5 ? expeditionLocker.GetChildAtIndex(5) : null;
-
-                if (logbookTab != null && logbookTab.IsVisible)
+                try
                 {
-                    FindMapsInElementRecursive(logbookTab, result, seenAddresses, 0);
+                    var count = expeditionLocker.ChildCount;
+                    var logbookTab = count > 26 ? expeditionLocker.GetChildAtIndex(26) :
+                                     count > 5 ? expeditionLocker.GetChildAtIndex(5) : null;
+
+                    if (logbookTab != null && logbookTab.IsVisible)
+                    {
+                        FindMapsInElementRecursive(logbookTab, result, seenAddresses, 0);
+                    }
                 }
+                catch { }
                 if (result.Count == 0) FindMapsInElementRecursive(expeditionLocker, result, seenAddresses, 0);
             }
 
@@ -254,11 +289,20 @@ namespace MapNotify_3_28
             else
             {
                 var seenAddresses = new HashSet<long>();
-                var currentTabContainer = window.GetChildAtIndex(8)?.GetChildAtIndex(1);
-                if (currentTabContainer != null)
-                    foreach (var tab in currentTabContainer.Children)
-                        if (tab.IsVisible && tab.ChildCount > 0 && tab.GetChildAtIndex(0) != null)
-                            FindMapsInElementRecursive(tab.GetChildAtIndex(0), result, seenAddresses, 0);
+                try
+                {
+                    var children = window.Children;
+                    var child8 = children.Count > 8 ? children[8] : null;
+                    var tabChildren = child8?.Children;
+                    var currentTabContainer = tabChildren != null && tabChildren.Count > 1 ? tabChildren[1] : null;
+                    if (currentTabContainer != null)
+                    {
+                        foreach (var tab in currentTabContainer.Children)
+                            if (tab.IsVisible && tab.ChildCount > 0)
+                                FindMapsInElementRecursive(tab.GetChildAtIndex(0), result, seenAddresses, 0);
+                    }
+                }
+                catch { }
             }
             return result;
         }

@@ -215,17 +215,17 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         // We remove the hardcoded index check for rendering and rely on the cached item's own visibility.
         if (Settings.ShowHeistLockerHighlights.Value)
         {
-            foreach (var item in _heistLockerItems.Value)
+            try
             {
-                if (item?.Item == null) continue;
-                try
+                foreach (var item in _heistLockerItems.Value)
                 {
+                    if (item?.Item == null) continue;
                     DrawMapBorders(item, item.Item);
                 }
-                catch (Exception ex)
-                {
-                    LogError($"Error drawing heist locker borders: {ex.Message}", 10);
-                }
+            }
+            catch (Exception ex)
+            {
+                LogError($"Error drawing heist locker borders: {ex.Message}", 10);
             }
         }
 

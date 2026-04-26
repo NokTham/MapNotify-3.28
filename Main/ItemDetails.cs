@@ -68,6 +68,7 @@ namespace MapNotify_3_28
             public bool IsMavenMap { get; set; }
             public bool IsLogbook { get; set; }
             public bool IsHeist { get; set; }
+            public bool IsValdoMap { get; set; }
             public string WindowID { get; private set; }
             public ItemDetails(NormalInventoryItem Item, Entity Entity)
             {
@@ -101,8 +102,12 @@ namespace MapNotify_3_28
                 var expeditionSaga = Entity.GetComponent<ExpeditionSaga>();
 
                 Tier = mapComponent?.Tier ?? -1;
-                IsMavenMap = path.Contains("MavenMap") || path.Contains("Invitations/Maven") || path.Contains("MavenInvitation");
-                IsLogbook = path.Contains("ExpeditionLogbook");
+                IsMavenMap = path.Contains("MavenMap", StringComparison.OrdinalIgnoreCase) || 
+                             path.Contains("Invitations/Maven", StringComparison.OrdinalIgnoreCase) || 
+                             path.Contains("MavenInvitation", StringComparison.OrdinalIgnoreCase);
+                IsLogbook = path.Contains("ExpeditionLogbook", StringComparison.OrdinalIgnoreCase);
+                IsValdoMap = path.Contains("Valdo", StringComparison.OrdinalIgnoreCase) || 
+                             itemName.Contains("Valdo", StringComparison.OrdinalIgnoreCase);
 
                 ProcessFlags(baseComponent);
 
@@ -161,8 +166,15 @@ namespace MapNotify_3_28
                     }
                 }
 
-                UpdateHeistDetails(heistContract, heistBlueprint, modsComponent);
-                ProcessQuality(qualityComponent, modsComponent);
+                // Performance and Stability: Only parse tooltips if the item is currently hovered.
+                // Tooltip parsing is expensive and prone to 'startIndex' errors when items are in lockers/stashes.
+                bool isHovered = ingameState?.UIHover?.Address == Item?.Address;
+                if (isHovered)
+                {
+                    UpdateHeistDetails(heistContract, heistBlueprint, modsComponent);
+                    ProcessQuality(qualityComponent, modsComponent);
+                }
+                
                 ProcessMods(modsComponent, path);
                 ProcessMapName(mapComponent, baseComponent, modsComponent, path, itemName);
                 ProcessItemColor(modsComponent);
@@ -178,8 +190,8 @@ namespace MapNotify_3_28
 
                 var mods = Entity?.GetComponent<Mods>();
                 bool isUnique = mods?.ItemRarity == ItemRarity.Unique;
-                bool isSpecial = (Entity?.Path?.Contains("Maven") ?? false) || Tier == 17;
-                if (ModCount <= 0 || (isUnique && !isSpecial) || IsLogbook || IsHeist) return lines;
+                bool isSpecial = Tier == 17;
+                if (ModCount <= 0 || (isUnique && !isSpecial) || IsLogbook || IsHeist || IsMavenMap || IsValdoMap) return lines;
 
                 var green = new nuVector4(0f, 1f, 0f, 1f);
                 var red = new nuVector4(1f, 0.4f, 0.4f, 1f);
@@ -231,7 +243,7 @@ namespace MapNotify_3_28
                 var scarabsColor = new nuVector4(0.85f, 0.45f, 0.85f, 1f);
                 var currencyColor = new nuVector4(0.0f, 1.0f, 0.0f, 1.0f);
 
-                if (IsLogbook || IsHeist) return lines;
+                if (IsLogbook || IsHeist || IsMavenMap || IsValdoMap) return lines;
 
                 if (pluginSettings.ShowOriginatorMaps.Value)
                 {
@@ -304,7 +316,7 @@ namespace MapNotify_3_28
                 ModCount = itemMods?.Count ?? 0;
                 if (modsComponent != null && itemMods != null && ModCount > 0)
                 {
-                    if (modsComponent.ItemRarity != ItemRarity.Unique || path.Contains("Maven") || Tier == 17)
+                    if (modsComponent.ItemRarity != ItemRarity.Unique || Tier == 17)
                     {
                         foreach (var mod in itemMods)
                         {
