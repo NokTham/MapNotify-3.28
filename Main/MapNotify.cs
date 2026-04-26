@@ -67,6 +67,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     private bool _showPreviewWindow;
     private string _modFilter = string.Empty;
     private List<CapturedMod> _capturedMods = new List<CapturedMod>();
+    private List<string> _availableProfiles = new List<string>();
+    private string _newProfileName = string.Empty;
 
     public MapNotify_3_28()
     {
@@ -78,6 +80,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     public override bool Initialise()
     {
         base.Initialise();
+        EnsureProfileStructure();
+        RefreshProfileList();
         windowArea = GameController.Window.GetWindowRectangle();
         GoodModsDictionary = LoadConfigGoodMod();
         BadModsDictionary = LoadConfigBadMod();
@@ -339,18 +343,26 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     /// </summary>
     private void HandleCaptureHotkey()
     {
+        if (ingameState == null) return;
+
         // Force reload from files before capturing to ensure we have the latest settings
         GoodModsDictionary = LoadConfigGoodMod();
         BadModsDictionary = LoadConfigBadMod();
+        RefreshProfileList();
 
-        var captureHover = ingameState.UIHover;
-        if (captureHover?.IsVisible != true) return;
-
-        var hoverItem = captureHover.AsObject<NormalInventoryItem>();
-        if (hoverItem?.Item == null || !ItemIsMap(hoverItem.Item)) return;
+        var hoverItem = ingameState.UIHover?.AsObject<NormalInventoryItem>();
+        if (hoverItem?.Item == null || !ItemIsMap(hoverItem.Item))
+        {
+            _showPreviewWindow = !_showPreviewWindow;
+            return;
+        }
 
         var mods = hoverItem.Item.GetComponent<Mods>();
-        if (mods == null) return;
+        if (mods == null)
+        {
+            _showPreviewWindow = !_showPreviewWindow;
+            return;
+        }
 
         _capturedMods.Clear();
         var descriptions = GetModDescriptionsFromTooltip(hoverItem.Tooltip);

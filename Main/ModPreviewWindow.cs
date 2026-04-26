@@ -18,6 +18,53 @@ namespace MapNotify_3_28
 
             if (ImGui.Begin("Map Mod Preview", ref _showPreviewWindow, ImGuiWindowFlags.NoCollapse))
             {
+                // Profile Management Header
+                ImGui.Text("Profile:");
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(150);
+                if (ImGui.BeginCombo("##profileselect", Settings.SelectedProfile.Value))
+                {
+                    foreach (var profile in _availableProfiles)
+                    {
+                        if (ImGui.Selectable(profile, profile == Settings.SelectedProfile.Value))
+                        {
+                            Settings.SelectedProfile.Value = profile;
+                            GoodModsDictionary = LoadConfigGoodMod();
+                            BadModsDictionary = LoadConfigBadMod();
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("New")) ImGui.OpenPopup("CreateProfilePopup");
+                
+                if (Settings.SelectedProfile.Value != "Default")
+                {
+                    ImGui.SameLine();
+                    if (ImGui.Button("Del"))
+                    {
+                        Directory.Delete(GetProfileDirectory(), true);
+                        Settings.SelectedProfile.Value = "Default";
+                        RefreshProfileList();
+                        GoodModsDictionary = LoadConfigGoodMod();
+                        BadModsDictionary = LoadConfigBadMod();
+                    }
+                }
+
+                if (ImGui.BeginPopup("CreateProfilePopup"))
+                {
+                    ImGui.InputTextWithHint("##newprofilename", "Profile Name", ref _newProfileName, 50);
+                    if (ImGui.Button("Create") && !string.IsNullOrWhiteSpace(_newProfileName))
+                    {
+                        Settings.SelectedProfile.Value = _newProfileName;
+                        ResetConfigs(); // Creates the directory and default files
+                        RefreshProfileList();
+                        _newProfileName = string.Empty;
+                        ImGui.CloseCurrentPopup();
+                    }
+                    ImGui.EndPopup();
+                }
                 
                 ImGui.InputTextWithHint("##modfilter", "Filter Mods...", ref _modFilter, 100);
                 ImGui.Separator();
@@ -141,9 +188,9 @@ namespace MapNotify_3_28
         private void AutoSaveIfExisting(CapturedMod mod)
         {
             if (GoodModsDictionary.Keys.Any(k => mod.RawName.IndexOf(k, System.StringComparison.OrdinalIgnoreCase) >= 0 || k.IndexOf(mod.RawName, System.StringComparison.OrdinalIgnoreCase) >= 0))
-                SaveModToConfig(mod, "GoodMods.txt");
+                SaveModToConfig(mod, Path.Combine(GetProfileDirectory(), "GoodMods.txt"));
             else if (BadModsDictionary.Keys.Any(k => mod.RawName.IndexOf(k, System.StringComparison.OrdinalIgnoreCase) >= 0 || k.IndexOf(mod.RawName, System.StringComparison.OrdinalIgnoreCase) >= 0))
-                SaveModToConfig(mod, "BadMods.txt");
+                SaveModToConfig(mod, Path.Combine(GetProfileDirectory(), "BadMods.txt"));
         }
 
         /// <summary>
@@ -152,8 +199,11 @@ namespace MapNotify_3_28
         /// </summary>
         private void SaveModToConfig(CapturedMod mod, string fileName)
         {
-            string otherFile = fileName == "GoodMods.txt" ? "BadMods.txt" : "GoodMods.txt";
-            var otherPath = Path.Combine(ConfigDirectory, otherFile);
+            // Ensure we handle just the filename or the full path
+            string pureFileName = Path.GetFileName(fileName);
+            string otherFile = pureFileName == "GoodMods.txt" ? "BadMods.txt" : "GoodMods.txt";
+            var otherPath = Path.Combine(GetProfileDirectory(), otherFile);
+            
             if (File.Exists(otherPath))
             {
                 var otherLines = File.ReadAllLines(otherPath).ToList();
@@ -169,10 +219,10 @@ namespace MapNotify_3_28
 
             if (mod.Color == new nuVector4(1, 1, 1, 1))
             {
-                if (fileName == "GoodMods.txt") mod.Color = new nuVector4(0.4f, 1f, 0.4f, 1f);
-                else if (fileName == "BadMods.txt") mod.Color = new nuVector4(1f, 0.4f, 0.4f, 1f);
+                if (pureFileName == "GoodMods.txt") mod.Color = new nuVector4(0.4f, 1f, 0.4f, 1f);
+                else if (pureFileName == "BadMods.txt") mod.Color = new nuVector4(1f, 0.4f, 0.4f, 1f);
             }
-            var path = Path.Combine(ConfigDirectory, fileName);
+            var path = Path.Combine(GetProfileDirectory(), pureFileName);
             var hexColor = ToHex(mod.Color);
             var newLine = $"{mod.RawName};{mod.DisplayName};{hexColor};{mod.IsBricking}";
 
@@ -198,7 +248,7 @@ namespace MapNotify_3_28
             bool deleted = false;
             foreach (var fileName in files)
             {
-                var path = Path.Combine(ConfigDirectory, fileName);
+                var path = Path.Combine(GetProfileDirectory(), fileName);
                 if (!File.Exists(path)) continue;
                 var lines = File.ReadAllLines(path).ToList();
                 var lineToRemove = lines.FirstOrDefault(l =>

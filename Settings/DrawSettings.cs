@@ -104,7 +104,7 @@ namespace MapNotify_3_28
             {
                 DrawHotkeySelector("Capture Hotkey", Settings.CaptureHotkey, Settings.UseControl, Settings.UseShift, Settings.UseAlt);
                 ImGui.SameLine();
-                HelpMarker("Key used to open the Map Mod Preview window while hovering over a map.\nESC to clear");
+                HelpMarker("Key used to open the Map Mod Preview window.\nESC to clear.");
                 Settings.InventoryCacheInterval.Value = IntSlider(
                     "Inventory Item Caching Interval in ms",
                     Settings.InventoryCacheInterval,

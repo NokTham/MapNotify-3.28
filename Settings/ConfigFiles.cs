@@ -9,13 +9,48 @@ namespace MapNotify_3_28
     public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     {
 
+        private string GetProfileDirectory()
+        {
+            var path = Path.Combine(ConfigDirectory, "Profiles", Settings.SelectedProfile?.Value ?? "Default");
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            return path;
+        }
+
+        private void EnsureProfileStructure()
+        {
+            var profilesRoot = Path.Combine(ConfigDirectory, "Profiles");
+            if (!Directory.Exists(profilesRoot)) Directory.CreateDirectory(profilesRoot);
+
+            var defaultPath = Path.Combine(profilesRoot, "Default");
+            if (!Directory.Exists(defaultPath)) Directory.CreateDirectory(defaultPath);
+
+            // Migration: Move old files to Default profile
+            string[] filesToMigrate = { "GoodMods.txt", "BadMods.txt" };
+            foreach (var file in filesToMigrate)
+            {
+                var oldPath = Path.Combine(ConfigDirectory, file);
+                var newPath = Path.Combine(defaultPath, file);
+                if (File.Exists(oldPath) && !File.Exists(newPath))
+                {
+                    File.Move(oldPath, newPath);
+                }
+            }
+        }
+
+        private void RefreshProfileList()
+        {
+            var profilesRoot = Path.Combine(ConfigDirectory, "Profiles");
+            if (!Directory.Exists(profilesRoot)) return;
+            _availableProfiles = Directory.GetDirectories(profilesRoot).Select(Path.GetFileName).ToList();
+        }
+
         public void ResetConfigs()
         {
             LogMessage("Deleting existing config files...");
             string[] files = { "GoodMods.txt", "BadMods.txt", "ExpectedNodes.txt", "ExpectedBonusNodes.txt" };
             foreach (var file in files)
             {
-                var path = Path.Combine(ConfigDirectory, file);
+                var path = (file.Contains("Mods")) ? Path.Combine(GetProfileDirectory(), file) : Path.Combine(ConfigDirectory, file);
                 if (File.Exists(path)) File.Delete(path);
             }
             ExpectedNodes = LoadExpectedNodes();
@@ -108,7 +143,7 @@ namespace MapNotify_3_28
             var FullDict = new Dictionary<string, StyledText>();
             
             // Load Good Mods. Using indexer assignment prevents crashes if keys overlap between files.
-            foreach (var mod in LoadConfigGood(Path.Combine(ConfigDirectory, "GoodMods.txt")))
+            foreach (var mod in LoadConfigGood(Path.Combine(GetProfileDirectory(), "GoodMods.txt")))
                 FullDict[mod.Key] = mod.Value;
             
             LogMessage("Loaded config files...");
@@ -119,7 +154,7 @@ namespace MapNotify_3_28
         private Dictionary<string, StyledText> LoadConfigBadMod()
         {
             LogMessage("Loading Bad Mods ..");
-            return LoadConfigBad(Path.Combine(ConfigDirectory, "BadMods.txt"));
+            return LoadConfigBad(Path.Combine(GetProfileDirectory(), "BadMods.txt"));
         }
 
 
@@ -134,7 +169,7 @@ namespace MapNotify_3_28
 
         public Dictionary<string, StyledText> LoadConfigBad(string path)
         {
-            var CreateDefaultPath1 = Path.Combine(ConfigDirectory, "BadMods.txt");
+            var CreateDefaultPath1 = Path.Combine(GetProfileDirectory(), "BadMods.txt");
 
             if (!File.Exists(CreateDefaultPath1))
                 if (CreateDefaultPath1.Contains("BadMods"))

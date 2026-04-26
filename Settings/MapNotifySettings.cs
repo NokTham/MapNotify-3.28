@@ -14,6 +14,7 @@ namespace MapNotify_3_28
         public ToggleNode UseAlt { get; set; } = new(false);
         public HotkeyNode CaptureHotkey { get; set; } = new(System.Windows.Forms.Keys.F1);
         public ToggleNode Enable { get; set; } = new(true);
+        public TextNode SelectedProfile { get; set; } = new TextNode("Default");
         public RangeNode<int> InventoryCacheInterval { get; set; } = new(200, 1, 2000);
         public RangeNode<int> StashCacheInterval { get; set; } = new(500, 1, 2000);
         public RangeNode<int> MapStashCacheInterval { get; set; } = new(500, 1, 2000);
