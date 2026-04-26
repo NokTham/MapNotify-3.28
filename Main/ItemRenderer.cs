@@ -164,8 +164,9 @@ namespace MapNotify_3_28
                                         if (i > 0)
                                         {
                                             ImGui.SameLine();
-                                            if (text.Contains("P:")) ImGui.SetCursorPosX(startX + 102); 
-                                            else if (text.Contains("S:")) ImGui.SetCursorPosX(startX + 172); 
+                                            if (i == 1) ImGui.SetCursorPosX(startX + (text == "Maps" ? 31 : 30));
+                                            else if (i == 2) ImGui.SetCursorPosX(startX + 92); 
+                                            else if (i == 3) ImGui.SetCursorPosX(startX + 162); 
                                         }
                                         ImGui.TextColored(line[i].Color, text);
                                     }
@@ -174,9 +175,33 @@ namespace MapNotify_3_28
                             else if (Settings.ShowOriginatorMaps.Value || Settings.ShowOriginatorScarabs.Value || Settings.ShowOriginatorCurrency.Value)
                             {
                                 if (Settings.HorizontalLines.Value) ImGui.Separator();
-                                if (Settings.ShowOriginatorMaps.Value) ImGui.TextColored(new nuVector4(0.5f, 0.85f, 1f, 1f), $"+{ItemDetails.OriginatorMaps}%% Maps");
-                                if (Settings.ShowOriginatorScarabs.Value) ImGui.TextColored(new nuVector4(0.85f, 0.45f, 0.85f, 1f), $"+{ItemDetails.OriginatorScarabs}%% Scarabs");
-                                if (Settings.ShowOriginatorCurrency.Value) ImGui.TextColored(new nuVector4(0.0f, 1.0f, 0.0f, 1.0f), $"+{ItemDetails.OriginatorCurrency}%% Currency");
+                                if (Settings.ShowOriginatorMaps.Value)
+                                {
+                                    var startX = ImGui.GetCursorPosX();
+                                    var color = new nuVector4(0.5f, 0.85f, 1f, 1f);
+                                    ImGui.TextColored(color, ItemDetails.OriginatorMaps == 0 ? "--" : $"{ItemDetails.OriginatorMaps}%%");
+                                    ImGui.SameLine();
+                                    ImGui.SetCursorPosX(startX + 31);
+                                    ImGui.TextColored(color, "Maps");
+                                }
+                                if (Settings.ShowOriginatorScarabs.Value)
+                                {
+                                    var startX = ImGui.GetCursorPosX();
+                                    var color = new nuVector4(0.85f, 0.45f, 0.85f, 1f);
+                                    ImGui.TextColored(color, ItemDetails.OriginatorScarabs == 0 ? "--" : $"{ItemDetails.OriginatorScarabs}%%");
+                                    ImGui.SameLine();
+                                    ImGui.SetCursorPosX(startX + 30);
+                                    ImGui.TextColored(color, "Scarabs");
+                                }
+                                if (Settings.ShowOriginatorCurrency.Value)
+                                {
+                                    var startX = ImGui.GetCursorPosX();
+                                    var color = new nuVector4(0.0f, 1.0f, 0.0f, 1.0f);
+                                    ImGui.TextColored(color, ItemDetails.OriginatorCurrency == 0 ? "--" : $"{ItemDetails.OriginatorCurrency}%%");
+                                    ImGui.SameLine();
+                                    ImGui.SetCursorPosX(startX + 30);
+                                    ImGui.TextColored(color, "Currency");
+                                }
                             }
                         }
 

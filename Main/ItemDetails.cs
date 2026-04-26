@@ -248,7 +248,8 @@ namespace MapNotify_3_28
                 if (pluginSettings.ShowOriginatorMaps.Value)
                 {
                     lines.Add(new List<StyledText> {
-                        new StyledText { Text = OriginatorMaps == 0 ? "-- Maps" : $"{OriginatorMaps}% Maps", Color = mapsColor, EscapedText = OriginatorMaps == 0 ? "-- Maps" : $"{OriginatorMaps}%% Maps" },
+                        new StyledText { Text = OriginatorMaps == 0 ? "--" : $"{OriginatorMaps}%", Color = mapsColor, EscapedText = OriginatorMaps == 0 ? "--" : $"{OriginatorMaps}%%" },
+                        new StyledText { Text = "Maps", Color = mapsColor, EscapedText = "Maps" },
                         new StyledText { Text = PrefixStats.MoreMaps == 0 ? "P: --" : $"P: {PrefixStats.MoreMaps}%", Color = white, EscapedText = PrefixStats.MoreMaps == 0 ? "P: --" : $"P: {PrefixStats.MoreMaps}%%" },
                         new StyledText { Text = SuffixStats.MoreMaps == 0 ? "S: --" : $"S: {SuffixStats.MoreMaps}%", Color = white, EscapedText = SuffixStats.MoreMaps == 0 ? "S: --" : $"S: {SuffixStats.MoreMaps}%%" }
                     });
@@ -257,7 +258,8 @@ namespace MapNotify_3_28
                 if (pluginSettings.ShowOriginatorScarabs.Value)
                 {
                     lines.Add(new List<StyledText> {
-                        new StyledText { Text = OriginatorScarabs == 0 ? "-- Scarabs" : $"{OriginatorScarabs}% Scarabs", Color = scarabsColor, EscapedText = OriginatorScarabs == 0 ? "-- Scarabs" : $"{OriginatorScarabs}%% Scarabs" },
+                        new StyledText { Text = OriginatorScarabs == 0 ? "--" : $"{OriginatorScarabs}%", Color = scarabsColor, EscapedText = OriginatorScarabs == 0 ? "--" : $"{OriginatorScarabs}%%" },
+                        new StyledText { Text = "Scarabs", Color = scarabsColor, EscapedText = "Scarabs" },
                         new StyledText { Text = PrefixStats.MoreScarabs == 0 ? "P: --" : $"P: {PrefixStats.MoreScarabs}%", Color = white, EscapedText = PrefixStats.MoreScarabs == 0 ? "P: --" : $"P: {PrefixStats.MoreScarabs}%%" },
                         new StyledText { Text = SuffixStats.MoreScarabs == 0 ? "S: --" : $"S: {SuffixStats.MoreScarabs}%", Color = white, EscapedText = SuffixStats.MoreScarabs == 0 ? "S: --" : $"S: {SuffixStats.MoreScarabs}%%" }
                     });
@@ -266,7 +268,8 @@ namespace MapNotify_3_28
                 if (pluginSettings.ShowOriginatorCurrency.Value)
                 {
                     lines.Add(new List<StyledText> {
-                        new StyledText { Text = OriginatorCurrency == 0 ? "-- Currency" : $"{OriginatorCurrency}% Currency", Color = currencyColor, EscapedText = OriginatorCurrency == 0 ? "-- Currency" : $"{OriginatorCurrency}%% Currency" },
+                        new StyledText { Text = OriginatorCurrency == 0 ? "--" : $"{OriginatorCurrency}%", Color = currencyColor, EscapedText = OriginatorCurrency == 0 ? "--" : $"{OriginatorCurrency}%%" },
+                        new StyledText { Text = "Currency", Color = currencyColor, EscapedText = "Currency" },
                         new StyledText { Text = PrefixStats.MoreCurrency == 0 ? "P: --" : $"P: {PrefixStats.MoreCurrency}%", Color = white, EscapedText = PrefixStats.MoreCurrency == 0 ? "P: --" : $"P: {PrefixStats.MoreCurrency}%%" },
                         new StyledText { Text = SuffixStats.MoreCurrency == 0 ? "S: --" : $"S: {SuffixStats.MoreCurrency}%", Color = white, EscapedText = SuffixStats.MoreCurrency == 0 ? "S: --" : $"S: {SuffixStats.MoreCurrency}%%" }
                     });
