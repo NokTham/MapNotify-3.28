@@ -140,20 +140,18 @@ namespace MapNotify_3_28
 
         private Dictionary<string, StyledText> LoadConfigGoodMod()
         {
+            LogMessage("Loading Good Mods...");
             var FullDict = new Dictionary<string, StyledText>();
             
             // Load Good Mods. Using indexer assignment prevents crashes if keys overlap between files.
             foreach (var mod in LoadConfigGood(Path.Combine(GetProfileDirectory(), "GoodMods.txt")))
                 FullDict[mod.Key] = mod.Value;
             
-            LogMessage("Loaded config files...");
             return FullDict;
         }
-
-
         private Dictionary<string, StyledText> LoadConfigBadMod()
         {
-            LogMessage("Loading Bad Mods ..");
+            LogMessage("Loading Bad Mods...");
             return LoadConfigBad(Path.Combine(GetProfileDirectory(), "BadMods.txt"));
         }
 

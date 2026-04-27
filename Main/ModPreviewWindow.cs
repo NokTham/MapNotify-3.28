@@ -194,9 +194,9 @@ namespace MapNotify_3_28
 
         private void AutoSaveIfExisting(CapturedMod mod)
         {
-            if (GoodModsDictionary.Keys.Any(k => mod.RawName.IndexOf(k, System.StringComparison.OrdinalIgnoreCase) >= 0 || k.IndexOf(mod.RawName, System.StringComparison.OrdinalIgnoreCase) >= 0))
+            if (GoodModsDictionary.Keys.Any(k => BaseModExtractor.AreEquivalent(mod.RawName, k)))
                 SaveModToConfig(mod, Path.Combine(GetProfileDirectory(), "GoodMods.txt"));
-            else if (BadModsDictionary.Keys.Any(k => mod.RawName.IndexOf(k, System.StringComparison.OrdinalIgnoreCase) >= 0 || k.IndexOf(mod.RawName, System.StringComparison.OrdinalIgnoreCase) >= 0))
+            else if (BadModsDictionary.Keys.Any(k => BaseModExtractor.AreEquivalent(mod.RawName, k)))
                 SaveModToConfig(mod, Path.Combine(GetProfileDirectory(), "BadMods.txt"));
         }
 
@@ -204,8 +204,11 @@ namespace MapNotify_3_28
         /// Writes a captured mod entry to the specified configuration file.
         /// Automatically handles moving mods between Good and Bad lists if they already exist.
         /// </summary>
-        private void SaveModToConfig(CapturedMod mod, string fileName)
+        private void SaveModToConfig(CapturedMod mod, string fileName, string baseMod = null)
         {
+            if (baseMod == null)
+                baseMod = BaseModExtractor.GetBaseMod(mod.RawName);
+
             // Ensure we handle just the filename or the full path
             string pureFileName = Path.GetFileName(fileName);
             string otherFile = pureFileName == "GoodMods.txt" ? "BadMods.txt" : "GoodMods.txt";
@@ -218,8 +221,7 @@ namespace MapNotify_3_28
                 {
                     var configKey = l.Split(';')[0].Trim();
                     if (string.IsNullOrEmpty(configKey) || configKey.StartsWith("#")) return false;
-                    return mod.RawName.IndexOf(configKey, System.StringComparison.OrdinalIgnoreCase) >= 0 ||
-                           configKey.IndexOf(mod.RawName, System.StringComparison.OrdinalIgnoreCase) >= 0;
+                    return BaseModExtractor.AreEquivalent(mod.RawName, configKey);
                 }) > 0;
                 if (removedFromOther) File.WriteAllLines(otherPath, otherLines);
             }
@@ -231,7 +233,7 @@ namespace MapNotify_3_28
             }
             var path = Path.Combine(GetProfileDirectory(), pureFileName);
             var hexColor = ToHex(mod.Color);
-            var newLine = $"{mod.RawName};{mod.DisplayName};{hexColor};{mod.IsBricking}";
+            var newLine = $"{baseMod};{mod.DisplayName};{hexColor};{mod.IsBricking}";
 
             if (!File.Exists(path)) File.WriteAllText(path, "");
             var lines = File.ReadAllLines(path).ToList();
@@ -239,8 +241,7 @@ namespace MapNotify_3_28
             {
                 var configKey = l.Split(';')[0].Trim();
                 if (string.IsNullOrEmpty(configKey) || configKey.StartsWith("#")) return false;
-                return mod.RawName.IndexOf(configKey, System.StringComparison.OrdinalIgnoreCase) >= 0 ||
-                       configKey.IndexOf(mod.RawName, System.StringComparison.OrdinalIgnoreCase) >= 0;
+                return BaseModExtractor.AreEquivalent(mod.RawName, configKey);
             });
             lines.Add(newLine);
             File.WriteAllLines(path, lines);
@@ -249,6 +250,10 @@ namespace MapNotify_3_28
             LogMessage($"Saved/Updated mod: {mod.RawName}", 5);
         }
 
+        /// <summary>
+        /// Removes a mod from both Good and Bad config files.
+        /// Suggestion: Consolidate IO operations to reduce disk hits when managing multiple mods.
+        /// </summary>
         private void DeleteModFromConfig(string rawName)
         {
             string[] files = { "GoodMods.txt", "BadMods.txt" };
@@ -262,8 +267,7 @@ namespace MapNotify_3_28
                 {
                     var configKey = l.Split(';')[0].Trim();
                     if (string.IsNullOrEmpty(configKey) || configKey.StartsWith("#")) return false;
-                    return rawName.IndexOf(configKey, System.StringComparison.OrdinalIgnoreCase) >= 0 ||
-                           configKey.IndexOf(rawName, System.StringComparison.OrdinalIgnoreCase) >= 0;
+                    return BaseModExtractor.AreEquivalent(rawName, configKey);
                 });
                 if (lineToRemove != null)
                 {

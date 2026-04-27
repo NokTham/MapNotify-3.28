@@ -128,25 +128,26 @@ namespace MapNotify_3_28
 
             // Reverting to manual path traversal as MapReceptacleWindow is not accessible.
             // Root is verified at Index 67.
-            if (ui.ChildCount > 67)
+            if (ui.ChildCount > UIIndices.MapDeviceRoot)
             {
-                var mapDeviceRoot = ui.GetChildAtIndex(67);
+                var mapDeviceRoot = ui.GetChildAtIndex(UIIndices.MapDeviceRoot);
                 if (mapDeviceRoot != null && mapDeviceRoot.IsVisible)
                 {
-                    // Maven Invitation Slot (Path: 67 -> 8 -> 1)
-                    if (mapDeviceRoot.ChildCount > 8)
+                    const int InvitationSlotParentIndex = 8;
+                    const int StandardSlotsParentIndex = 7;
+
+                    if (mapDeviceRoot.ChildCount > InvitationSlotParentIndex)
                     {
-                        var slot8 = mapDeviceRoot.GetChildAtIndex(8);
+                        var slot8 = mapDeviceRoot.GetChildAtIndex(InvitationSlotParentIndex);
                         var invitationSlot = slot8 != null && slot8.ChildCount > 1 ? slot8.GetChildAtIndex(1) : null;
                         var item = invitationSlot?.AsObject<NormalInventoryItem>();
                         if (item?.Item != null && ItemIsMap(item.Item))
                             result.Add(item);
                     }
 
-                    // Standard Map Device Slots (Path: 67 -> 7)
-                    if (mapDeviceRoot.ChildCount > 7)
+                    if (mapDeviceRoot.ChildCount > StandardSlotsParentIndex)
                     {
-                        var piecesPanel = mapDeviceRoot.GetChildAtIndex(7);
+                        var piecesPanel = mapDeviceRoot.GetChildAtIndex(StandardSlotsParentIndex);
                         if (piecesPanel != null && piecesPanel.IsVisible)
                         {
                             foreach (var child in piecesPanel.Children)
@@ -178,15 +179,14 @@ namespace MapNotify_3_28
             var ui = ingameState?.IngameUi;
             if (ui == null) return result;
 
-            // ExileCore's HeistLockerElement is a stub (returns 'this'), so we must find it manually.
-            // We try index 98 first, but fallback to a search if the child doesn't look like a locker.
-            var heistLocker = ui.ChildCount > 98 ? ui.GetChildAtIndex(98) : null;
+            // Try known index first, then fallback to robust search
+            var heistLocker = ui.ChildCount > UIIndices.HeistLockerDefault ? ui.GetChildAtIndex(UIIndices.HeistLockerDefault) : null;
             if (heistLocker == null || !heistLocker.IsVisible || heistLocker.ChildCount < 10)
             {
                 for (int i = 0; i < ui.ChildCount; i++)
                 {
                     var child = ui.GetChildAtIndex(i);
-                    if (child != null && child.IsVisible && child.ChildCount >= 24 && child.ChildCount <= 45)
+                    if (child != null && child.IsVisible && child.ChildCount is >= 24 and <= 45)
                     {
                         heistLocker = child;
                         break;
@@ -226,17 +226,18 @@ namespace MapNotify_3_28
             if (ui == null) return result;
 
             // Robust search for Expedition Locker (Commonly at 101, 102, 103, or 104)
-            var expeditionLocker = (ui.ChildCount > 101 && ui.GetChildAtIndex(101).IsVisible) ? ui.GetChildAtIndex(101) :
-                                   (ui.ChildCount > 103 && ui.GetChildAtIndex(103).IsVisible) ? ui.GetChildAtIndex(103) :
-                                   (ui.ChildCount > 102 && ui.GetChildAtIndex(102).IsVisible) ? ui.GetChildAtIndex(102) : 
-                                   (ui.ChildCount > 104 && ui.GetChildAtIndex(104).IsVisible) ? ui.GetChildAtIndex(104) : null;
+            int[] possibleExpeditionIndices = { UIIndices.ExpeditionLockerDefault, 102, 103, 104 };
+            var expeditionLocker = possibleExpeditionIndices
+                .Where(idx => ui.ChildCount > idx)
+                .Select(ui.GetChildAtIndex)
+                .FirstOrDefault(c => c is { IsVisible: true });
             
             if (expeditionLocker == null || !expeditionLocker.IsVisible) // Expedition Locker usually has 10-30 children
             {
                 for (int i = 0; i < ui.ChildCount; i++)
                 {
                     var child = ui.GetChildAtIndex(i);
-                    if (child != null && child.IsVisible && child.ChildCount >= 10 && child.ChildCount <= 35)
+                    if (child != null && child.IsVisible && child.ChildCount is >= 10 and <= 35)
                     {
                         expeditionLocker = child;
                         break;

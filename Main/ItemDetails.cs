@@ -112,59 +112,8 @@ namespace MapNotify_3_28
                 ProcessFlags(baseComponent);
 
                 LogbookAreaLevel = IsLogbook ? (expeditionSaga?.AreaLevel ?? (Tier > 0 ? Tier : 0)) : 0;
-
-                LogbookAreas.Clear();
-                if (IsLogbook && expeditionSaga != null && expeditionSaga.Areas != null)
-                {
-                    foreach (var area in expeditionSaga.Areas)
-                    {
-                        if (area == null) continue;
-                        var logArea = new LogbookArea { Name = area.Name, Faction = area.Faction };
-                        if (area.ImplicitMods != null)
-                        {
-                            foreach (var mod in area.ImplicitMods)
-                            {
-                                if (mod == null) continue;
-                                var modText = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
-                                var cleanText = !string.IsNullOrEmpty(modText) ? TooltipTagsRegex.Replace(modText, "") : string.Empty;
-                                if (!string.IsNullOrEmpty(cleanText))
-                                {
-                                    var styledMod = new StyledText { Text = cleanText, EscapedText = EscapeImGui(cleanText), Color = new nuVector4(0.9f, 0.9f, 0.9f, 1f) };
-                                    if (!string.IsNullOrEmpty(mod.RawName))
-                                    {
-                                        bool found = false;
-                                        foreach (var entry in GoodModsDictionary)
-                                        {
-                                            if (mod.RawName.Contains(entry.Key))
-                                            {
-                                                styledMod.Color = entry.Value.Color;
-                                                if (entry.Value.Bricking) Bricked = true;
-                                                ActiveGoodMods.Add(styledMod);
-                                                found = true; break;
-                                            }
-                                        }
-                                        if (!found)
-                                        {
-                                            foreach (var entry in BadModsDictionary)
-                                            {
-                                                if (mod.RawName.Contains(entry.Key))
-                                                {
-                                                    styledMod.Color = entry.Value.Color;
-                                                    styledMod.Bricking = entry.Value.Bricking;
-                                                    if (entry.Value.Bricking) Bricked = true;
-                                                    ActiveBadMods.Add(styledMod);
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    logArea.Implicits.Add(styledMod);
-                                }
-                            }
-                        }
-                        LogbookAreas.Add(logArea);
-                    }
-                }
+                
+                if (IsLogbook) ProcessLogbookDetails(expeditionSaga);
 
                 // Performance and Stability: Only parse tooltips if the item is currently hovered.
                 // Tooltip parsing is expensive and prone to 'startIndex' errors when items are in lockers/stashes.
@@ -178,6 +127,87 @@ namespace MapNotify_3_28
                 ProcessMods(modsComponent, path);
                 ProcessMapName(mapComponent, baseComponent, modsComponent, path, itemName);
                 ProcessItemColor(modsComponent);
+            }
+
+            private void ProcessLogbookDetails(ExpeditionSaga expeditionSaga)
+            {
+                LogbookAreas.Clear();
+                if (expeditionSaga?.Areas == null) return;
+
+                foreach (var area in expeditionSaga.Areas)
+                {
+                    if (area == null) continue;
+                    var logArea = new LogbookArea { Name = area.Name, Faction = area.Faction };
+                    if (area.ImplicitMods == null) continue;
+
+                    foreach (var mod in area.ImplicitMods)
+                    {
+                        if (mod == null) continue;
+                        var modText = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
+                        var cleanText = !string.IsNullOrEmpty(modText) ? TooltipTagsRegex.Replace(modText, "") : string.Empty;
+                        if (string.IsNullOrEmpty(cleanText)) continue;
+
+                        var (match, _) = MatchModInDictionaries(mod.RawName);
+                        var styledMod = new StyledText
+                        {
+                            Text = match?.Text ?? cleanText,
+                            EscapedText = EscapeImGui(match?.Text ?? cleanText),
+                            Color = match?.Color ?? new nuVector4(0.9f, 0.9f, 0.9f, 1f),
+                            Bricking = match?.Bricking ?? false
+                        };
+
+                        if (match != null)
+                        {
+                            if (match.Bricking) Bricked = true;
+                            // The MatchModInDictionaries doesn't tell us if it was good or bad, 
+                            // so we rely on the side-effect-free version if we want to add to specific lists.
+                            ProcessModWarnings(mod.RawName);
+                        }
+                        logArea.Implicits.Add(styledMod);
+                    }
+                    LogbookAreas.Add(logArea);
+                }
+            }
+
+            /// <summary>
+            /// Checks a mod against Good and Bad dictionaries and updates the item's active warning lists.
+            /// </summary>
+            private void ProcessModWarnings(string rawName)
+            {
+                if (string.IsNullOrEmpty(rawName)) return;
+
+                foreach (var entry in GoodModsDictionary)
+                {
+                    if (BaseModExtractor.AreEquivalent(rawName, entry.Key))
+                    {
+                        var warning = entry.Value; 
+                        if (string.IsNullOrEmpty(warning.EscapedText)) warning.EscapedText = EscapeImGui(warning.Text);
+                        if (warning.Bricking) Bricked = true; 
+                        ActiveGoodMods.Add(warning); 
+                        return;
+                    }
+                }
+
+                foreach (var entry in BadModsDictionary)
+                {
+                    if (BaseModExtractor.AreEquivalent(rawName, entry.Key))
+                    {
+                        var bad = entry.Value; 
+                        if (string.IsNullOrEmpty(bad.EscapedText)) bad.EscapedText = EscapeImGui(bad.Text);
+                        if (bad.Bricking) Bricked = true; 
+                        ActiveBadMods.Add(bad); 
+                        return;
+                    }
+                }
+            }
+
+            private (StyledText match, bool isGood) MatchModInDictionaries(string rawName)
+            {
+                if (string.IsNullOrEmpty(rawName)) return (null, false);
+                var goodMatch = GoodModsDictionary.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key)).Value;
+                if (goodMatch != null) return (goodMatch, true);
+                var badMatch = BadModsDictionary.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key)).Value;
+                return (badMatch, false);
             }
 
             /// <summary>
@@ -372,26 +402,7 @@ namespace MapNotify_3_28
                                 }
                             }
                             if (!IsOriginatorMap && (mod.RawName == "IsUberMap" || mod.RawName.Contains("MapZanaInfluence"))) IsOriginatorMap = true;
-                            bool foundMod = false;
-                            foreach (var entry in GoodModsDictionary)
-                            {
-                                if (mod.RawName.Contains(entry.Key))
-                                {
-                                    var warning = entry.Value; if (string.IsNullOrEmpty(warning.EscapedText)) warning.EscapedText = EscapeImGui(warning.Text);
-                                    if (warning.Bricking) Bricked = true; ActiveGoodMods.Add(warning); foundMod = true; break;
-                                }
-                            }
-                            if (!foundMod)
-                            {
-                                foreach (var entry in BadModsDictionary)
-                                {
-                                    if (mod.RawName.Contains(entry.Key))
-                                    {
-                                        var bad = entry.Value; if (string.IsNullOrEmpty(bad.EscapedText)) bad.EscapedText = EscapeImGui(bad.Text);
-                                        if (bad.Bricking) Bricked = true; ActiveBadMods.Add(bad); break;
-                                    }
-                                }
-                            }
+                            ProcessModWarnings(mod.RawName);
                         }
                     }
                 }

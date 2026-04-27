@@ -23,6 +23,15 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 {
     private static readonly Regex TooltipTagsRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
 
+    public static class UIIndices
+    {
+        public const int MapDeviceRoot = 67;
+        public const int HeistLockerDefault = 98;
+        public const int ExpeditionLockerDefault = 101;
+        public const int PurchaseWindowTabDetails = 8;
+        public const int StashMapTabItems = 3;
+    }
+
     public static readonly string[] ModNameBlacklist =
     {
         "AfflictionMapDeliriumStacks",
