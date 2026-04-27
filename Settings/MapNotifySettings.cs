@@ -6,9 +6,6 @@ namespace MapNotify_3_28
 {
     public class MapNotifySettings : ISettings
     {
-        public ColorNode WarningColor { get; set; } = new SharpDX.Color(255, 0, 0, 255);
-        public RangeNode<int> WarningTokenWidth { get; set; } = new RangeNode<int>(2, 1, 10);
-
         public ToggleNode UseControl { get; set; } = new(false);
         public ToggleNode UseShift { get; set; } = new(false);
         public ToggleNode UseAlt { get; set; } = new(false);
@@ -24,15 +21,13 @@ namespace MapNotify_3_28
         public ToggleNode ShowRarityPercent { get; set; } = new(true);
         public ToggleNode ColorQuantityPercent { get; set; } = new(true);
         public ToggleNode ShowPrefixSuffixStats { get; set; } = new(false);
-        public RangeNode<int> ColorQuantity { get; set; } = new(100, 0, 220);
+        public RangeNode<int> ColorQuantity { get; set; } = new(60, 0, 225);
         public ToggleNode ColorPackSizePercent { get; set; } = new(true);
         public RangeNode<int> ColorPackSize { get; set; } = new(25, 0, 100);
         public ToggleNode ColorRarityPercent { get; set; } = new(true);
-        public RangeNode<int> ColorRarity { get; set; } = new(100, 0, 500);
+        public RangeNode<int> ColorRarity { get; set; } = new(60, 0, 500);
         public RangeNode<int> BorderDeflation { get; set; } = new(4, 0, 50);
         public RangeNode<int> BorderThickness { get; set; } = new(1, 1, 6);
-        public RangeNode<int> MapQuantSetting { get; set; } = new(100, 0, 220);
-        public RangeNode<int> MapPackSetting { get; set; } = new(100, 0, 220);
         public ToggleNode ShowPackSizePercent { get; set; } = new(true);
         public ToggleNode ShowModWarnings { get; set; } = new(true);
         public ToggleNode HorizontalLines { get; set; } = new(true);
@@ -41,7 +36,6 @@ namespace MapNotify_3_28
         public ToggleNode PadForNinjaPricer2 { get; set; } = new(false);
         public ToggleNode PadForAltPricer { get; set; } = new(false);
         public ToggleNode AlwaysShowTooltip { get; set; } = new(true);
-        public ToggleNode StyleTextForBorder { get; set; } = new(false);
         public ToggleNode ShowForInvitations { get; set; } = new(true);
         public ToggleNode FilterInventory { get; set; } = new(true);
         public ToggleNode FilterStash { get; set; } = new(true);
@@ -53,8 +47,6 @@ namespace MapNotify_3_28
         public ToggleNode BoxForBricked { get; set; } = new(true);
         public ToggleNode BoxForMapWarnings { get; set; } = new(true);
         public ToggleNode BoxForMapBadWarnings { get; set; } = new(true);
-
-        // Originator & Nightmare map bonus stats
         public ToggleNode ShowOriginatorScarabs { get; set; } = new(true);
         public ToggleNode ShowOriginatorCurrency { get; set; } = new(true);
         public ToggleNode ShowOriginatorMaps { get; set; } = new(true);
@@ -62,13 +54,10 @@ namespace MapNotify_3_28
         public ToggleNode ShowHeistInfo { get; set; } = new(true);
         public ToggleNode ShowLogbookInfo { get; set; } = new(true);
         public Vector4 ChiselColor { get; set; } = new(1f, 0.80f, 0.30f, 1f);
-
         public Vector4 Bricked { get; set; } = new(1f, 0f, 0f, 1f);
         public Vector4 MapBorderGood { get; set; } = new(0f, 1f, 0f, 0.35f);
-
         public Vector4 MapBorderBad { get; set; } = new(1f, 0f, 0f, 0.35f);
         public RangeNode<int> BorderThicknessMap { get; set; } = new(2, 1, 6);
-
         public ToggleNode ShowAtlasHighlight { get; set; } = new(false);
         public ToggleNode ShowAtlasBonusHighlight { get; set; } = new(false);
         public ToggleNode ShowMavenWitnessHighlight { get; set; } = new(false);

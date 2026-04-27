@@ -6,6 +6,7 @@ using ImGuiNET;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ExileCore.Shared.Helpers;
 using nuVector4 = System.Numerics.Vector4;
 using nuVector2 = System.Numerics.Vector2;
 
@@ -230,6 +231,11 @@ namespace MapNotify_3_28
                 HelpMarker(
                     "Show chisel applied to map, Maven or Cartographer's (legacy)."
                 );
+                ImGui.SameLine();
+                nuVector4 chiselColor = Settings.ChiselColor;
+                if (ImGui.ColorEdit4("##ChiselColor", ref chiselColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf))
+                    Settings.ChiselColor = chiselColor;
+
                 Settings.ShowHeistInfo.Value = Checkbox("Show Heist Job Info", Settings.ShowHeistInfo.Value);
                 ImGui.SameLine();
                 HelpMarker("Show Job type and Level for Contracts and Blueprints.");
@@ -271,17 +277,23 @@ namespace MapNotify_3_28
             {
                 Settings.ShowAtlasHighlight.Value = Checkbox("Incomplete Maps", Settings.ShowAtlasHighlight.Value);
                 ImGui.SameLine();
-                Settings.AtlasNotCompletedColor = ColorButton("Color##AtlasIncomplete", Settings.AtlasNotCompletedColor);
+                nuVector4 atlasNotCompletedColor = Settings.AtlasNotCompletedColor;
+                if (ImGui.ColorEdit4("##AtlasIncomplete", ref atlasNotCompletedColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf))
+                    Settings.AtlasNotCompletedColor = atlasNotCompletedColor;
                 Settings.AtlasHighlightRadius.Value = IntSlider("Radius##AtlasIncomplete", Settings.AtlasHighlightRadius, 400f);
 
                 Settings.ShowAtlasBonusHighlight.Value = Checkbox("Incomplete Bonus", Settings.ShowAtlasBonusHighlight.Value);
                 ImGui.SameLine();
-                Settings.AtlasBonusIncompleteColor = ColorButton("Color##AtlasBonus", Settings.AtlasBonusIncompleteColor);
+                nuVector4 atlasBonusIncompleteColor = Settings.AtlasBonusIncompleteColor;
+                if (ImGui.ColorEdit4("##AtlasBonus", ref atlasBonusIncompleteColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf))
+                    Settings.AtlasBonusIncompleteColor = atlasBonusIncompleteColor;
                 Settings.AtlasBonusHighlightRadius.Value = IntSlider("Radius##AtlasBonus", Settings.AtlasBonusHighlightRadius, 400f);
 
                 Settings.ShowMavenWitnessHighlight.Value = Checkbox("Maven Witness", Settings.ShowMavenWitnessHighlight.Value);
                 ImGui.SameLine();
-                Settings.MavenWitnessColor = ColorButton("Color##MavenWitness", Settings.MavenWitnessColor);
+                nuVector4 mavenWitnessColor = Settings.MavenWitnessColor;
+                if (ImGui.ColorEdit4("##MavenWitness", ref mavenWitnessColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf))
+                    Settings.MavenWitnessColor = mavenWitnessColor;
                 Settings.MavenWitnessHighlightRadius.Value = IntSlider("Radius##MavenWitness", Settings.MavenWitnessHighlightRadius, 400f);
             }
 
@@ -296,16 +308,23 @@ namespace MapNotify_3_28
                     "Tooltip Border Thickness##BorderThickness",
                     Settings.BorderThickness, 400f
                 );
-
-                Settings.Bricked = ColorButton("Bricked Map", Settings.Bricked);
-                Settings.MapBorderBad = ColorButton("Bad Mods Color", Settings.MapBorderBad);
+                ImGui.Dummy(new nuVector2(0, 2));
+                nuVector4 mapBorderGood = Settings.MapBorderGood;
+                if (ImGui.ColorEdit4("Good Mods Color", ref mapBorderGood, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf))
+                    Settings.MapBorderGood = mapBorderGood;
                 ImGui.SameLine();
                 HelpMarker("Set transparency (Alpha) to see the map icon through the highlight.");
-
-                Settings.MapBorderGood = ColorButton("Good Mods Color", Settings.MapBorderGood);
+                ImGui.SameLine(0f, 20f);
+                nuVector4 mapBorderBad = Settings.MapBorderBad;
+                if (ImGui.ColorEdit4("Bad Mods Color", ref mapBorderBad, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf))
+                    Settings.MapBorderBad = mapBorderBad;
                 ImGui.SameLine();
                 HelpMarker("Set transparency (Alpha) to see the map icon through the highlight.");
-
+                ImGui.SameLine(0f, 20f);
+                nuVector4 brickedColor = Settings.Bricked;
+                if (ImGui.ColorEdit4("Bricked Map", ref brickedColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf))
+                    Settings.Bricked = brickedColor;
+                ImGui.Dummy(new nuVector2(0, 2));
                 Settings.BorderThicknessMap.Value = IntSlider(
                     "Border Thickness for Bricked Maps##BorderThickness Maps",
                     Settings.BorderThicknessMap, 400f
