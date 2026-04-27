@@ -38,7 +38,7 @@ namespace MapNotify_3_28
 
                 ImGui.SameLine();
                 if (ImGui.Button("New")) ImGui.OpenPopup("CreateProfilePopup");
-                
+
                 if (Settings.SelectedProfile.Value != "Default")
                 {
                     ImGui.SameLine();
@@ -65,7 +65,7 @@ namespace MapNotify_3_28
                     }
                     ImGui.EndPopup();
                 }
-                
+
                 ImGui.InputTextWithHint("##modfilter", "Filter Mods...", ref _modFilter, 100);
                 ImGui.Separator();
 
@@ -126,13 +126,12 @@ namespace MapNotify_3_28
                         ImGui.TextWrapped("No mods captured. Hover over a map and press your hotkey to see and configure its modifiers.");
                         ImGui.PopStyleColor();
                     }
-
                     string lastAffixType = null;
                     for (int i = 0; i < _capturedMods.Count; i++)
                     {
                         var mod = _capturedMods[i];
-                        if (!string.IsNullOrEmpty(_modFilter) && 
-                            !mod.RawName.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) && 
+                        if (!string.IsNullOrEmpty(_modFilter) &&
+                            !mod.RawName.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) &&
                             !mod.Description.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) &&
                             !mod.DisplayName.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase)) continue;
 
@@ -146,36 +145,38 @@ namespace MapNotify_3_28
                             ImGui.Separator();
                             lastAffixType = mod.AffixType;
                         }
-
                         ImGui.PushID(i);
                         HelpMarker($"Internal Name: {mod.RawName}");
                         ImGui.SameLine();
                         string displayDesc = EscapeImGui(string.IsNullOrEmpty(mod.Description) ? mod.RawName : mod.Description);
-                        ImGui.TextWrapped(displayDesc);
 
+                        ImGui.TextWrapped(displayDesc);
                         var dispName = mod.DisplayName;
-                        if (ImGui.InputText("Tooltip Name", ref dispName, 100))
+                        if (ImGui.InputText("##displayname", ref dispName, 100))
                         {
                             mod.DisplayName = dispName;
                             AutoSaveIfExisting(mod);
                         }
+                        ImGui.SameLine();
                         var color = mod.Color;
-                        if (ImGui.ColorEdit4("Color", ref color, ImGuiColorEditFlags.AlphaPreviewHalf))
+                        if (ImGui.ColorEdit4("", ref color, ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.NoInputs))
                         {
                             mod.Color = color;
                             AutoSaveIfExisting(mod);
                         }
-                        var brick = mod.IsBricking;
-                        if (ImGui.Checkbox("Bricking Mod", ref brick))
-                        {
-                            mod.IsBricking = brick;
-                            AutoSaveIfExisting(mod);
-                        }
+                        ImGui.Dummy(new nuVector2(0, 5));
                         if (ImGui.Button("Add Good")) SaveModToConfig(mod, "GoodMods.txt");
                         ImGui.SameLine();
                         if (ImGui.Button("Add Bad")) SaveModToConfig(mod, "BadMods.txt");
                         ImGui.SameLine();
                         if (ImGui.Button("Delete")) DeleteModFromConfig(mod.RawName);
+                        ImGui.SameLine();
+                        var brick = mod.IsBricking;
+                        if (ImGui.Checkbox("Brick", ref brick))
+                        {
+                            mod.IsBricking = brick;
+                            AutoSaveIfExisting(mod);
+                        }
                         ImGui.Separator();
                         ImGui.PopID();
                     }
@@ -187,7 +188,6 @@ namespace MapNotify_3_28
                     _showPreviewWindow = false;
                     _modFilter = string.Empty;
                 }
-
                 ImGui.End();
             }
         }
@@ -210,7 +210,7 @@ namespace MapNotify_3_28
             string pureFileName = Path.GetFileName(fileName);
             string otherFile = pureFileName == "GoodMods.txt" ? "BadMods.txt" : "GoodMods.txt";
             var otherPath = Path.Combine(GetProfileDirectory(), otherFile);
-            
+
             if (File.Exists(otherPath))
             {
                 var otherLines = File.ReadAllLines(otherPath).ToList();
