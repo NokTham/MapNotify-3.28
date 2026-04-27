@@ -146,14 +146,57 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     }
 
     /// <summary>
+    /// Common helper to check a mod against configured Good and Bad mod dictionaries.
+    /// </summary>
+    private static (StyledText match, bool isGood) MatchMod(string rawName)
+    {
+        if (string.IsNullOrEmpty(rawName)) return (null, false);
+        var goodMatch = GoodModsDictionary.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key)).Value;
+        if (goodMatch != null) return (goodMatch, true);
+        var badMatch = BadModsDictionary.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key)).Value;
+        return (badMatch, false);
+    }
+
+    private static bool RemoveModFromFile(string path, string rawName)
+    {
+        if (!File.Exists(path)) return false;
+        var lines = File.ReadAllLines(path).ToList();
+        bool removed = lines.RemoveAll(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith("#") && 
+                                            BaseModExtractor.AreEquivalent(rawName, l.Split(';')[0].Trim())) > 0;
+        if (removed) File.WriteAllLines(path, lines);
+        return removed;
+    }
+
+    /// <summary>
     /// Main rendering entry point called every frame.
     /// Iterates through visible UI panels (Inventory, Stash, Shops) and applies highlights.
     /// </summary>
     public override void Render()
     {
-        // Update window area every frame in case the game window was moved or resized
         windowArea = GameController.Window.GetWindowRectangle();
-        // Capture Hotkey Logic
+        
+        ProcessHotkeys();
+
+        if (_showPreviewWindow) DrawPreviewWindow();
+        if (ingameState == null) return;
+
+        if (Settings.ShowAtlasHighlight || Settings.ShowAtlasBonusHighlight || Settings.ShowMavenWitnessHighlight)
+            DrawAtlasHighlights();
+
+        var ui = ingameState.IngameUi;
+
+        if (Settings.FilterInventory && ui.InventoryPanel.IsVisible)
+            DrawBordersForItems(_inventoryItems.Value, "Inventory");
+
+        RenderStash(ui);
+        RenderLockers();
+        RenderShopsAndTrade(ui);
+        RenderMapDevice();
+        RenderHoveredItem();
+    }
+
+    private void ProcessHotkeys()
+    {
         bool ctrlHeld = Input.GetKeyState(System.Windows.Forms.Keys.LControlKey) || Input.GetKeyState(System.Windows.Forms.Keys.RControlKey);
         bool shiftHeld = Input.GetKeyState(System.Windows.Forms.Keys.LShiftKey) || Input.GetKeyState(System.Windows.Forms.Keys.RShiftKey);
         bool altHeld = Input.GetKeyState(System.Windows.Forms.Keys.LMenu) || Input.GetKeyState(System.Windows.Forms.Keys.RMenu);
@@ -161,156 +204,51 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         bool modifiersMatch = (Settings.UseControl == ctrlHeld) &&
                              (Settings.UseShift == shiftHeld) &&
                              (Settings.UseAlt == altHeld);
-        if (modifiersMatch && Settings.CaptureHotkey.PressedOnce())
-        {
-            HandleCaptureHotkey();
-        }
+        
+        if (modifiersMatch && Settings.CaptureHotkey.PressedOnce()) HandleCaptureHotkey();
+    }
 
-        if (_showPreviewWindow)
-        {
-            DrawPreviewWindow();
-        }
-        if (ingameState == null)
-            return;
-
-        var ui = ingameState.IngameUi;
-
-        if (Settings.ShowAtlasHighlight || Settings.ShowAtlasBonusHighlight || Settings.ShowMavenWitnessHighlight)
-        {
-            DrawAtlasHighlights();
-        }
-
-        // 1. Player Inventory
-        if (Settings.FilterInventory && ui.InventoryPanel.IsVisible)
-        {
-            foreach (var item in _inventoryItems.Value)
-            {
-                if (item?.Item == null)
-                    continue;
-                try
-                {
-                    DrawMapBorders(item, item.Item);
-                }
-                catch (System.Exception ex)
-                {
-                    LogError($"Error drawing player inventory borders: {ex.Message}", 10);
-                }
-            }
-        }
-
-        // 2. Stash
+    private void RenderStash(IngameUIElements ui)
+    {
         var stashUI = ui.StashElement;
         if (stashUI.IsVisible && stashUI.VisibleStash != null)
         {
-            // Synchronized detection: Rely on InventoryType. Fallback checks for ChildIndex(3) 
-            // often cause conflicts with other specialized stash tabs (Blight, etc.).
             var isMapStash = stashUI.VisibleStash.InvType == InventoryType.MapStash;
-
             var cache = isMapStash ? _mapStashItems.Value : _stashItems.Value;
             if (stashUI.IndexVisibleStash == cache.stashIndex)
-            {
-                foreach (var item in cache.Item2)
-                {
-                    if (item?.Item == null) continue;
-                    try
-                    {
-                        DrawMapBorders(item, item.Item);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        LogError($"Error drawing stash borders: {ex.Message}", 10);
-                    }
-                }
-            }
+                DrawBordersForItems(cache.Item2, "Stash");
         }
+    }
 
-        // 2.5 Heist Locker
-        // We remove the hardcoded index check for rendering and rely on the cached item's own visibility.
+    private void RenderLockers()
+    {
         if (Settings.ShowHeistLockerHighlights.Value)
-        {
-            try
-            {
-                foreach (var item in _heistLockerItems.Value)
-                {
-                    if (item?.Item == null) continue;
-                    DrawMapBorders(item, item.Item);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogError($"Error drawing heist locker borders: {ex.Message}", 10);
-            }
-        }
+            DrawBordersForItems(_heistLockerItems.Value, "Heist Locker");
 
-        // 2.6 Expedition Locker (Logbooks)
         if (Settings.ShowExpeditionLockerHighlights.Value)
-        {
-            foreach (var item in _expeditionLockerItems.Value)
-            {
-                if (item?.Item == null) continue;
-                try
-                {
-                    DrawMapBorders(item, item.Item);
-                }
-                catch (Exception ex)
-                {
-                    LogError($"Error drawing expedition locker borders: {ex.Message}", 10);
-                }
-            }
-        }
+            DrawBordersForItems(_expeditionLockerItems.Value, "Expedition Locker");
+    }
 
-        // 3. Kingsmarch / Offline Merchant
+    private void RenderShopsAndTrade(IngameUIElements ui)
+    {
         if (Settings.FilterShops && ui.OfflineMerchantPanel.IsVisible)
-        {
-            foreach (var item in _merchantItems.Value)
-            {
-                if (item?.Item == null)
-                    continue;
-                try
-                {
-                    DrawMapBorders(item, item.Item);
-                }
-                catch (System.Exception ex)
-                {
-                    LogError($"Error drawing merchant borders: {ex.Message}", 10);
-                }
-            }
-        }
-        // 4. Combined Purchase/Haggle Optimized Block
+            DrawBordersForItems(_merchantItems.Value, "Merchant");
+
         bool isShopVisible =
             ui.PurchaseWindow?.IsVisible == true
             || ui.PurchaseWindowHideout?.IsVisible == true
             || ui.HaggleWindow?.IsVisible == true;
 
-        // Use the specialized TradeWindow property for more robust detection
         var tradeWindow = ui.TradeWindow;
         bool isTradeWindowVisible = tradeWindow != null && tradeWindow.IsVisible;
 
-        if (Settings.FilterTrade && (isShopVisible || isTradeWindowVisible))
-        {
-            // Use the cached value to prevent CPU lag, GetPurchaseWindowItems now handles all these windows.
-            var cachedShopItems = _purchaseWindowItems.Value;
-            if (cachedShopItems != null)
-            {
-                foreach (var item in cachedShopItems)
-                {
-                    if (item?.Item == null || !item.IsVisible)
-                        continue;
-                    try
-                    {
-                        DrawMapBorders(item, item.Item);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        LogError($"Error drawing shop borders: {ex.Message}", 10);
-                    }
-                }
-            }
-        }
+        if (Settings.FilterTrade && (isShopVisible || isTradeWindowVisible)) 
+            DrawBordersForItems(_purchaseWindowItems.Value, "Shop/Trade");
+    }
 
-        // 4.5. Map Device & Maven Invitations
-        // Using MapReceptacleWindow to replace hardcoded paths (67->8->1)
-        if (Settings.ShowForInvitations.Value || Settings.FilterTrade.Value)
+    private void RenderMapDevice()
+    {
+        if (Settings.ShowForInvitations.Value || Settings.FilterTrade.Value) 
         {
             var deviceItems = _mapDeviceItems.Value;
             foreach (var item in deviceItems)
@@ -323,25 +261,36 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                 
                 if (isInvitation && !Settings.ShowForInvitations.Value) continue;
                 if (!isInvitation && !Settings.FilterTrade.Value) continue;
-
-                try
-                {
-                    DrawMapBorders(item, item.Item);
-                }
-                catch (Exception ex)
-                {
-                    LogError($"Error drawing map device borders: {ex.Message}", 10);
-                }
+                DrawBordersForItems(new[] { item }, "Map Device");
             }
         }
-        
-        // 5. Hovered Item
+    }
+
+    private void RenderHoveredItem()
+    {
         var uiHover = ingameState.UIHover;
         if (uiHover?.IsVisible == true)
         {
             var hoverItem = uiHover.AsObject<NormalInventoryItem>();
             if (hoverItem?.Item != null && ItemIsMap(hoverItem.Item))
                 RenderItem(hoverItem, hoverItem.Item);
+        }
+    }
+
+    private void DrawBordersForItems(IEnumerable<NormalInventoryItem> items, string sourceName)
+    {
+        if (items == null) return;
+        foreach (var item in items)
+        {
+            if (item?.Item == null || !item.IsVisible) continue;
+            try
+            {
+                DrawMapBorders(item, item.Item);
+            }
+            catch (Exception ex)
+            {
+                LogError($"Error drawing {sourceName} borders: {ex.Message}", 10);
+            }
         }
     }
 
@@ -372,6 +321,19 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         _capturedMods.Clear();
         var descriptions = GetModDescriptionsFromTooltip(hoverItem.Tooltip);
         var availableDescriptions = new List<string>(descriptions);
+        
+        _capturedMods = GetCapturableMods(mods, availableDescriptions);
+
+        // Capture Logbook Implicits from ExpeditionSaga
+        CaptureLogbookMods(hoverItem.Item);
+
+        _modFilter = string.Empty;
+        _showPreviewWindow = true;
+    }
+
+    private List<CapturedMod> GetCapturableMods(Mods mods, List<string> availableDescriptions)
+    {
+        var captured = new List<CapturedMod>();
 
         var explicitModsFromItem = mods.ItemMods
             .Where(m => m.ModRecord != null)
@@ -435,22 +397,28 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 
             if (descIndex != -1) availableDescriptions.RemoveAt(descIndex);
 
-            var existingEntry = GoodModsDictionary.FirstOrDefault(x => mod.RawName.Contains(x.Key)).Value ??
-                                BadModsDictionary.FirstOrDefault(x => mod.RawName.Contains(x.Key)).Value;
+            var (existingEntry, _) = MatchMod(mod.RawName);
 
-            _capturedMods.Add(new CapturedMod
+            captured.Add(new CapturedMod
             {
                 RawName = mod.RawName.Trim(),
                 AffixType = mod.ModRecord.AffixType.ToString(),
                 DisplayName = existingEntry?.Text ?? (matchedDescription ?? mod.Name),
                 Description = matchedDescription ?? (!string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name),
-                Color = existingEntry != null ? existingEntry.Color : new nuVector4(1, 1, 1, 1),
+                Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
                 IsBricking = existingEntry?.Bricking ?? false
             });
         }
+        return captured;
+    }
 
-        // Capture Logbook Implicits from ExpeditionSaga
-        var saga = hoverItem.Item.GetComponent<ExpeditionSaga>();
+    /// <summary>
+    /// Specialized capture for Logbook implicit modifiers which are stored in the ExpeditionSaga component.
+    /// </summary>
+    private void CaptureLogbookMods(Entity item)
+    {
+        if (item == null) return;
+        var saga = item.GetComponent<ExpeditionSaga>();
         if (saga != null && saga.Areas != null)
         {
             foreach (var area in saga.Areas)
@@ -462,8 +430,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                     // Avoid duplicates if multiple areas have the same mod type
                     if (_capturedMods.Any(m => m.RawName == mod.RawName)) continue;
 
-                    var existingEntry = GoodModsDictionary.FirstOrDefault(x => mod.RawName.Contains(x.Key)).Value ??
-                                        BadModsDictionary.FirstOrDefault(x => mod.RawName.Contains(x.Key)).Value;
+                    var (existingEntry, _) = MatchMod(mod.RawName);
 
                     var modText = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
                     var cleanDesc = TooltipTagsRegex.Replace(modText, "").Replace("{", "").Replace("}", "").Trim();
@@ -474,14 +441,11 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                         AffixType = "Logbook Implicit",
                         DisplayName = existingEntry?.Text ?? cleanDesc,
                         Description = cleanDesc,
-                        Color = existingEntry != null ? existingEntry.Color : new nuVector4(1, 1, 1, 1),
+                        Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
                         IsBricking = existingEntry?.Bricking ?? false
                     });
                 }
             }
         }
-
-        _modFilter = string.Empty;
-        _showPreviewWindow = true;
     }
 }

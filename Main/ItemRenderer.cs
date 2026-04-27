@@ -30,6 +30,9 @@ namespace MapNotify_3_28
                 }
                 if (ItemDetails == null) return;
 
+                // Refresh item details to ensure the tooltip reflects any changes made in the Mod Preview window or config files.
+                ItemDetails.Update();
+
                 var alwaysShow = Settings.AlwaysShowTooltip.Value;
                 if (alwaysShow || ItemDetails.ActiveGoodMods.Count > 0 || ItemDetails.ActiveBadMods.Count > 0)
                 {
@@ -61,174 +64,7 @@ namespace MapNotify_3_28
                     if (ImGui.Begin(windowId, ref _opened, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoNavInputs))
                     {
                         ImGui.BeginGroup();
-                        if (isInventory || Settings.ShowMapName.Value) ImGui.TextColored(ItemDetails.ItemColor, ItemDetails.EscapedMapName);
-
-                        // Map Stats Block
-                        var prefixSuffixLines = ItemDetails.GetPrefixSuffixLines();
-                        if (Settings.ShowPrefixSuffixStats.Value && prefixSuffixLines.Count > 0)
-                        {
-                            for (int lineIdx = 0; lineIdx < prefixSuffixLines.Count; lineIdx++)
-                            {
-                                var line = prefixSuffixLines[lineIdx];
-                                var startX = ImGui.GetCursorPosX();
-                                for (int i = 0; i < line.Count; i++)
-                                {
-                                    var text = line[i].EscapedText;
-                                    if (i > 0)
-                                    {
-                                        ImGui.SameLine();
-                                        if (i == 1) ImGui.SetCursorPosX(startX + 20); 
-                                        else if (i == 2) ImGui.SetCursorPosX(startX + 87); 
-                                        else if (i == 3) ImGui.SetCursorPosX(startX + 152); 
-                                    }
-                                    ImGui.TextColored(line[i].Color, text);
-                                }
-                                if (lineIdx == 0) ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 1f);
-                            }
-                            if (Settings.ShowChisel.Value && !string.IsNullOrEmpty(ItemDetails.ChiselName)) ImGui.TextColored(Settings.ChiselColor, $"+{ItemDetails.ChiselValue}%% {ItemDetails.ChiselName}");
-                        }
-                        else
-                        {
-                            var qCol = new nuVector4(1f, 1f, 1f, 1f);
-                            if (Settings.ColorQuantityPercent.Value) qCol = ItemDetails.Quantity < Settings.ColorQuantity.Value ? new nuVector4(1f, 0.4f, 0.4f, 1f) : new nuVector4(0.4f, 1f, 0.4f, 1f);
-
-                            var pCol = new nuVector4(1f, 1f, 1f, 1f);
-                            if (Settings.ColorPackSizePercent.Value) pCol = ItemDetails.PackSize < Settings.ColorPackSize.Value ? new nuVector4(1f, 0.4f, 0.4f, 1f) : new nuVector4(0.4f, 1f, 0.4f, 1f);
-
-                            var rCol = new nuVector4(1f, 1f, 1f, 1f);
-                            if (Settings.ColorRarityPercent.Value) rCol = ItemDetails.Rarity < Settings.ColorRarity.Value ? new nuVector4(1f, 0.4f, 0.4f, 1f) : new nuVector4(0.4f, 1f, 0.4f, 1f);
-
-                            var showQuant = Settings.ShowQuantityPercent.Value;
-                            var showPack = Settings.ShowPackSizePercent.Value;
-                            var showRarity = Settings.ShowRarityPercent.Value;
-
-                            bool drawnSomething = false;
-                            if (showQuant && ItemDetails.Quantity != 0)
-                            {
-                                ImGui.TextColored(qCol, $"{ItemDetails.Quantity}%% IIQ");
-                                drawnSomething = true;
-                            }
-
-                            if (showPack && ItemDetails.PackSize != 0)
-                            {
-                                if (drawnSomething) ImGui.SameLine();
-                                ImGui.TextColored(pCol, $"{ItemDetails.PackSize}%% PS");
-                                drawnSomething = true;
-                            }
-
-                            if (showRarity && ItemDetails.Rarity != 0)
-                            {
-                                if (drawnSomething) ImGui.SameLine();
-                                ImGui.TextColored(rCol, $"{ItemDetails.Rarity}%% IIR");
-                            }
-                            if (Settings.ShowChisel.Value && !string.IsNullOrEmpty(ItemDetails.ChiselName)) ImGui.TextColored(Settings.ChiselColor, $"+{ItemDetails.ChiselValue}%% {ItemDetails.ChiselName}");
-                        }
-
-                        // Heist Info
-                        if (Settings.ShowHeistInfo.Value && (ItemDetails.HeistAreaLevel > 0 || ItemDetails.HeistJobLines.Count > 0))
-                        {
-                            if (Settings.HorizontalLines.Value) ImGui.Separator();
-                            var heistColor = new nuVector4(0.5f, 0.8f, 1f, 1f);
-                            if (ItemDetails.HeistAreaLevel > 0) ImGui.TextColored(heistColor, $"Area Level: {ItemDetails.HeistAreaLevel}");
-                            foreach (var line in ItemDetails.HeistJobLines) ImGui.TextColored(line.IsRevealed ? heistColor : new nuVector4(0.5f, 0.8f, 1f, 0.5f), line.Text);
-                        }
-
-                        // Logbook Info
-                        if (Settings.ShowLogbookInfo.Value && ItemDetails.IsLogbook && ItemDetails.LogbookAreaLevel > 0)
-                        {
-                            if (Settings.HorizontalLines.Value) ImGui.Separator();
-                            var logbookColor = new nuVector4(1f, 0.7f, 0.3f, 1f);
-                            ImGui.TextColored(logbookColor, $"Logbook Area Level: {ItemDetails.LogbookAreaLevel}");
-                            foreach (var area in ItemDetails.LogbookAreas)
-                            {
-                                if (Settings.HorizontalLines.Value) ImGui.Separator();
-                                ImGui.TextColored(logbookColor, area.Name); ImGui.SameLine();
-                                ImGui.TextColored(new nuVector4(0.7f, 0.7f, 0.7f, 1f), $"({area.Faction})");
-                                foreach (var implicitMod in area.Implicits) ImGui.TextColored(implicitMod.Color, $"{(implicitMod.Bricking ? "[B] " : "- ")}{implicitMod.EscapedText}");
-                            }
-                        }
-
-                        // Originator Stats
-                        if (ItemDetails.IsOriginatorMap)
-                        {
-                            var originatorLines = Settings.ShowPrefixSuffixStats.Value ? ItemDetails.GetOriginatorBreakdownLines() : null;
-                            if (Settings.ShowPrefixSuffixStats.Value && originatorLines?.Count > 0)
-                            {
-                                if (Settings.HorizontalLines.Value) ImGui.Separator();
-                                foreach (var line in originatorLines)
-                                {
-                                    var startX = ImGui.GetCursorPosX();
-                                    for (int i = 0; i < line.Count; i++)
-                                    {
-                                        var text = line[i].EscapedText;
-                                        if (i > 0)
-                                        {
-                                            ImGui.SameLine();
-                                            if (i == 1) ImGui.SetCursorPosX(startX + (text == "Maps" ? 31 : 30));
-                                            else if (i == 2) ImGui.SetCursorPosX(startX + 92); 
-                                            else if (i == 3) ImGui.SetCursorPosX(startX + 162); 
-                                        }
-                                        ImGui.TextColored(line[i].Color, text);
-                                    }
-                                }
-                            }
-                            else if (Settings.ShowOriginatorMaps.Value || Settings.ShowOriginatorScarabs.Value || Settings.ShowOriginatorCurrency.Value)
-                            {
-                                if (Settings.HorizontalLines.Value) ImGui.Separator();
-                                if (Settings.ShowOriginatorMaps.Value)
-                                {
-                                    var startX = ImGui.GetCursorPosX();
-                                    var color = new nuVector4(0.5f, 0.85f, 1f, 1f);
-                                    ImGui.TextColored(color, ItemDetails.OriginatorMaps == 0 ? "--" : $"{ItemDetails.OriginatorMaps}%%");
-                                    ImGui.SameLine();
-                                    ImGui.SetCursorPosX(startX + 31);
-                                    ImGui.TextColored(color, "Maps");
-                                }
-                                if (Settings.ShowOriginatorScarabs.Value)
-                                {
-                                    var startX = ImGui.GetCursorPosX();
-                                    var color = new nuVector4(0.85f, 0.45f, 0.85f, 1f);
-                                    ImGui.TextColored(color, ItemDetails.OriginatorScarabs == 0 ? "--" : $"{ItemDetails.OriginatorScarabs}%%");
-                                    ImGui.SameLine();
-                                    ImGui.SetCursorPosX(startX + 30);
-                                    ImGui.TextColored(color, "Scarabs");
-                                }
-                                if (Settings.ShowOriginatorCurrency.Value)
-                                {
-                                    var startX = ImGui.GetCursorPosX();
-                                    var color = new nuVector4(0.0f, 1.0f, 0.0f, 1.0f);
-                                    ImGui.TextColored(color, ItemDetails.OriginatorCurrency == 0 ? "--" : $"{ItemDetails.OriginatorCurrency}%%");
-                                    ImGui.SameLine();
-                                    ImGui.SetCursorPosX(startX + 30);
-                                    ImGui.TextColored(color, "Currency");
-                                }
-                            }
-                        }
-
-                        if (Settings.HorizontalLines.Value) ImGui.Separator();
-
-                        // Mod Count & Warnings
-                        if (Settings.ShowModCount.Value && ItemDetails.ModCount != 0)
-                        {
-                            var modCountStr = $"{(isInventory ? ItemDetails.ModCount - 1 : ItemDetails.ModCount)} Mods";
-                            if (entity.GetComponent<Base>().isCorrupted) ImGui.TextColored(new nuVector4(1f, 0f, 0f, 1f), $"{modCountStr}, Corrupted");
-                            else ImGui.TextColored(new nuVector4(1f, 1f, 1f, 1f), modCountStr);
-                        }
-
-                        if (Settings.ShowModWarnings.Value)
-                        {
-                            foreach (var styledText in ItemDetails.ActiveGoodMods)
-                            {
-                                if (ItemDetails.IsLogbook && Settings.ShowLogbookInfo.Value && ItemDetails.LogbookAreas.Any(a => a.Implicits.Contains(styledText))) continue;
-                                ImGui.TextColored(styledText.Color, styledText.EscapedText);
-                            }
-                            if (ItemDetails.ActiveGoodMods.Count > 0 && ItemDetails.ActiveBadMods.Count > 0) ImGui.Dummy(new nuVector2(0, 5));
-                            foreach (var styledText in ItemDetails.ActiveBadMods)
-                            {
-                                if (ItemDetails.IsLogbook && Settings.ShowLogbookInfo.Value && ItemDetails.LogbookAreas.Any(a => a.Implicits.Contains(styledText))) continue;
-                                ImGui.TextColored(styledText.Color, $"{(styledText.Bricking ? "[B] " : "")}{styledText.EscapedText}");
-                            }
-                        }
+                        DrawTooltipContent(ItemDetails, isInventory, entity);
                         ImGui.EndGroup();
 
                         // Border Logic
@@ -259,6 +95,169 @@ namespace MapNotify_3_28
             }
         }
 
+        private void DrawTooltipContent(ItemDetails details, bool isInventory, Entity entity)
+        {
+            if (isInventory || Settings.ShowMapName.Value) 
+                ImGui.TextColored(details.ItemColor, details.EscapedMapName);
+
+            DrawStatsBlock(details);
+            if (Settings.ShowHeistInfo.Value) DrawHeistBlock(details);
+            if (Settings.ShowLogbookInfo.Value) DrawLogbookBlock(details);
+            DrawOriginatorBlock(details);
+
+            if (Settings.HorizontalLines.Value) ImGui.Separator();
+
+            if (Settings.ShowModCount.Value && details.ModCount != 0)
+            {
+                var modCountStr = $"{(isInventory ? details.ModCount - 1 : details.ModCount)} Mods";
+                var color = entity.GetComponent<Base>().isCorrupted ? new nuVector4(1f, 0f, 0f, 1f) : new nuVector4(1f, 1f, 1f, 1f);
+                ImGui.TextColored(color, entity.GetComponent<Base>().isCorrupted ? $"{modCountStr}, Corrupted" : modCountStr);
+            }
+
+            if (Settings.ShowModWarnings.Value) DrawWarningsBlock(details);
+        }
+
+        private void DrawStatsBlock(ItemDetails details)
+        {
+            var prefixSuffixLines = details.GetPrefixSuffixLines();
+            if (Settings.ShowPrefixSuffixStats.Value && prefixSuffixLines.Count > 0)
+            {
+                for (int lineIdx = 0; lineIdx < prefixSuffixLines.Count; lineIdx++)
+                {
+                    var line = prefixSuffixLines[lineIdx];
+                    var startX = ImGui.GetCursorPosX();
+                    for (int i = 0; i < line.Count; i++)
+                    {
+                        if (i > 0)
+                        {
+                            ImGui.SameLine();
+                            ImGui.SetCursorPosX(startX + (i == 1 ? 20 : i == 2 ? 87 : 152));
+                        }
+                        ImGui.TextColored(line[i].Color, line[i].EscapedText);
+                    }
+                    if (lineIdx == 0) ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 1f);
+                }
+            }
+            else
+            {
+                var green = new nuVector4(0.4f, 1f, 0.4f, 1f);
+                var red = new nuVector4(1f, 0.4f, 0.4f, 1f);
+
+                bool drawn = false;
+                if (Settings.ShowQuantityPercent.Value && details.Quantity != 0)
+                {
+                    var col = Settings.ColorQuantityPercent.Value && details.Quantity < Settings.ColorQuantity.Value ? red : green;
+                    ImGui.TextColored(col, $"{details.Quantity}%% IIQ");
+                    drawn = true;
+                }
+                if (Settings.ShowPackSizePercent.Value && details.PackSize != 0)
+                {
+                    if (drawn) ImGui.SameLine();
+                    var col = Settings.ColorPackSizePercent.Value && details.PackSize < Settings.ColorPackSize.Value ? red : green;
+                    ImGui.TextColored(col, $"{details.PackSize}%% PS");
+                    drawn = true;
+                }
+                if (Settings.ShowRarityPercent.Value && details.Rarity != 0)
+                {
+                    if (drawn) ImGui.SameLine();
+                    var col = Settings.ColorRarityPercent.Value && details.Rarity < Settings.ColorRarity.Value ? red : green;
+                    ImGui.TextColored(col, $"{details.Rarity}%% IIR");
+                }
+            }
+            if (Settings.ShowChisel.Value && !string.IsNullOrEmpty(details.ChiselName)) 
+                ImGui.TextColored(Settings.ChiselColor, $"+{details.ChiselValue}%% {details.ChiselName}");
+        }
+
+        private void DrawHeistBlock(ItemDetails details)
+        {
+            if (details.HeistAreaLevel <= 0 && details.HeistJobLines.Count <= 0) return;
+            if (Settings.HorizontalLines.Value) ImGui.Separator();
+            var heistColor = new nuVector4(0.5f, 0.8f, 1f, 1f);
+            if (details.HeistAreaLevel > 0) ImGui.TextColored(heistColor, $"Area Level: {details.HeistAreaLevel}");
+            foreach (var line in details.HeistJobLines) 
+                ImGui.TextColored(line.IsRevealed ? heistColor : new nuVector4(0.5f, 0.8f, 1f, 0.5f), line.Text);
+        }
+
+        private void DrawLogbookBlock(ItemDetails details)
+        {
+            if (!details.IsLogbook || details.LogbookAreaLevel <= 0) return;
+            if (Settings.HorizontalLines.Value) ImGui.Separator();
+            var logbookColor = new nuVector4(1f, 0.7f, 0.3f, 1f);
+            ImGui.TextColored(logbookColor, $"Logbook Area Level: {details.LogbookAreaLevel}");
+            foreach (var area in details.LogbookAreas)
+            {
+                if (Settings.HorizontalLines.Value) ImGui.Separator();
+                ImGui.TextColored(logbookColor, area.Name); ImGui.SameLine();
+                ImGui.TextColored(new nuVector4(0.7f, 0.7f, 0.7f, 1f), $"({area.Faction})");
+                foreach (var imp in area.Implicits) 
+                    ImGui.TextColored(imp.Color, $"{(imp.Bricking ? "[B] " : "- ")}{imp.EscapedText}");
+            }
+        }
+
+        private void DrawOriginatorBlock(ItemDetails details)
+        {
+            if (!details.IsOriginatorMap) return;
+            var lines = Settings.ShowPrefixSuffixStats.Value ? details.GetOriginatorBreakdownLines() : null;
+            
+            if (Settings.ShowPrefixSuffixStats.Value && lines?.Count > 0)
+            {
+                if (Settings.HorizontalLines.Value) ImGui.Separator();
+                foreach (var line in lines)
+                {
+                    var startX = ImGui.GetCursorPosX();
+                    for (int i = 0; i < line.Count; i++)
+                    {
+                        if (i > 0)
+                        {
+                            ImGui.SameLine();
+                            ImGui.SetCursorPosX(startX + (i == 1 ? (line[i].Text == "Maps" ? 31 : 30) : i == 2 ? 92 : 162));
+                        }
+                        ImGui.TextColored(line[i].Color, line[i].EscapedText);
+                    }
+                }
+            }
+            else if (Settings.ShowOriginatorMaps.Value || Settings.ShowOriginatorScarabs.Value || Settings.ShowOriginatorCurrency.Value)
+            {
+                if (Settings.HorizontalLines.Value) ImGui.Separator();
+                if (Settings.ShowOriginatorMaps.Value) DrawStatLine(details.OriginatorMaps, "Maps", new nuVector4(0.5f, 0.85f, 1f, 1f), 31);
+                if (Settings.ShowOriginatorScarabs.Value) DrawStatLine(details.OriginatorScarabs, "Scarabs", new nuVector4(0.85f, 0.45f, 0.85f, 1f), 30);
+                if (Settings.ShowOriginatorCurrency.Value) DrawStatLine(details.OriginatorCurrency, "Currency", new nuVector4(0.0f, 1.0f, 0.0f, 1.0f), 30);
+            }
+        }
+
+        private void DrawStatLine(int val, string label, nuVector4 color, float offset)
+        {
+            var startX = ImGui.GetCursorPosX();
+            ImGui.TextColored(color, val == 0 ? "--" : $"{val}%%");
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(startX + offset);
+            ImGui.TextColored(color, label);
+        }
+
+        private void DrawWarningsBlock(ItemDetails details)
+        {
+            foreach (var styled in details.ConflictingMods)
+            {
+                ImGui.TextColored(styled.Color, styled.EscapedText);
+            }
+            if (details.ConflictingMods.Count > 0 && (details.ActiveGoodMods.Count > 0 || details.ActiveBadMods.Count > 0)) 
+                ImGui.Dummy(new nuVector2(0, 5));
+
+            foreach (var styled in details.ActiveGoodMods)
+            {
+                if (details.IsLogbook && Settings.ShowLogbookInfo.Value && details.LogbookAreas.Any(a => a.Implicits.Contains(styled))) continue;
+                ImGui.TextColored(styled.Color, styled.EscapedText);
+            }
+            
+            if ((details.ActiveGoodMods.Count > 0 || details.ConflictingMods.Count > 0) && details.ActiveBadMods.Count > 0) ImGui.Dummy(new nuVector2(0, 5));
+            
+            foreach (var styled in details.ActiveBadMods)
+            {
+                if (details.IsLogbook && Settings.ShowLogbookInfo.Value && details.LogbookAreas.Any(a => a.Implicits.Contains(styled))) continue;
+                ImGui.TextColored(styled.Color, $"{(styled.Bricking ? "[B] " : "")}{styled.EscapedText}");
+            }
+        }
+
         /// <summary>
         /// Draws colored highlights (borders or filled rects) around items in inventory or stash tabs.
         /// </summary>
@@ -283,8 +282,8 @@ namespace MapNotify_3_28
             }
 
             // Mapping logic to match UI labels:
-            var hasBadMod = Settings.BoxForMapWarnings && itemDetails.ActiveBadMods.Count > 0;
-            var hasGoodMod = Settings.BoxForMapBadWarnings && itemDetails.ActiveGoodMods.Count > 0;
+            var hasBadMod = Settings.BoxForMapWarnings && (itemDetails.ActiveBadMods.Count > 0 || itemDetails.ConflictingMods.Count > 0);
+            var hasGoodMod = Settings.BoxForMapBadWarnings && (itemDetails.ActiveGoodMods.Count > 0 || itemDetails.ConflictingMods.Count > 0);
 
             if (hasGoodMod && hasBadMod)
             {

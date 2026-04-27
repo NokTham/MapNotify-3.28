@@ -31,15 +31,11 @@ namespace MapNotify_3_28
 
         private List<NormalInventoryItem> GetItemsFromCollection(IEnumerable<NormalInventoryItem> items)
         {
-            var result = new List<NormalInventoryItem>();
-            if (items == null) return result;
-            var seenAddresses = new HashSet<long>();
-            foreach (var it in items)
-            {
-                if (it?.Item != null && ItemIsMap(it.Item) && seenAddresses.Add(it.Item.Address))
-                    result.Add(it);
-            }
-            return result;
+            if (items == null) return new List<NormalInventoryItem>();
+            return items.Where(it => it?.Item != null && ItemIsMap(it.Item))
+                        .GroupBy(it => it.Item.Address)
+                        .Select(g => g.First())
+                        .ToList();
         }
 
         private List<NormalInventoryItem> GetInventoryItems()

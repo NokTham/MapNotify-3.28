@@ -76,7 +76,6 @@ namespace MapNotify_3_28
                         var filteredGood = GoodModsDictionary
                             .Where(m => string.IsNullOrEmpty(_modFilter) || m.Key.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) || m.Value.Text.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase))
                             .ToList();
-
                         ImGui.TextColored(new nuVector4(0.4f, 1f, 0.4f, 1f), "Good Mods:");
                         ImGui.Indent();
                         foreach (var mod in filteredGood)
@@ -85,9 +84,10 @@ namespace MapNotify_3_28
                             if (ImGui.Button("X")) DeleteModFromConfig(mod.Key);
                             ImGui.SameLine();
                             var col = mod.Value.Color;
+                            string conflictStatus = (BadModsDictionary?.ContainsKey(mod.Key) ?? false) ? " [!] CONFLICT" : "";
                             string brickStatus = mod.Value.Bricking ? " [BRICKED]" : "";
                             string cleanText = EscapeImGui(mod.Value.Text);
-                            ImGui.TextColored(col, $"{cleanText} ({mod.Key}){brickStatus}");
+                            ImGui.TextColored(col, $"{cleanText} ({mod.Key}){brickStatus}{conflictStatus}");
                             ImGui.PopID();
                         }
                         ImGui.Unindent();
@@ -98,7 +98,6 @@ namespace MapNotify_3_28
                         var filteredBad = BadModsDictionary
                             .Where(m => string.IsNullOrEmpty(_modFilter) || m.Key.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) || m.Value.Text.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase))
                             .ToList();
-
                         ImGui.TextColored(new nuVector4(1f, 0.4f, 0.4f, 1f), "Bad Mods:");
                         ImGui.Indent();
                         foreach (var mod in filteredBad)
@@ -107,9 +106,10 @@ namespace MapNotify_3_28
                             if (ImGui.Button("X")) DeleteModFromConfig(mod.Key);
                             ImGui.SameLine();
                             var col = mod.Value.Color;
+                            string conflictStatus = (GoodModsDictionary?.ContainsKey(mod.Key) ?? false) ? " [!] CONFLICT" : "";
                             string brickPrefix = mod.Value.Bricking ? "[B] " : "";
                             string cleanText = EscapeImGui(mod.Value.Text);
-                            ImGui.TextColored(col, $"{brickPrefix}{cleanText} ({mod.Key})");
+                            ImGui.TextColored(col, $"{brickPrefix}{cleanText} ({mod.Key}){conflictStatus}");
                             ImGui.PopID();
                         }
                         ImGui.Unindent();
@@ -145,7 +145,12 @@ namespace MapNotify_3_28
                             ImGui.Separator();
                             lastAffixType = mod.AffixType;
                         }
-                        ImGui.PushID(i);
+                        ImGui.PushID(mod.RawName);
+
+                        bool inGood = GoodModsDictionary?.Any(x => BaseModExtractor.AreEquivalent(mod.RawName, x.Key)) ?? false;
+                        bool inBad = BadModsDictionary?.Any(x => BaseModExtractor.AreEquivalent(mod.RawName, x.Key)) ?? false;
+                        if (inGood && inBad) ImGui.TextColored(new nuVector4(1f, 1f, 0f, 1f), "[!] CONFLICT: Present in both Good and Bad lists.");
+                        
                         HelpMarker($"Internal Name: {mod.RawName}");
                         ImGui.SameLine();
                         string displayDesc = EscapeImGui(string.IsNullOrEmpty(mod.Description) ? mod.RawName : mod.Description);
@@ -165,9 +170,29 @@ namespace MapNotify_3_28
                             AutoSaveIfExisting(mod);
                         }
                         ImGui.Dummy(new nuVector2(0, 5));
-                        if (ImGui.Button("Add Good")) SaveModToConfig(mod, "GoodMods.txt");
+                        if (ImGui.Button("Add Good"))
+                        {
+                            // If color is White, Soft Red (UI), or Pure Red (Config Template), switch to Good default
+                            if (mod.Color == new nuVector4(1f, 1f, 1f, 1f) || 
+                                mod.Color == new nuVector4(1f, 0.4f, 0.4f, 1f) || 
+                                mod.Color == new nuVector4(1f, 0f, 0f, 1f))
+                            {
+                                mod.Color = new nuVector4(0.4f, 1f, 0.4f, 1f);
+                            }
+                            SaveModToConfig(mod, "GoodMods.txt");
+                        }
                         ImGui.SameLine();
-                        if (ImGui.Button("Add Bad")) SaveModToConfig(mod, "BadMods.txt");
+                        if (ImGui.Button("Add Bad"))
+                        {
+                            // If color is White, Soft Green (UI), or Pure Green (Config Template), switch to Bad default
+                            if (mod.Color == new nuVector4(1f, 1f, 1f, 1f) || 
+                                mod.Color == new nuVector4(0.4f, 1f, 0.4f, 1f) || 
+                                mod.Color == new nuVector4(0f, 1f, 0f, 1f))
+                            {
+                                mod.Color = new nuVector4(1f, 0.4f, 0.4f, 1f);
+                            }
+                            SaveModToConfig(mod, "BadMods.txt");
+                        }
                         ImGui.SameLine();
                         if (ImGui.Button("Delete")) DeleteModFromConfig(mod.RawName);
                         ImGui.SameLine();
@@ -194,10 +219,8 @@ namespace MapNotify_3_28
 
         private void AutoSaveIfExisting(CapturedMod mod)
         {
-            if (GoodModsDictionary.Keys.Any(k => BaseModExtractor.AreEquivalent(mod.RawName, k)))
-                SaveModToConfig(mod, Path.Combine(GetProfileDirectory(), "GoodMods.txt"));
-            else if (BadModsDictionary.Keys.Any(k => BaseModExtractor.AreEquivalent(mod.RawName, k)))
-                SaveModToConfig(mod, Path.Combine(GetProfileDirectory(), "BadMods.txt"));
+            var (match, isGood) = MatchMod(mod.RawName);
+            if (match != null) SaveModToConfig(mod, isGood ? "GoodMods.txt" : "BadMods.txt");
         }
 
         /// <summary>
@@ -209,45 +232,33 @@ namespace MapNotify_3_28
             if (baseMod == null)
                 baseMod = BaseModExtractor.GetBaseMod(mod.RawName);
 
-            // Ensure we handle just the filename or the full path
             string pureFileName = Path.GetFileName(fileName);
             string otherFile = pureFileName == "GoodMods.txt" ? "BadMods.txt" : "GoodMods.txt";
             var otherPath = Path.Combine(GetProfileDirectory(), otherFile);
+            RemoveModFromFile(otherPath, mod.RawName);
 
-            if (File.Exists(otherPath))
-            {
-                var otherLines = File.ReadAllLines(otherPath).ToList();
-                bool removedFromOther = otherLines.RemoveAll(l =>
-                {
-                    var configKey = l.Split(';')[0].Trim();
-                    if (string.IsNullOrEmpty(configKey) || configKey.StartsWith("#")) return false;
-                    return BaseModExtractor.AreEquivalent(mod.RawName, configKey);
-                }) > 0;
-                if (removedFromOther) File.WriteAllLines(otherPath, otherLines);
-            }
-
+            // Set default colors if user hasn't picked one
             if (mod.Color == new nuVector4(1, 1, 1, 1))
-            {
-                if (pureFileName == "GoodMods.txt") mod.Color = new nuVector4(0.4f, 1f, 0.4f, 1f);
-                else if (pureFileName == "BadMods.txt") mod.Color = new nuVector4(1f, 0.4f, 0.4f, 1f);
-            }
+                mod.Color = pureFileName == "GoodMods.txt" ? new nuVector4(0.4f, 1f, 0.4f, 1f) : new nuVector4(1f, 0.4f, 0.4f, 1f);
+
             var path = Path.Combine(GetProfileDirectory(), pureFileName);
             var hexColor = ToHex(mod.Color);
             var newLine = $"{baseMod};{mod.DisplayName};{hexColor};{mod.IsBricking}";
 
-            if (!File.Exists(path)) File.WriteAllText(path, "");
-            var lines = File.ReadAllLines(path).ToList();
-            lines.RemoveAll(l =>
-            {
-                var configKey = l.Split(';')[0].Trim();
-                if (string.IsNullOrEmpty(configKey) || configKey.StartsWith("#")) return false;
-                return BaseModExtractor.AreEquivalent(mod.RawName, configKey);
-            });
-            lines.Add(newLine);
-            File.WriteAllLines(path, lines);
+            UpdateModInFile(path, mod.RawName, newLine);
             GoodModsDictionary = LoadConfigGoodMod();
             BadModsDictionary = LoadConfigBadMod();
             LogMessage($"Saved/Updated mod: {mod.RawName}", 5);
+        }
+
+        private void UpdateModInFile(string path, string rawName, string newLine)
+        {
+            if (!File.Exists(path)) File.WriteAllText(path, "");
+            var lines = File.ReadAllLines(path).ToList();
+            lines.RemoveAll(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith("#") &&
+                                 BaseModExtractor.AreEquivalent(rawName, l.Split(';')[0].Trim()));
+            lines.Add(newLine);
+            File.WriteAllLines(path, lines);
         }
 
         /// <summary>
@@ -258,23 +269,13 @@ namespace MapNotify_3_28
         {
             string[] files = { "GoodMods.txt", "BadMods.txt" };
             bool deleted = false;
+
             foreach (var fileName in files)
             {
-                var path = Path.Combine(GetProfileDirectory(), fileName);
-                if (!File.Exists(path)) continue;
-                var lines = File.ReadAllLines(path).ToList();
-                var lineToRemove = lines.FirstOrDefault(l =>
+                if (RemoveModFromFile(Path.Combine(GetProfileDirectory(), fileName), rawName))
                 {
-                    var configKey = l.Split(';')[0].Trim();
-                    if (string.IsNullOrEmpty(configKey) || configKey.StartsWith("#")) return false;
-                    return BaseModExtractor.AreEquivalent(rawName, configKey);
-                });
-                if (lineToRemove != null)
-                {
-                    lines.Remove(lineToRemove);
-                    File.WriteAllLines(path, lines);
-                    LogMessage($"Deleted mod entry: {lineToRemove.Split(';')[0]} from {fileName}", 5);
                     deleted = true;
+                    LogMessage($"Deleted mod entry: {rawName} from {fileName}", 5);
                 }
             }
             if (deleted) { GoodModsDictionary = LoadConfigGoodMod(); BadModsDictionary = LoadConfigBadMod(); }

@@ -21,6 +21,56 @@ namespace MapNotify_3_28
         /// </summary>
         public class ItemDetails
         {
+            // References
+            public NormalInventoryItem Item { get; set; }
+            public Entity Entity { get; }
+
+            // Mod state
+            public List<StyledText> ActiveGoodMods { get; set; } = new List<StyledText>();
+            public List<StyledText> ActiveBadMods { get; set; } = new List<StyledText>();
+            public List<StyledText> ConflictingMods { get; set; } = new List<StyledText>();
+            public bool Bricked { get; set; }
+            public bool Corrupted { get; set; }
+
+            // Base Stats
+            public int Tier { get; set; }
+            public int ModCount { get; set; }
+            public int PackSize { get; set; }
+            public int Quantity { get; set; }
+            public int Rarity { get; set; }
+
+            // Visuals
+            public string MapName { get; set; }
+            public string EscapedMapName { get; set; }
+            public nuVector4 ItemColor { get; set; }
+            public string ClassID { get; set; }
+            public string WindowID { get; private set; }
+            public bool NeedsPadding { get; set; }
+
+            // Chisel / Quality info
+            public string ChiselName { get; set; }
+            public int ChiselValue { get; set; }
+
+            // Heist & Expedition
+            public int HeistAreaLevel { get; set; }
+            public int LogbookAreaLevel { get; set; }
+            public List<LogbookArea> LogbookAreas { get; set; } = new List<LogbookArea>();
+            public List<HeistJobLine> HeistJobLines { get; set; } = new List<HeistJobLine>();
+
+            // Originator / Nightmare stats
+            public int OriginatorScarabs { get; set; }
+            public int OriginatorCurrency { get; set; }
+            public int OriginatorMaps { get; set; }
+            public MapModStats PrefixStats { get; set; } = new MapModStats();
+            public MapModStats SuffixStats { get; set; } = new MapModStats();
+
+            // Item Classification
+            public bool IsOriginatorMap { get; set; }
+            public bool IsMavenMap { get; set; }
+            public bool IsLogbook { get; set; }
+            public bool IsHeist { get; set; }
+            public bool IsValdoMap { get; set; }
+
             public class MapModStats
             {
                 public int Quantity { get; set; }
@@ -31,51 +81,17 @@ namespace MapNotify_3_28
                 public int MoreCurrency { get; set; }
             }
 
-            public NormalInventoryItem Item { get; }
-            public Entity Entity { get; }
-            public List<StyledText> ActiveGoodMods { get; set; }
-            public List<StyledText> ActiveBadMods { get; set; }
-            public nuVector4 ItemColor { get; set; }
-            public string MapName { get; set; }
-            public string EscapedMapName { get; set; }
-            public string ClassID { get; set; }
-            public string ChiselName { get; set; }
-            public int ChiselValue { get; set; }
-            public int PackSize { get; set; }
-            public int Quantity { get; set; }
-            public int Rarity { get; set; }
-            public int ModCount { get; set; }
-            public int HeistAreaLevel { get; set; }
-            public int LogbookAreaLevel { get; set; }
             public class LogbookArea
             {
                 public string Name { get; set; }
                 public string Faction { get; set; }
                 public List<StyledText> Implicits { get; set; } = new List<StyledText>();
             }
-            public List<LogbookArea> LogbookAreas { get; set; } = new List<LogbookArea>();
-            public List<HeistJobLine> HeistJobLines { get; set; } = new List<HeistJobLine>();
-            public bool NeedsPadding { get; set; }
-            public bool Bricked { get; set; }
-            public bool Corrupted { get; set; }
-            public int Tier { get; set; }
-            public int OriginatorScarabs { get; set; }
-            public int OriginatorCurrency { get; set; }
-            public int OriginatorMaps { get; set; }
-            public MapModStats PrefixStats { get; set; } = new MapModStats();
-            public MapModStats SuffixStats { get; set; } = new MapModStats();
-            public bool IsOriginatorMap { get; set; }
-            public bool IsMavenMap { get; set; }
-            public bool IsLogbook { get; set; }
-            public bool IsHeist { get; set; }
-            public bool IsValdoMap { get; set; }
-            public string WindowID { get; private set; }
+
             public ItemDetails(NormalInventoryItem Item, Entity Entity)
             {
                 this.Item = Item;
                 this.Entity = Entity;
-                ActiveGoodMods = new List<StyledText>();
-                ActiveBadMods = new List<StyledText>();
                 Update();
             }
 
@@ -87,6 +103,7 @@ namespace MapNotify_3_28
                 WindowID = $"##{Entity.Address}";
                 ActiveGoodMods.Clear();
                 ActiveBadMods.Clear();
+                ConflictingMods.Clear();
                 string path = Entity.Path ?? string.Empty;
 
                 var BaseItem = gameController?.Files?.BaseItemTypes?.Translate(path);
@@ -147,7 +164,7 @@ namespace MapNotify_3_28
                         var cleanText = !string.IsNullOrEmpty(modText) ? TooltipTagsRegex.Replace(modText, "") : string.Empty;
                         if (string.IsNullOrEmpty(cleanText)) continue;
 
-                        var (match, _) = MatchModInDictionaries(mod.RawName);
+                        var (match, _) = MatchMod(mod.RawName);
                         var styledMod = new StyledText
                         {
                             Text = match?.Text ?? cleanText,
@@ -159,8 +176,6 @@ namespace MapNotify_3_28
                         if (match != null)
                         {
                             if (match.Bricking) Bricked = true;
-                            // The MatchModInDictionaries doesn't tell us if it was good or bad, 
-                            // so we rely on the side-effect-free version if we want to add to specific lists.
                             ProcessModWarnings(mod.RawName);
                         }
                         logArea.Implicits.Add(styledMod);
@@ -176,38 +191,33 @@ namespace MapNotify_3_28
             {
                 if (string.IsNullOrEmpty(rawName)) return;
 
-                foreach (var entry in GoodModsDictionary)
-                {
-                    if (BaseModExtractor.AreEquivalent(rawName, entry.Key))
-                    {
-                        var warning = entry.Value; 
-                        if (string.IsNullOrEmpty(warning.EscapedText)) warning.EscapedText = EscapeImGui(warning.Text);
-                        if (warning.Bricking) Bricked = true; 
-                        ActiveGoodMods.Add(warning); 
-                        return;
-                    }
-                }
+                var goodMatch = GoodModsDictionary?.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key)).Value;
+                var badMatch = BadModsDictionary?.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key)).Value;
 
-                foreach (var entry in BadModsDictionary)
+                if (goodMatch != null && badMatch != null)
                 {
-                    if (BaseModExtractor.AreEquivalent(rawName, entry.Key))
+                    var conflict = new StyledText
                     {
-                        var bad = entry.Value; 
-                        if (string.IsNullOrEmpty(bad.EscapedText)) bad.EscapedText = EscapeImGui(bad.Text);
-                        if (bad.Bricking) Bricked = true; 
-                        ActiveBadMods.Add(bad); 
-                        return;
-                    }
+                        Text = $"[!] DUPLICATE: {goodMatch.Text} / {badMatch.Text}",
+                        EscapedText = EscapeImGui($"[!] DUPLICATE: {goodMatch.Text} / {badMatch.Text}"),
+                        Color = new nuVector4(1f, 1f, 0f, 1f), // Yellow warning color
+                        Bricking = goodMatch.Bricking || badMatch.Bricking
+                    };
+                    ConflictingMods.Add(conflict);
+                    if (conflict.Bricking) Bricked = true;
                 }
-            }
-
-            private (StyledText match, bool isGood) MatchModInDictionaries(string rawName)
-            {
-                if (string.IsNullOrEmpty(rawName)) return (null, false);
-                var goodMatch = GoodModsDictionary.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key)).Value;
-                if (goodMatch != null) return (goodMatch, true);
-                var badMatch = BadModsDictionary.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key)).Value;
-                return (badMatch, false);
+                else if (goodMatch != null)
+                {
+                    if (string.IsNullOrEmpty(goodMatch.EscapedText)) goodMatch.EscapedText = EscapeImGui(goodMatch.Text);
+                    if (goodMatch.Bricking) Bricked = true;
+                    ActiveGoodMods.Add(goodMatch);
+                }
+                else if (badMatch != null)
+                {
+                    if (string.IsNullOrEmpty(badMatch.EscapedText)) badMatch.EscapedText = EscapeImGui(badMatch.Text);
+                    if (badMatch.Bricking) Bricked = true;
+                    ActiveBadMods.Add(badMatch);
+                }
             }
 
             /// <summary>
@@ -364,42 +374,9 @@ namespace MapNotify_3_28
                             if (stats != null && values != null)
                             {
                                 for (int i = 0; i < stats.Length && i < values.Count; i++)
-                                {
-                                    var key = stats[i].Key; if (string.IsNullOrEmpty(key)) continue;
-                                    int val = values[i];
-                                    string lowerKey = key.ToLower();
-
-                                    if (lowerKey.Contains("quantity"))
-                                    {
-                                        quantity += val;
-                                        if (isPrefix) PrefixStats.Quantity += val; else if (isSuffix) SuffixStats.Quantity += val;
-                                    }
-                                    else if (lowerKey.Contains("rarity"))
-                                    {
-                                        rarity += val;
-                                        if (isPrefix) PrefixStats.Rarity += val; else if (isSuffix) SuffixStats.Rarity += val;
-                                    }
-                                    else if (lowerKey.Contains("pack_size"))
-                                    {
-                                        packSize += val;
-                                        if (isPrefix) PrefixStats.PackSize += val; else if (isSuffix) SuffixStats.PackSize += val;
-                                    }
-                                    else if (lowerKey.Contains("scarab_drop_chance"))
-                                    {
-                                        originatorScarabs += val; IsOriginatorMap = true;
-                                        if (isPrefix) PrefixStats.MoreScarabs += val; else if (isSuffix) SuffixStats.MoreScarabs += val;
-                                    }
-                                    else if (lowerKey.Contains("currency_drop_chance"))
-                                    {
-                                        originatorCurrency += val; IsOriginatorMap = true;
-                                        if (isPrefix) PrefixStats.MoreCurrency += val; else if (isSuffix) SuffixStats.MoreCurrency += val;
-                                    }
-                                    else if (lowerKey.Contains("map_item_drop_chance"))
-                                    {
-                                        originatorMaps += val; IsOriginatorMap = true;
-                                        if (isPrefix) PrefixStats.MoreMaps += val; else if (isSuffix) SuffixStats.MoreMaps += val;
-                                    }
-                                }
+                                    UpdateStatsFromMod(stats[i].Key, values[i], isPrefix, isSuffix, 
+                                        ref quantity, ref rarity, ref packSize, 
+                                        ref originatorScarabs, ref originatorCurrency, ref originatorMaps);
                             }
                             if (!IsOriginatorMap && (mod.RawName == "IsUberMap" || mod.RawName.Contains("MapZanaInfluence"))) IsOriginatorMap = true;
                             ProcessModWarnings(mod.RawName);
@@ -408,6 +385,45 @@ namespace MapNotify_3_28
                 }
                 Quantity = quantity; PackSize = packSize; Rarity = rarity;
                 OriginatorScarabs = originatorScarabs; OriginatorCurrency = originatorCurrency; OriginatorMaps = originatorMaps;
+            }
+
+            private void UpdateStatsFromMod(string key, int val, bool isPrefix, bool isSuffix, 
+                ref int quantity, ref int rarity, ref int packSize, 
+                ref int scarabs, ref int currency, ref int maps)
+            {
+                if (string.IsNullOrEmpty(key)) return;
+                string lowerKey = key.ToLower();
+
+                if (lowerKey.Contains("quantity"))
+                {
+                    quantity += val;
+                    if (isPrefix) PrefixStats.Quantity += val; else if (isSuffix) SuffixStats.Quantity += val;
+                }
+                else if (lowerKey.Contains("rarity"))
+                {
+                    rarity += val;
+                    if (isPrefix) PrefixStats.Rarity += val; else if (isSuffix) SuffixStats.Rarity += val;
+                }
+                else if (lowerKey.Contains("pack_size"))
+                {
+                    packSize += val;
+                    if (isPrefix) PrefixStats.PackSize += val; else if (isSuffix) SuffixStats.PackSize += val;
+                }
+                else if (lowerKey.Contains("scarab_drop_chance"))
+                {
+                    scarabs += val; IsOriginatorMap = true;
+                    if (isPrefix) PrefixStats.MoreScarabs += val; else if (isSuffix) SuffixStats.MoreScarabs += val;
+                }
+                else if (lowerKey.Contains("currency_drop_chance"))
+                {
+                    currency += val; IsOriginatorMap = true;
+                    if (isPrefix) PrefixStats.MoreCurrency += val; else if (isSuffix) SuffixStats.MoreCurrency += val;
+                }
+                else if (lowerKey.Contains("map_item_drop_chance"))
+                {
+                    maps += val; IsOriginatorMap = true;
+                    if (isPrefix) PrefixStats.MoreMaps += val; else if (isSuffix) SuffixStats.MoreMaps += val;
+                }
             }
 
             private void ProcessMapName(ExileCore.PoEMemory.Components.MapKey mapComponent, Base baseComponent, Mods modsComponent, string path, string itemName)
