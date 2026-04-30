@@ -5,9 +5,9 @@ namespace MapNotify_3_28
 {
     public static class BaseModExtractor
     {
-        private static readonly Regex UberPrefixRegex = new Regex(@"^Map(UberWeak|Uber)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex TierNumberRegex = new Regex(@"(\d+)(?=MapWorlds|Expedition|Maven|Unique|_|$)", RegexOptions.Compiled);
-        private static readonly Regex SuffixRegex = new Regex(@"(MapWorlds|Expedition|Maven|Unique|_+).*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex UberPrefixRegex = new Regex(@"^Map(UberWeak|UberMod|Uber)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex TierNumberRegex = new Regex(@"(\d+)(?=MapWorlds|Worlds|Expedition|Maven|Unique|_|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex SuffixRegex = new Regex(@"(MapWorlds|Worlds|Expedition|Maven|Unique|_+).*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex CamelCaseSplitRegex = new Regex(@"([A-Z])", RegexOptions.Compiled);
         private static readonly Regex ExtraSpacesRegex = new Regex(@"\s+", RegexOptions.Compiled);
 
@@ -16,12 +16,18 @@ namespace MapNotify_3_28
             if (string.IsNullOrEmpty(modId))
                 return modId;
 
-            return SuffixRegex.Replace(TierNumberRegex.Replace(UberPrefixRegex.Replace(modId, "Map"), ""), "");
+            var normalized = SuffixRegex.Replace(TierNumberRegex.Replace(UberPrefixRegex.Replace(modId, "Map"), ""), "");
+            
+            // Consistently remove the "Map" prefix to allow matching against config entries that omit it
+            if (normalized.StartsWith("Map", StringComparison.OrdinalIgnoreCase))
+                normalized = normalized.Substring(3);
+
+            return normalized.ToLowerInvariant();
         }
 
         public static bool AreEquivalent(string modId1, string modId2)
         {
-            return GetBaseMod(modId1) == GetBaseMod(modId2);
+            return string.Equals(GetBaseMod(modId1), GetBaseMod(modId2), StringComparison.Ordinal);
         }
 
         public static string GetReadableName(string baseMod)
