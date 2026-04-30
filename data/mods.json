@@ -2263,30 +2263,6 @@
         "{%} chance for Rare Monsters to Fracture on death"
       ]
     },
-    "{%}-{%} Item Quantity": {
-      "BaseMods": [
-        "MapCorruptionItemQuantity"
-      ],
-      "Descriptions": [
-        "{%}-{%} Item Quantity"
-      ]
-    },
-    "{%}-{%} Item Rarity": {
-      "BaseMods": [
-        "MapCorruptionItemRarity"
-      ],
-      "Descriptions": [
-        "{%}-{%} Item Rarity"
-      ]
-    },
-    "{%}-{%} Pack Size": {
-      "BaseMods": [
-        "MapCorruptionPackSize"
-      ],
-      "Descriptions": [
-        "{%}-{%} Pack Size"
-      ]
-    },
     "{%}-{%} increased Explicit Modifier magnitudes": {
       "BaseMods": [
         "MapCorruptionModEffect"
