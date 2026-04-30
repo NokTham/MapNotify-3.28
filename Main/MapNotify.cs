@@ -23,8 +23,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 {
     // JSON Database helper classes
     public class ModsJson { public Dictionary<string, ModGroup> groups { get; set; } }
-    public class ModGroup { public List<string> BaseMods { get; set; } public List<string> Descriptions { get; set; } }
-    public class ModEntry { public string GroupKey { get; set; } public List<string> Descriptions { get; set; } public List<string> BaseMods { get; set; } }
+    public class ModGroup { public List<string> BaseMods { get; set; } public List<string> Descriptions { get; set; } public string Type { get; set; } }
+    public class ModEntry { public string GroupKey { get; set; } public List<string> Descriptions { get; set; } public List<string> BaseMods { get; set; } public string Type { get; set; } }
     public class ModData { public string BaseMod { get; set; } public string Description { get; set; } }
 
     private static readonly Regex TooltipTagsRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
@@ -172,7 +172,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                     {
                         GroupKey = kvp.Key,
                         Descriptions = kvp.Value.Descriptions ?? new List<string>(),
-                        BaseMods = kvp.Value.BaseMods
+                        BaseMods = kvp.Value.BaseMods,
+                        Type = kvp.Value.Type
                     }).ToList();
 
                     _allModsList = _modEntries

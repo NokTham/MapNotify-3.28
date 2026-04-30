@@ -43,15 +43,6 @@
         "% reduced effect of Curses on Monsters"
       ]
     },
-    "All Magic and Normal Monsters in Area are in a Union of Souls": {
-      "BaseMods": [
-        "MapSupporterUnionOfSouls"
-      ],
-      "Descriptions": [
-        "All Magic and Normal Monsters in Area are in a Union of Souls"
-      ],
-      "Type": "unique_map"
-    },
     "All Monster Damage from Hits always Ignites": {
       "BaseMods": [
         "MapMonstersAllDamageAlwaysIgnitesMapWorldsMaven",
@@ -62,242 +53,6 @@
         "All Monster Damage from Hits always Ignites"
       ]
     },
-    "Area becomes fatal after some time": {
-      "BaseMods": [
-        "MapSupporterFatal"
-      ],
-      "Descriptions": [
-        "Area becomes fatal after some time"
-      ],
-      "Type": "unique_map"
-    },
-    "Area becomes increasingly lethal": {
-      "BaseMods": [
-        "MapSupporterRampingDamage"
-      ],
-      "Descriptions": [
-        "Area becomes increasingly lethal"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains Drowning Orbs": {
-      "BaseMods": [
-        "MapUberModDrowningOrbs"
-      ],
-      "Descriptions": [
-        "Area contains Drowning Orbs"
-      ]
-    },
-    "Area contains Einhar": {
-      "BaseMods": [
-        "MapSupporterIncursion"
-      ],
-      "Descriptions": [
-        "All Incursions must be completed to claim Reward",
-        "Area contains Einhar",
-        "Incursion Architects have % chance to be Possessed by a Tormented Spirit"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains Einhar, Exilehunter": {
-      "BaseMods": [
-        "MapSupporterEvilEinhar"
-      ],
-      "Descriptions": [
-        "Area contains Einhar, Exilehunter"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains Labyrinth Hazards": {
-      "BaseMods": [
-        "MapUberModLabyrinthHazards"
-      ],
-      "Descriptions": [
-        "Area contains Labyrinth Hazards"
-      ]
-    },
-    "Area contains Malachai's Creeping Agony": {
-      "BaseMods": [
-        "MapSupporterCreepingAgony"
-      ],
-      "Descriptions": [
-        "Area contains Malachai's Creeping Agony"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains Runes of the Searing Exarch": {
-      "BaseMods": [
-        "MapUberModExarch"
-      ],
-      "Descriptions": [
-        "Area contains Runes of the Searing Exarch"
-      ]
-    },
-    "Area contains Sirus' Deatomisation Storms": {
-      "BaseMods": [
-        "MapSupporterSirusStorms"
-      ],
-      "Descriptions": [
-        "Area contains Sirus' Deatomisation Storms"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains The Elderslayers": {
-      "BaseMods": [
-        "MapSupporterTheElderslayers"
-      ],
-      "Descriptions": [
-        "Area contains The Elderslayers"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains The Feared": {
-      "BaseMods": [
-        "MapSupporterTheFeared"
-      ],
-      "Descriptions": [
-        "Area contains The Feared"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains The Forgotten": {
-      "BaseMods": [
-        "MapSupporterTheForgotten"
-      ],
-      "Descriptions": [
-        "Area contains The Forgotten"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains The Formed": {
-      "BaseMods": [
-        "MapSupporterTheFormed"
-      ],
-      "Descriptions": [
-        "Area contains The Formed"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains The Remembered": {
-      "BaseMods": [
-        "MapSupporterTheHidden"
-      ],
-      "Descriptions": [
-        "Area contains The Remembered"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains The Twisted": {
-      "BaseMods": [
-        "MapSupporterTheTwisted"
-      ],
-      "Descriptions": [
-        "Area contains The Twisted"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains Unstable Tentacle Fiends": {
-      "BaseMods": [
-        "MapUberModElderNovas"
-      ],
-      "Descriptions": [
-        "Area contains Unstable Tentacle Fiends"
-      ]
-    },
-    "Area contains a Bismuth Ore Deposit": {
-      "BaseMods": [
-        "MapSupporterHarbinger"
-      ],
-      "Descriptions": [
-        "Area contains a Bismuth Ore Deposit"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains a Gigantic Rogue Exile": {
-      "BaseMods": [
-        "MapSupporterRogueGiants"
-      ],
-      "Descriptions": [
-        "Area contains a Gigantic Rogue Exile"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains additional packs of Restless Dead": {
-      "BaseMods": [
-        "MapSupporterRevivingMonsters"
-      ],
-      "Descriptions": [
-        "Area contains additional packs of Restless Dead"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains an additional Abyss": {
-      "BaseMods": [
-        "MapSupporterAbyss"
-      ],
-      "Descriptions": [
-        "Abysses in Area spawn % increased Monsters",
-        "All Abysses in Area must be completed to claim Reward",
-        "Area contains an additional Abyss"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains an additional Primal Harvest Boss": {
-      "BaseMods": [
-        "MapSupporterHarvestBoss3"
-      ],
-      "Descriptions": [
-        "Area contains an additional Primal Harvest Boss"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains an additional Vivid Harvest Boss": {
-      "BaseMods": [
-        "MapSupporterHarvestBoss2"
-      ],
-      "Descriptions": [
-        "Area contains an additional Vivid Harvest Boss"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains an additional Wild Harvest Boss": {
-      "BaseMods": [
-        "MapSupporterHarvestBoss1"
-      ],
-      "Descriptions": [
-        "Area contains an additional Wild Harvest Boss"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains {0} additional guarded Exquisite Vaal Vessels": {
-      "BaseMods": [
-        "MapCorruptionVaalVessel",
-        "MapSupporterVaalEmpoweredChests"
-      ],
-      "Descriptions": [
-        "All Strongboxes in Area must be opened to claim Reward",
-        "Area contains {0} additional guarded Exquisite Vaal Vessels"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains enemies of all influence types": {
-      "BaseMods": [
-        "MapSupporterInfluencePacks"
-      ],
-      "Descriptions": [
-        "Area contains enemies of all influence types"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains many Detonation Totems": {
-      "BaseMods": [
-        "MapSupporterDetonateTotems"
-      ],
-      "Descriptions": [
-        "Area contains many Detonation Totems"
-      ],
-      "Type": "unique_map"
-    },
     "Area contains many Totems": {
       "BaseMods": [
         "MapTotemsMapWorlds"
@@ -306,84 +61,12 @@
         "Area contains many Totems"
       ]
     },
-    "Area contains patches of moving Marked Ground, inflicting random Marks": {
-      "BaseMods": [
-        "MapUberModPlayerMarked"
-      ],
-      "Descriptions": [
-        "Area contains patches of moving Marked Ground, inflicting random Marks"
-      ]
-    },
-    "Area contains roaming Hexfields": {
-      "BaseMods": [
-        "MapSupporterRoamingCurses"
-      ],
-      "Descriptions": [
-        "Area contains roaming Hexfields"
-      ],
-      "Type": "unique_map"
-    },
     "Area contains two Unique Bosses": {
       "BaseMods": [
         "MapTwoBossesMapWorlds"
       ],
       "Descriptions": [
         "Area contains two Unique Bosses"
-      ]
-    },
-    "Area contains # additional Rare Monsters that create Frost Walls and Flee": {
-      "BaseMods": [
-        "MapSupporterTricksters"
-      ],
-      "Descriptions": [
-        "Area contains # additional Rare Monsters that create Frost Walls and Flee"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains # additional pack of four Map Bosses": {
-      "BaseMods": [
-        "MapSupporterAtlasBosses1",
-        "MapSupporterAtlasBosses2",
-        "MapSupporterAtlasBosses3"
-      ],
-      "Descriptions": [
-        "Area contains # additional pack of four Map Bosses"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains #-# additional packs of Frog": {
-      "BaseMods": [
-        "MapSupporterAdditionalFrogPacks"
-      ],
-      "Descriptions": [
-        "Area contains #-# additional packs of Frog"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains #-# additional packs of Sulphite Golems": {
-      "BaseMods": [
-        "MapSupporterSulphiteGolems"
-      ],
-      "Descriptions": [
-        "Area contains #-# additional packs of Sulphite Golems"
-      ],
-      "Type": "unique_map"
-    },
-    "Area contains #-# additional packs of Untainted Wild Animals": {
-      "BaseMods": [
-        "MapSupporterUntaintedPacks"
-      ],
-      "Descriptions": [
-        "Area contains #-# additional packs of Untainted Wild Animals"
-      ],
-      "Type": "unique_map"
-    },
-    "Area has an additional random Scarab effect": {
-      "BaseMods": [
-        "MapCorruptionRandomScarab"
-      ],
-      "Descriptions": [
-        "Area has an additional random Scarab effect"
       ]
     },
     "Area has increased monster variety": {
@@ -464,43 +147,6 @@
         "# patches with Ground Effect per # tiles"
       ]
     },
-    "Area has # additional random Modifier": {
-      "BaseMods": [
-        "MapSupporterAdditionalModifiers1",
-        "MapSupporterAdditionalModifiers2",
-        "MapSupporterAdditionalModifiers3"
-      ],
-      "Descriptions": [
-        "Area has # additional random Modifier"
-      ],
-      "Type": "unique_map"
-    },
-    "Area is affected by a Corrupting Tempest": {
-      "BaseMods": [
-        "MapSupporterCorruptingTempest"
-      ],
-      "Descriptions": [
-        "Area is affected by a Corrupting Tempest"
-      ],
-      "Type": "unique_map"
-    },
-    "Area is affected by an additional random Unallocated Notable Atlas Passives": {
-      "BaseMods": [
-        "MapCorruptionRandomAtlasNotables"
-      ],
-      "Descriptions": [
-        "Area is affected by an additional random Unallocated Notable Atlas Passives"
-      ]
-    },
-    "Area is infested with Maddening Tentacles": {
-      "BaseMods": [
-        "MapSupporterMaddeningTentacles"
-      ],
-      "Descriptions": [
-        "Area is infested with Maddening Tentacles"
-      ],
-      "Type": "unique_map"
-    },
     "Area is inhabited by Abominations": {
       "BaseMods": [
         "MapMonsterPacksAbominationMapWorlds"
@@ -516,15 +162,6 @@
       "Descriptions": [
         "Area is inhabited by Animals"
       ]
-    },
-    "Area is inhabited by Bone Husks": {
-      "BaseMods": [
-        "MapSupporterInhabitedByBoneHusks"
-      ],
-      "Descriptions": [
-        "Area is inhabited by Bone Husks"
-      ],
-      "Type": "unique_map"
     },
     "Area is inhabited by Cultists of Kitava": {
       "BaseMods": [
@@ -566,15 +203,6 @@
         "Area is inhabited by Humanoids"
       ]
     },
-    "Area is inhabited by Kitava's Heralds": {
-      "BaseMods": [
-        "MapSupporterInhabitedByHeralds"
-      ],
-      "Descriptions": [
-        "Area is inhabited by Kitava's Heralds"
-      ],
-      "Type": "unique_map"
-    },
     "Area is inhabited by Lunaris fanatics": {
       "BaseMods": [
         "MapMonsterPacksLunarisMapWorlds_"
@@ -582,15 +210,6 @@
       "Descriptions": [
         "Area is inhabited by Lunaris fanatics"
       ]
-    },
-    "Area is inhabited by Porcupines": {
-      "BaseMods": [
-        "MapSupporterInhabitedBySpikers"
-      ],
-      "Descriptions": [
-        "Area is inhabited by Porcupines"
-      ],
-      "Type": "unique_map"
     },
     "Area is inhabited by Sea Witches and their Spawn": {
       "BaseMods": [
@@ -632,22 +251,6 @@
         "Area is inhabited by ranged monsters"
       ]
     },
-    "Atlas Passives have %-% reduced Effect on Area": {
-      "BaseMods": [
-        "MapCorruptionAtlasEffect"
-      ],
-      "Descriptions": [
-        "Atlas Passives have %-% reduced Effect on Area"
-      ]
-    },
-    "Auras from Player Skills which affect Allies also affect Enemies": {
-      "BaseMods": [
-        "MapUberModAurasAffectMonsters"
-      ],
-      "Descriptions": [
-        "Auras from Player Skills which affect Allies also affect Enemies"
-      ]
-    },
     "Buffs on Players expire % faster": {
       "BaseMods": [
         "MapPlayersBuffsExpireFaster2MapWorlds___",
@@ -660,33 +263,6 @@
       "Descriptions": [
         "Buffs on Players expire % faster"
       ]
-    },
-    "Debuffs on Monsters expire % faster": {
-      "BaseMods": [
-        "MapUberModMonsterDebuffSpeed"
-      ],
-      "Descriptions": [
-        "Debuffs on Monsters expire % faster"
-      ]
-    },
-    "Debuffs on players expire % slower": {
-      "BaseMods": [
-        "MapSupporterDebuffsExpireSlower"
-      ],
-      "Descriptions": [
-        "Debuffs on players expire % slower"
-      ],
-      "Type": "unique_map"
-    },
-    "Durability of Ichor Pumps in Area is #": {
-      "BaseMods": [
-        "MapSupporterBlight"
-      ],
-      "Descriptions": [
-        "Area contains a Blight Encounter",
-        "Durability of Ichor Pumps in Area is #"
-      ],
-      "Type": "unique_map"
     },
     "Final Boss drops an additional Currency Item": {
       "BaseMods": [
@@ -710,34 +286,6 @@
       ],
       "Descriptions": [
         "Final Boss drops an additional Unique Item"
-      ]
-    },
-    "Legion Monsters in Area have a Volatile Core": {
-      "BaseMods": [
-        "MapSupporterLegionVolatiles"
-      ],
-      "Descriptions": [
-        "All Legion monsters in Area must be released to claim Reward",
-        "Area contains an additional Legion Encounter",
-        "Legion Monsters in Area have a Volatile Core"
-      ],
-      "Type": "unique_map"
-    },
-    "Living Weapons": {
-      "BaseMods": [
-        "MapSupporterAnimatedWeapons"
-      ],
-      "Descriptions": [
-        "Living Weapons"
-      ],
-      "Type": "unique_map"
-    },
-    "Map Boss is accompanied by a Synthesis Boss": {
-      "BaseMods": [
-        "MapUberModSynthMiniboss"
-      ],
-      "Descriptions": [
-        "Map Boss is accompanied by a Synthesis Boss"
       ]
     },
     "Map Bosses have % chance to be surrounded by Tormented Spirits": {
@@ -775,50 +323,6 @@
         "Maven releases all Bosses at once"
       ]
     },
-    "Maximum number of Players in Area is one": {
-      "BaseMods": [
-        "MapSupporterSoloMode"
-      ],
-      "Descriptions": [
-        "Maximum number of Players in Area is one"
-      ],
-      "Type": "unique_map"
-    },
-    "Monster Damage Penetrates % Elemental Resistances": {
-      "BaseMods": [
-        "MapUberModEleDamagePenetration"
-      ],
-      "Descriptions": [
-        "Monster Damage Penetrates % Elemental Resistances"
-      ]
-    },
-    "Monster corpses cannot be Destroyed": {
-      "BaseMods": [
-        "MapSupporterNoCorpseRemoval"
-      ],
-      "Descriptions": [
-        "Monster corpses cannot be Destroyed"
-      ],
-      "Type": "unique_map"
-    },
-    "Monsters Enrage on Low Life": {
-      "BaseMods": [
-        "MapSupporterEnrage"
-      ],
-      "Descriptions": [
-        "Monsters Enrage on Low Life"
-      ],
-      "Type": "unique_map"
-    },
-    "Monsters Kill things with % or lower Life on Hit": {
-      "BaseMods": [
-        "MapSupporterSuperCull"
-      ],
-      "Descriptions": [
-        "Monsters Kill things with % or lower Life on Hit"
-      ],
-      "Type": "unique_map"
-    },
     "Monsters Poison on Hit": {
       "BaseMods": [
         "MapPoisoningMapWorlds",
@@ -840,15 +344,6 @@
       "Descriptions": [
         "Monsters are Hexproof"
       ]
-    },
-    "Monsters can only be Damaged while within # metres of a Player\nPlayers' modifiers to Light Radius also apply to this range": {
-      "BaseMods": [
-        "MapSupporterDamageRadius"
-      ],
-      "Descriptions": [
-        "Monsters can only be Damaged while within # metres of a Player\nPlayers' modifiers to Light Radius also apply to this range"
-      ],
-      "Type": "unique_map"
     },
     "Monsters cannot be Leeched from": {
       "BaseMods": [
@@ -912,15 +407,6 @@
         "Monsters deal %-% extra Physical Damage as Lightning"
       ]
     },
-    "Monsters drop no Items": {
-      "BaseMods": [
-        "MapSupporterNoItems"
-      ],
-      "Descriptions": [
-        "Monsters drop no Items"
-      ],
-      "Type": "unique_map"
-    },
     "Monsters fire # additional Projectiles": {
       "BaseMods": [
         "MapMonsterMultipleProjectilesWorlds",
@@ -932,7 +418,7 @@
         "Monsters fire # additional Projectiles",
         "Monsters have % increased Area of Effect"
       ],
-      "Type": "unique_map"
+      "Type": "Valdo"
     },
     "Monsters gain %-% of Maximum Life as Extra Maximum Energy Shield": {
       "BaseMods": [
@@ -960,14 +446,6 @@
         "Monsters have % chance to inflict Withered for # seconds on Hit"
       ]
     },
-    "Monsters gain %-% of their Physical Damage as Extra Damage of a random Element": {
-      "BaseMods": [
-        "MapUberModDamageAsElemental"
-      ],
-      "Descriptions": [
-        "Monsters gain %-% of their Physical Damage as Extra Damage of a random Element"
-      ]
-    },
     "Monsters have a % chance to Ignite, Freeze and Shock on Hit": {
       "BaseMods": [
         "MapMonstersChanceToInflictStatusAilments2MapWorlds",
@@ -991,23 +469,6 @@
       ],
       "Descriptions": [
         "Monsters have a % chance to avoid Poison, Impale, and Bleeding"
-      ]
-    },
-    "Monsters have # to Maximum Endurance Charges": {
-      "BaseMods": [
-        "MapUberModEnduranceCharges"
-      ],
-      "Descriptions": [
-        "Monsters have a % chance to gain an Endurance Charge when hit",
-        "Monsters have # to Maximum Endurance Charges"
-      ]
-    },
-    "Monsters have % Chance to Block Attack Damage": {
-      "BaseMods": [
-        "MapUberModMonsterAttackBlock"
-      ],
-      "Descriptions": [
-        "Monsters have % Chance to Block Attack Damage"
       ]
     },
     "Monsters have % chance to Avoid Elemental Ailments": {
@@ -1076,7 +537,7 @@
         "Monsters have # to Maximum Frenzy Charges",
         "Monsters have % chance to gain a Frenzy Charge on Hit"
       ],
-      "Type": "unique_map"
+      "Type": "Valdo"
     },
     "Monsters have % chance to gain a Power Charge on Hit": {
       "BaseMods": [
@@ -1090,7 +551,7 @@
         "Monsters have # to Maximum Power Charges",
         "Monsters have % chance to gain a Power Charge on Hit"
       ],
-      "Type": "unique_map"
+      "Type": "Valdo"
     },
     "Monsters have % chance to gain an Endurance Charge on Hit": {
       "BaseMods": [
@@ -1103,16 +564,7 @@
         "Monsters have # to Maximum Endurance Charges",
         "Monsters have % chance to gain an Endurance Charge on Hit"
       ],
-      "Type": "unique_map"
-    },
-    "Monsters have % chance to have a Volatile Core": {
-      "BaseMods": [
-        "MapSupporterVolatilesOnDeath"
-      ],
-      "Descriptions": [
-        "Monsters have % chance to have a Volatile Core"
-      ],
-      "Type": "unique_map"
+      "Type": "Valdo"
     },
     "Monsters have % chance to steal Power, Frenzy and Endurance charges on Hit": {
       "BaseMods": [
@@ -1149,24 +601,6 @@
         "%-% to Monster Critical Strike Multiplier"
       ]
     },
-    "Monsters inflict Malediction on hit": {
-      "BaseMods": [
-        "MapSupporterMalediction"
-      ],
-      "Descriptions": [
-        "Monsters inflict Malediction on hit"
-      ],
-      "Type": "unique_map"
-    },
-    "Monsters inflict Petrification for # seconds on hit": {
-      "BaseMods": [
-        "MapSupporterPetrifyOnHit"
-      ],
-      "Descriptions": [
-        "Monsters inflict Petrification for # seconds on hit"
-      ],
-      "Type": "unique_map"
-    },
     "Monsters inflict # Grasping Vine on Hit": {
       "BaseMods": [
         "MapSupporterGraspingVines",
@@ -1175,7 +609,7 @@
       "Descriptions": [
         "Monsters inflict # Grasping Vine on Hit"
       ],
-      "Type": "unique_map"
+      "Type": "Valdo"
     },
     "Monsters reflect % of Elemental Damage": {
       "BaseMods": [
@@ -1203,7 +637,7 @@
         "Monsters reflect % of Elemental Damage",
         "Monsters reflect % of Physical Damage"
       ],
-      "Type": "unique_map"
+      "Type": "Valdo"
     },
     "Monsters take %-% reduced Extra Damage from Critical Strikes": {
       "BaseMods": [
@@ -1251,25 +685,6 @@
         "Monsters' Projectiles have % chance to be able to Chain when colliding with Terrain",
         "Monsters' skills Chain # additional times"
       ]
-    },
-    "Non-Unique Equipment found in Area drops as Currency instead": {
-      "BaseMods": [
-        "MapSupporterVendoredDrops"
-      ],
-      "Descriptions": [
-        "Non-Unique Equipment found in Area drops as Currency instead"
-      ],
-      "Type": "unique_map"
-    },
-    "Only opens # Portal to Area": {
-      "BaseMods": [
-        "MapSupporterPortalLimit1",
-        "MapSupporterPortalLimit2"
-      ],
-      "Descriptions": [
-        "Only opens # Portal to Area"
-      ],
-      "Type": "unique_map"
     },
     "Players Prevent -% of Suppressed Spell Damage": {
       "BaseMods": [
@@ -1328,153 +743,6 @@
         "Players are Cursed with Vulnerability"
       ]
     },
-    "Players are Cursed with Ele/Temp/Vuln": {
-      "BaseMods": [
-        "MapUberModCurses"
-      ],
-      "Descriptions": [
-        "Players are Cursed with Elemental Weakness",
-        "Players are Cursed with Temporal Chains",
-        "Players are Cursed with Vulnerability"
-      ]
-    },
-    "Players are assaulted by Bloodstained Sawblades": {
-      "BaseMods": [
-        "MapUberModSawblades"
-      ],
-      "Descriptions": [
-        "Players are assaulted by Bloodstained Sawblades"
-      ]
-    },
-    "Players are assaulted by Ruinous Ghosts\nReaching seven Ruin prevents Reward from being claimed": {
-      "BaseMods": [
-        "MapSupporterRuinGhosts"
-      ],
-      "Descriptions": [
-        "Area has no chance to contain Ultimatum Encounters",
-        "Players are assaulted by Ruinous Ghosts\nReaching seven Ruin prevents Reward from being claimed"
-      ],
-      "Type": "unique_map"
-    },
-    "Players are assaulted by apparitions of Al-Hezmin, the Hunter": {
-      "BaseMods": [
-        "MapSupporterAlHezminApparitions"
-      ],
-      "Descriptions": [
-        "Players are assaulted by apparitions of Al-Hezmin, the Hunter"
-      ],
-      "Type": "unique_map"
-    },
-    "Players are assaulted by apparitions of Atziri, Queen of the Vaal": {
-      "BaseMods": [
-        "MapSupporterAtziriApparitions"
-      ],
-      "Descriptions": [
-        "Players are assaulted by apparitions of Atziri, Queen of the Vaal"
-      ],
-      "Type": "unique_map"
-    },
-    "Players are assaulted by apparitions of Baran, the Crusader": {
-      "BaseMods": [
-        "MapSupporterBaranApparitions"
-      ],
-      "Descriptions": [
-        "Players are assaulted by apparitions of Baran, the Crusader"
-      ],
-      "Type": "unique_map"
-    },
-    "Players are assaulted by apparitions of Drox, the Warlord": {
-      "BaseMods": [
-        "MapSupporterDroxApparitions"
-      ],
-      "Descriptions": [
-        "Players are assaulted by apparitions of Drox, the Warlord"
-      ],
-      "Type": "unique_map"
-    },
-    "Players are assaulted by apparitions of Sirus, Awakener of Worlds": {
-      "BaseMods": [
-        "MapSupporterSirusApparitions"
-      ],
-      "Descriptions": [
-        "Players are assaulted by apparitions of Sirus, Awakener of Worlds"
-      ],
-      "Type": "unique_map"
-    },
-    "Players are assaulted by apparitions of The Elder": {
-      "BaseMods": [
-        "MapSupporterElderApparitions"
-      ],
-      "Descriptions": [
-        "Players are assaulted by apparitions of The Elder"
-      ],
-      "Type": "unique_map"
-    },
-    "Players are assaulted by apparitions of The Shaper": {
-      "BaseMods": [
-        "MapSupporterShaperApparitions"
-      ],
-      "Descriptions": [
-        "Players are assaulted by apparitions of The Shaper"
-      ],
-      "Type": "unique_map"
-    },
-    "Players are assaulted by apparitions of Veritania, the Redeemer": {
-      "BaseMods": [
-        "MapSupporterVeritaniaApparitions"
-      ],
-      "Descriptions": [
-        "Players are assaulted by apparitions of Veritania, the Redeemer"
-      ],
-      "Type": "unique_map"
-    },
-    "Players are assaulted by many dangerous Apparitions": {
-      "BaseMods": [
-        "MapSupporterAllApparitions"
-      ],
-      "Descriptions": [
-        "Players are assaulted by many dangerous Apparitions"
-      ],
-      "Type": "unique_map"
-    },
-    "Players are randomly targeted by Meteors": {
-      "BaseMods": [
-        "MapSupporterMeteor"
-      ],
-      "Descriptions": [
-        "Players are randomly targeted by Meteors"
-      ],
-      "Type": "unique_map"
-    },
-    "Players cannot Block": {
-      "BaseMods": [
-        "MapSupporterCannotBlock"
-      ],
-      "Descriptions": [
-        "Players cannot Block"
-      ],
-      "Type": "unique_map"
-    },
-    "Players cannot Evade": {
-      "BaseMods": [
-        "MapSupporterCannotEvade"
-      ],
-      "Descriptions": [
-        "Players cannot Evade"
-      ],
-      "Type": "unique_map"
-    },
-    "Players cannot Recover Life or Energy Shield above % during Rituals in Area": {
-      "BaseMods": [
-        "MapSupporterRitual"
-      ],
-      "Descriptions": [
-        "Areas contain Ritual Altars",
-        "Must fully complete all Ritual Encounters in Area to claim Reward",
-        "Players cannot Recover Life or Energy Shield above % during Rituals in Area"
-      ],
-      "Type": "unique_map"
-    },
     "Players cannot Regenerate Life, Mana or Energy Shield": {
       "BaseMods": [
         "MapPlayerNoLifeESRegenMapWorlds",
@@ -1484,35 +752,6 @@
         "Players cannot Regenerate Life, Mana or Energy Shield"
       ]
     },
-    "Players cannot Suppress Spell Damage": {
-      "BaseMods": [
-        "MapSupporterPlayerCannotSuppress"
-      ],
-      "Descriptions": [
-        "Players cannot Suppress Spell Damage"
-      ],
-      "Type": "unique_map"
-    },
-    "Players cannot choose which Ultimatum Modifier is applied each Round": {
-      "BaseMods": [
-        "MapSupporterUltimatum"
-      ],
-      "Descriptions": [
-        "Areas contain an Ultimatum Encounter",
-        "Must complete ten Ultimatum Encounter waves to claim Reward",
-        "Players cannot choose which Ultimatum Modifier is applied each Round"
-      ],
-      "Type": "unique_map"
-    },
-    "Players cannot gain Flask Charges": {
-      "BaseMods": [
-        "MapSupporterCannotGainFlasks"
-      ],
-      "Descriptions": [
-        "Players cannot gain Flask Charges"
-      ],
-      "Type": "unique_map"
-    },
     "Players cannot inflict Exposure": {
       "BaseMods": [
         "MapPlayerElementalEquilibriumMapWorlds",
@@ -1521,24 +760,6 @@
       "Descriptions": [
         "Players cannot inflict Exposure"
       ]
-    },
-    "Players deal % increased Damage while Dead": {
-      "BaseMods": [
-        "MapSupporterPlayerDamageWhileDead"
-      ],
-      "Descriptions": [
-        "Players deal % increased Damage while Dead"
-      ],
-      "Type": "unique_map"
-    },
-    "Players do not gain Experience": {
-      "BaseMods": [
-        "MapSupporterNoExperience"
-      ],
-      "Descriptions": [
-        "Players do not gain Experience"
-      ],
-      "Type": "unique_map"
     },
     "Players gain % reduced Flask Charges": {
       "BaseMods": [
@@ -1550,39 +771,6 @@
       ],
       "Descriptions": [
         "Players gain % reduced Flask Charges"
-      ]
-    },
-    "Players gain Instability on Kill\nUnstable Players eventually detonate": {
-      "BaseMods": [
-        "MapSupporterInstabilityCharges"
-      ],
-      "Descriptions": [
-        "Players gain Instability on Kill\nUnstable Players eventually detonate"
-      ],
-      "Type": "unique_map"
-    },
-    "Players have %-% reduced Maximum total Life, Mana and Energy Shield Recovery per second from Leech": {
-      "BaseMods": [
-        "MapUberModLessPlayerLeech"
-      ],
-      "Descriptions": [
-        "Players have %-% reduced Maximum total Life, Mana and Energy Shield Recovery per second from Leech"
-      ]
-    },
-    "Players have %-% less Area of Effect": {
-      "BaseMods": [
-        "MapUberModAOEPlayer"
-      ],
-      "Descriptions": [
-        "Players have %-% less Area of Effect"
-      ]
-    },
-    "Players have %-% less Defences": {
-      "BaseMods": [
-        "MapUberModGlobalDefences"
-      ],
-      "Descriptions": [
-        "Players have %-% less Defences"
       ]
     },
     "Players have -%-% to all maximum Resistances": {
@@ -1609,15 +797,6 @@
         "Players have % less Armour"
       ]
     },
-    "Players have % reduced Character Size": {
-      "BaseMods": [
-        "MapSupporterActorScale2"
-      ],
-      "Descriptions": [
-        "Players have % reduced Character Size"
-      ],
-      "Type": "unique_map"
-    },
     "Players have % reduced effect of Non-Curse Auras from Skills": {
       "BaseMods": [
         "MapPlayersReducedAuraEffect2MapWorlds",
@@ -1630,7 +809,7 @@
       "Descriptions": [
         "Players have % reduced effect of Non-Curse Auras from Skills"
       ],
-      "Type": "unique_map"
+      "Type": "Valdo"
     },
     "Players have % less Accuracy Rating": {
       "BaseMods": [
@@ -1680,148 +859,6 @@
         "Players have % less Recovery Rate of Life and Energy Shield"
       ]
     },
-    "Players have % less effect of Flasks applied to them": {
-      "BaseMods": [
-        "MapUberModLessFlaskEffect"
-      ],
-      "Descriptions": [
-        "Players have % less effect of Flasks applied to them"
-      ]
-    },
-    "Players have -% to all maximum Resistances": {
-      "BaseMods": [
-        "MapUberModMinusMax"
-      ],
-      "Descriptions": [
-        "Players have -% to all maximum Resistances"
-      ]
-    },
-    "Players have Shroud Walker": {
-      "BaseMods": [
-        "MapSupporterShroudWalker"
-      ],
-      "Descriptions": [
-        "Players have Shroud Walker"
-      ],
-      "Type": "unique_map"
-    },
-    "Players have % chance to be targeted by a Meteor when they use a Flask": {
-      "BaseMods": [
-        "MapUberModFlaskMeteor"
-      ],
-      "Descriptions": [
-        "Players have % chance to be targeted by a Meteor when they use a Flask"
-      ]
-    },
-    "Players have % chance to gain Rare Monster Modifiers for # seconds on Kill": {
-      "BaseMods": [
-        "MapSupporterRareMonsterModOnKill"
-      ],
-      "Descriptions": [
-        "Players have % chance to gain Rare Monster Modifiers for # seconds on Kill"
-      ],
-      "Type": "unique_map"
-    },
-    "Players have % increased Character Size": {
-      "BaseMods": [
-        "MapSupporterActorScale1"
-      ],
-      "Descriptions": [
-        "Players have % increased Character Size"
-      ],
-      "Type": "unique_map"
-    },
-    "Players have % increased Cost of Skills for each Skill they've used Recently": {
-      "BaseMods": [
-        "MapSupporterSkillCosts"
-      ],
-      "Descriptions": [
-        "Players have % increased Cost of Skills for each Skill they've used Recently"
-      ],
-      "Type": "unique_map"
-    },
-    "Players in Area are driven mad": {
-      "BaseMods": [
-        "MapSupporterInsanity"
-      ],
-      "Descriptions": [
-        "Players in Area are driven mad"
-      ],
-      "Type": "unique_map"
-    },
-    "Players in Area are % Delirious": {
-      "BaseMods": [
-        "MapSupporterMaxAffliction"
-      ],
-      "Descriptions": [
-        "Players in Area are % Delirious"
-      ],
-      "Type": "unique_map"
-    },
-    "Players reflect % of Melee Physical Damage taken": {
-      "BaseMods": [
-        "MapSupporterPlayerThorns"
-      ],
-      "Descriptions": [
-        "Players reflect % of Melee Physical Damage taken"
-      ],
-      "Type": "unique_map"
-    },
-    "Players who Die in area are sent to the Void": {
-      "BaseMods": [
-        "MapSupporterVoidOnDeath"
-      ],
-      "Descriptions": [
-        "Players who Die in area are sent to the Void"
-      ],
-      "Type": "unique_map"
-    },
-    "Players' Minions deal % less Damage per Item Equipped by their Master": {
-      "BaseMods": [
-        "MapSupporterDamagePerSlot"
-      ],
-      "Descriptions": [
-        "Players deal % less Damage per Equipped Item",
-        "Players' Minions deal % less Damage per Item Equipped by their Master"
-      ],
-      "Type": "unique_map"
-    },
-    "Players' Travel Skills are Disabled": {
-      "BaseMods": [
-        "MapSupporterMovement"
-      ],
-      "Descriptions": [
-        "Players have % reduced Movement Speed",
-        "Players' Travel Skills are Disabled"
-      ],
-      "Type": "unique_map"
-    },
-    "Players' Vaal Skills do not apply Soul Gain Prevention": {
-      "BaseMods": [
-        "MapCorruptionSoulGainPrevention"
-      ],
-      "Descriptions": [
-        "Players' Vaal Skills do not apply Soul Gain Prevention"
-      ]
-    },
-    "Portals to Area close over time": {
-      "BaseMods": [
-        "MapSupporterPortalLoss"
-      ],
-      "Descriptions": [
-        "Portals to Area close over time"
-      ],
-      "Type": "unique_map"
-    },
-    "Portals to Area only close when Players die": {
-      "BaseMods": [
-        "MapSupporterGenerousPortals"
-      ],
-      "Descriptions": [
-        "Portals to Area only close when Players die"
-      ],
-      "Type": "unique_map"
-    },
     "Rare Monsters each have # additional Modifier": {
       "BaseMods": [
         "MapSupporterAdditionalRareMonsterMods1",
@@ -1833,90 +870,7 @@
         "Rare Monsters each have # additional Modifier",
         "%-% increased number of Rare Monsters"
       ],
-      "Type": "unique_map"
-    },
-    "Rare Monsters have Essence effects": {
-      "BaseMods": [
-        "MapSupporterEssence"
-      ],
-      "Descriptions": [
-        "Rare Monsters have Essence effects"
-      ],
-      "Type": "unique_map"
-    },
-    "Rare Monsters have % chance to have a Volatile Core": {
-      "BaseMods": [
-        "MapUberModVolatiles"
-      ],
-      "Descriptions": [
-        "Rare Monsters have % chance to have a Volatile Core"
-      ]
-    },
-    "Rare Monsters have % chance to spawn a Duplicate of Map Boss on Death": {
-      "BaseMods": [
-        "MapSupporterRareMonsterSpawnBoss"
-      ],
-      "Descriptions": [
-        "Rare Monsters have % chance to spawn a Duplicate of Map Boss on Death"
-      ],
-      "Type": "unique_map"
-    },
-    "Rare and Unique Monsters in Area are Possessed by up to # Tormented Spirit and if Possessed their Minions are Touched": {
-      "BaseMods": [
-        "MapSupporterPossessed1",
-        "MapSupporterPossessed2",
-        "MapSupporterPossessed3"
-      ],
-      "Descriptions": [
-        "Rare and Unique Monsters in Area are Possessed by up to # Tormented Spirit and if Possessed their Minions are Touched"
-      ],
-      "Type": "unique_map"
-    },
-    "Rare monsters in area Temporarily Revive on death": {
-      "BaseMods": [
-        "MapUberModRaresLastGasp"
-      ],
-      "Descriptions": [
-        "Rare monsters in area Temporarily Revive on death"
-      ]
-    },
-    "Rare monsters in area are Shaper-Touched": {
-      "BaseMods": [
-        "MapUberModShaperTouched"
-      ],
-      "Descriptions": [
-        "Rare monsters in area are Shaper-Touched"
-      ]
-    },
-    "Slaying Enemies close together can attract monsters from Beyond this realm": {
-      "BaseMods": [
-        "MapSupporterBeyond"
-      ],
-      "Descriptions": [
-        "Monsters from Beyond create Desecrated Ground\n Beyond Bosses cannot spawn",
-        "Slaying Enemies close together can attract monsters from Beyond this realm"
-      ],
-      "Type": "unique_map"
-    },
-    "Slaying Enemies in a kill streak grants Rampage bonuses": {
-      "BaseMods": [
-        "MapSupporterRampage"
-      ],
-      "Descriptions": [
-        "Slaying Enemies in a kill streak grants Rampage bonuses"
-      ],
-      "Type": "unique_map"
-    },
-    "Smuggler's Caches in area are guarded": {
-      "BaseMods": [
-        "MapSupporterHeist"
-      ],
-      "Descriptions": [
-        "All Smuggler's Caches must be opened to claim Reward",
-        "Area contains a Smuggler's Cache",
-        "Smuggler's Caches in area are guarded"
-      ],
-      "Type": "unique_map"
+      "Type": "Valdo"
     },
     "The Maven interferes with Players": {
       "BaseMods": [
@@ -1926,17 +880,7 @@
       "Descriptions": [
         "The Maven interferes with Players"
       ],
-      "Type": "unique_map"
-    },
-    "Tormented Spirits can Possess Players for # seconds\nTormented Spirits cannot Possess Monsters": {
-      "BaseMods": [
-        "MapSupporterTorment"
-      ],
-      "Descriptions": [
-        "Area is haunted by #-# additional Tormented Spirit",
-        "Tormented Spirits can Possess Players for # seconds\nTormented Spirits cannot Possess Monsters"
-      ],
-      "Type": "unique_map"
+      "Type": "Valdo"
     },
     "Unique Boss deals % increased Damage": {
       "BaseMods": [
@@ -1973,24 +917,6 @@
         "Unique Bosses are Possessed"
       ]
     },
-    "Unique Monsters drop Corrupted Items": {
-      "BaseMods": [
-        "MapCorruptionBossCorruption"
-      ],
-      "Descriptions": [
-        "Unique Monsters drop Corrupted Items"
-      ]
-    },
-    "Unique Monsters have a random Shrine Buff": {
-      "BaseMods": [
-        "MapSupporterDomination",
-        "MapUberModShrineBuff"
-      ],
-      "Descriptions": [
-        "Unique Monsters have a random Shrine Buff"
-      ],
-      "Type": "unique_map"
-    },
     "UniqueWatchstoneMapModEffect": {
       "BaseMods": [
         "UniqueWatchstoneMapModEffect_"
@@ -2002,60 +928,6 @@
         "UniqueWatchstoneMapPackSize"
       ],
       "Descriptions": []
-    },
-    "Unstable Breaches in Area contain a Boss": {
-      "BaseMods": [
-        "MapSupporterBreach"
-      ],
-      "Descriptions": [
-        "All Unstable Breaches must be Stabilised and Closed to claim Reward",
-        "Area contains an additional unstable Breach",
-        "Unstable Breaches in Area contain a Boss"
-      ],
-      "Type": "unique_map"
-    },
-    "When Hit, Players gain a random Movement Speed\nmodifier from % less to % more, until Hit again": {
-      "BaseMods": [
-        "MapSupporterVariableMovement"
-      ],
-      "Descriptions": [
-        "When Hit, Players gain a random Movement Speed\nmodifier from % less to % more, until Hit again"
-      ],
-      "Type": "unique_map"
-    },
-    "% chance for Rare Monsters to Fracture on death": {
-      "BaseMods": [
-        "MapUberModRareFracture"
-      ],
-      "Descriptions": [
-        "% chance for Rare Monsters to Fracture on death"
-      ]
-    },
-    "%-% increased Explicit Modifier magnitudes": {
-      "BaseMods": [
-        "MapCorruptionModEffect"
-      ],
-      "Descriptions": [
-        "%-% increased Explicit Modifier magnitudes"
-      ]
-    },
-    "%-% increased Magic Monsters": {
-      "BaseMods": [
-        "MapBloodlinesModOnMagicsMapWorlds"
-      ],
-      "Descriptions": [
-        "%-% increased Magic Monsters"
-      ]
-    },
-    "%-% increased Monster Cast Speed": {
-      "BaseMods": [
-        "MapUberModTurbo"
-      ],
-      "Descriptions": [
-        "%-% increased Monster Attack Speed",
-        "%-% increased Monster Cast Speed",
-        "%-% increased Monster Movement Speed"
-      ]
     },
     "%-% increased Monster Damage": {
       "BaseMods": [
@@ -2112,6 +984,254 @@
         "%-% more Monster Life"
       ]
     },
+    "Unique Monsters have a random Shrine Buff": {
+      "BaseMods": [
+        "MapUberModShrineBuff"
+      ],
+      "Descriptions": [
+        "Unique Monsters have a random Shrine Buff"
+      ],
+      "Type": "Uber"
+    },
+    "%-% increased Magic Monsters": {
+      "BaseMods": [
+        "MapBloodlinesModOnMagicsMapWorlds"
+      ],
+      "Descriptions": [
+        "%-% increased Magic Monsters"
+      ],
+      "Type": "Uber"
+    },
+    "Area contains Drowning Orbs": {
+      "BaseMods": [
+        "MapUberModDrowningOrbs"
+      ],
+      "Descriptions": [
+        "Area contains Drowning Orbs"
+      ],
+      "Type": "Uber"
+    },
+    "Area contains Labyrinth Hazards": {
+      "BaseMods": [
+        "MapUberModLabyrinthHazards"
+      ],
+      "Descriptions": [
+        "Area contains Labyrinth Hazards"
+      ],
+      "Type": "Uber"
+    },
+    "Area contains Runes of the Searing Exarch": {
+      "BaseMods": [
+        "MapUberModExarch"
+      ],
+      "Descriptions": [
+        "Area contains Runes of the Searing Exarch"
+      ],
+      "Type": "Uber"
+    },
+    "Area contains Unstable Tentacle Fiends": {
+      "BaseMods": [
+        "MapUberModElderNovas"
+      ],
+      "Descriptions": [
+        "Area contains Unstable Tentacle Fiends"
+      ],
+      "Type": "Uber"
+    },
+    "Area contains patches of moving Marked Ground, inflicting random Marks": {
+      "BaseMods": [
+        "MapUberModPlayerMarked"
+      ],
+      "Descriptions": [
+        "Area contains patches of moving Marked Ground, inflicting random Marks"
+      ],
+      "Type": "Uber"
+    },
+    "Auras from Player Skills which affect Allies also affect Enemies": {
+      "BaseMods": [
+        "MapUberModAurasAffectMonsters"
+      ],
+      "Descriptions": [
+        "Auras from Player Skills which affect Allies also affect Enemies"
+      ],
+      "Type": "Uber"
+    },
+    "Debuffs on Monsters expire % faster": {
+      "BaseMods": [
+        "MapUberModMonsterDebuffSpeed"
+      ],
+      "Descriptions": [
+        "Debuffs on Monsters expire % faster"
+      ],
+      "Type": "Uber"
+    },
+    "Map Boss is accompanied by a Synthesis Boss": {
+      "BaseMods": [
+        "MapUberModSynthMiniboss"
+      ],
+      "Descriptions": [
+        "Map Boss is accompanied by a Synthesis Boss"
+      ],
+      "Type": "Uber"
+    },
+    "Monster Damage Penetrates % Elemental Resistances": {
+      "BaseMods": [
+        "MapUberModEleDamagePenetration"
+      ],
+      "Descriptions": [
+        "Monster Damage Penetrates % Elemental Resistances"
+      ],
+      "Type": "Uber"
+    },
+    "Monsters gain %-% of their Physical Damage as Extra Damage of a random Element": {
+      "BaseMods": [
+        "MapUberModDamageAsElemental"
+      ],
+      "Descriptions": [
+        "Monsters gain %-% of their Physical Damage as Extra Damage of a random Element"
+      ],
+      "Type": "Uber"
+    },
+    "Monsters have # to Maximum Endurance Charges": {
+      "BaseMods": [
+        "MapUberModEnduranceCharges"
+      ],
+      "Descriptions": [
+        "Monsters have a % chance to gain an Endurance Charge when hit",
+        "Monsters have # to Maximum Endurance Charges"
+      ],
+      "Type": "Uber"
+    },
+    "Monsters have % Chance to Block Attack Damage": {
+      "BaseMods": [
+        "MapUberModMonsterAttackBlock"
+      ],
+      "Descriptions": [
+        "Monsters have % Chance to Block Attack Damage"
+      ],
+      "Type": "Uber"
+    },
+    "Players are Cursed with Ele/Temp/Vuln": {
+      "BaseMods": [
+        "MapUberModCurses"
+      ],
+      "Descriptions": [
+        "Players are Cursed with Elemental Weakness",
+        "Players are Cursed with Temporal Chains",
+        "Players are Cursed with Vulnerability"
+      ],
+      "Type": "Uber"
+    },
+    "Players are assaulted by Bloodstained Sawblades": {
+      "BaseMods": [
+        "MapUberModSawblades"
+      ],
+      "Descriptions": [
+        "Players are assaulted by Bloodstained Sawblades"
+      ],
+      "Type": "Uber"
+    },
+    "Players have %-% reduced Maximum total Life, Mana and Energy Shield Recovery per second from Leech": {
+      "BaseMods": [
+        "MapUberModLessPlayerLeech"
+      ],
+      "Descriptions": [
+        "Players have %-% reduced Maximum total Life, Mana and Energy Shield Recovery per second from Leech"
+      ],
+      "Type": "Uber"
+    },
+    "Players have %-% less Area of Effect": {
+      "BaseMods": [
+        "MapUberModAOEPlayer"
+      ],
+      "Descriptions": [
+        "Players have %-% less Area of Effect"
+      ],
+      "Type": "Uber"
+    },
+    "Players have %-% less Defences": {
+      "BaseMods": [
+        "MapUberModGlobalDefences"
+      ],
+      "Descriptions": [
+        "Players have %-% less Defences"
+      ],
+      "Type": "Uber"
+    },
+    "Players have % less effect of Flasks applied to them": {
+      "BaseMods": [
+        "MapUberModLessFlaskEffect"
+      ],
+      "Descriptions": [
+        "Players have % less effect of Flasks applied to them"
+      ],
+      "Type": "Uber"
+    },
+    "Players have -% to all maximum Resistances": {
+      "BaseMods": [
+        "MapUberModMinusMax"
+      ],
+      "Descriptions": [
+        "Players have -% to all maximum Resistances"
+      ],
+      "Type": "Uber"
+    },
+    "Players have % chance to be targeted by a Meteor when they use a Flask": {
+      "BaseMods": [
+        "MapUberModFlaskMeteor"
+      ],
+      "Descriptions": [
+        "Players have % chance to be targeted by a Meteor when they use a Flask"
+      ],
+      "Type": "Uber"
+    },
+    "Rare Monsters have % chance to have a Volatile Core": {
+      "BaseMods": [
+        "MapUberModVolatiles"
+      ],
+      "Descriptions": [
+        "Rare Monsters have % chance to have a Volatile Core"
+      ],
+      "Type": "Uber"
+    },
+    "Rare monsters in area Temporarily Revive on death": {
+      "BaseMods": [
+        "MapUberModRaresLastGasp"
+      ],
+      "Descriptions": [
+        "Rare monsters in area Temporarily Revive on death"
+      ],
+      "Type": "Uber"
+    },
+    "Rare monsters in area are Shaper-Touched": {
+      "BaseMods": [
+        "MapUberModShaperTouched"
+      ],
+      "Descriptions": [
+        "Rare monsters in area are Shaper-Touched"
+      ],
+      "Type": "Uber"
+    },
+    "% chance for Rare Monsters to Fracture on death": {
+      "BaseMods": [
+        "MapUberModRareFracture"
+      ],
+      "Descriptions": [
+        "% chance for Rare Monsters to Fracture on death"
+      ],
+      "Type": "Uber"
+    },
+    "%-% increased Monster Cast Speed": {
+      "BaseMods": [
+        "MapUberModTurbo"
+      ],
+      "Descriptions": [
+        "%-% increased Monster Attack Speed",
+        "%-% increased Monster Cast Speed",
+        "%-% increased Monster Movement Speed"
+      ],
+      "Type": "Uber"
+    },
     "%-% to Monster Critical Strike Multiplier": {
       "BaseMods": [
         "MapUberModCrit"
@@ -2119,7 +1239,995 @@
       "Descriptions": [
         "Monsters have %-% increased Critical Strike Chance",
         "%-% to Monster Critical Strike Multiplier"
-      ]
+      ],
+      "Type": "Uber"
+    },
+    "All Magic and Normal Monsters in Area are in a Union of Souls": {
+      "BaseMods": [
+        "MapSupporterUnionOfSouls"
+      ],
+      "Descriptions": [
+        "All Magic and Normal Monsters in Area are in a Union of Souls"
+      ],
+      "Type": "Valdo"
+    },
+    "Area becomes fatal after some time": {
+      "BaseMods": [
+        "MapSupporterFatal"
+      ],
+      "Descriptions": [
+        "Area becomes fatal after some time"
+      ],
+      "Type": "Valdo"
+    },
+    "Area becomes increasingly lethal": {
+      "BaseMods": [
+        "MapSupporterRampingDamage"
+      ],
+      "Descriptions": [
+        "Area becomes increasingly lethal"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains Einhar": {
+      "BaseMods": [
+        "MapSupporterIncursion"
+      ],
+      "Descriptions": [
+        "All Incursions must be completed to claim Reward",
+        "Area contains Einhar",
+        "Incursion Architects have % chance to be Possessed by a Tormented Spirit"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains Einhar, Exilehunter": {
+      "BaseMods": [
+        "MapSupporterEvilEinhar"
+      ],
+      "Descriptions": [
+        "Area contains Einhar, Exilehunter"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains Malachai's Creeping Agony": {
+      "BaseMods": [
+        "MapSupporterCreepingAgony"
+      ],
+      "Descriptions": [
+        "Area contains Malachai's Creeping Agony"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains Sirus' Deatomisation Storms": {
+      "BaseMods": [
+        "MapSupporterSirusStorms"
+      ],
+      "Descriptions": [
+        "Area contains Sirus' Deatomisation Storms"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains The Elderslayers": {
+      "BaseMods": [
+        "MapSupporterTheElderslayers"
+      ],
+      "Descriptions": [
+        "Area contains The Elderslayers"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains The Feared": {
+      "BaseMods": [
+        "MapSupporterTheFeared"
+      ],
+      "Descriptions": [
+        "Area contains The Feared"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains The Forgotten": {
+      "BaseMods": [
+        "MapSupporterTheForgotten"
+      ],
+      "Descriptions": [
+        "Area contains The Forgotten"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains The Formed": {
+      "BaseMods": [
+        "MapSupporterTheFormed"
+      ],
+      "Descriptions": [
+        "Area contains The Formed"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains The Remembered": {
+      "BaseMods": [
+        "MapSupporterTheHidden"
+      ],
+      "Descriptions": [
+        "Area contains The Remembered"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains The Twisted": {
+      "BaseMods": [
+        "MapSupporterTheTwisted"
+      ],
+      "Descriptions": [
+        "Area contains The Twisted"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains a Bismuth Ore Deposit": {
+      "BaseMods": [
+        "MapSupporterHarbinger"
+      ],
+      "Descriptions": [
+        "Area contains a Bismuth Ore Deposit"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains a Gigantic Rogue Exile": {
+      "BaseMods": [
+        "MapSupporterRogueGiants"
+      ],
+      "Descriptions": [
+        "Area contains a Gigantic Rogue Exile"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains additional packs of Restless Dead": {
+      "BaseMods": [
+        "MapSupporterRevivingMonsters"
+      ],
+      "Descriptions": [
+        "Area contains additional packs of Restless Dead"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains an additional Abyss": {
+      "BaseMods": [
+        "MapSupporterAbyss"
+      ],
+      "Descriptions": [
+        "Abysses in Area spawn % increased Monsters",
+        "All Abysses in Area must be completed to claim Reward",
+        "Area contains an additional Abyss"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains an additional Primal Harvest Boss": {
+      "BaseMods": [
+        "MapSupporterHarvestBoss3"
+      ],
+      "Descriptions": [
+        "Area contains an additional Primal Harvest Boss"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains an additional Vivid Harvest Boss": {
+      "BaseMods": [
+        "MapSupporterHarvestBoss2"
+      ],
+      "Descriptions": [
+        "Area contains an additional Vivid Harvest Boss"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains an additional Wild Harvest Boss": {
+      "BaseMods": [
+        "MapSupporterHarvestBoss1"
+      ],
+      "Descriptions": [
+        "Area contains an additional Wild Harvest Boss"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains {0} additional guarded Exquisite Vaal Vessels": {
+      "BaseMods": [
+        "MapSupporterVaalEmpoweredChests"
+      ],
+      "Descriptions": [
+        "Area contains {0} additional guarded Exquisite Vaal Vessels"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains enemies of all influence types": {
+      "BaseMods": [
+        "MapSupporterInfluencePacks"
+      ],
+      "Descriptions": [
+        "Area contains enemies of all influence types"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains many Detonation Totems": {
+      "BaseMods": [
+        "MapSupporterDetonateTotems"
+      ],
+      "Descriptions": [
+        "Area contains many Detonation Totems"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains roaming Hexfields": {
+      "BaseMods": [
+        "MapSupporterRoamingCurses"
+      ],
+      "Descriptions": [
+        "Area contains roaming Hexfields"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains # additional Rare Monsters that create Frost Walls and Flee": {
+      "BaseMods": [
+        "MapSupporterTricksters"
+      ],
+      "Descriptions": [
+        "Area contains # additional Rare Monsters that create Frost Walls and Flee"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains # additional pack of four Map Bosses": {
+      "BaseMods": [
+        "MapSupporterAtlasBosses1",
+        "MapSupporterAtlasBosses2",
+        "MapSupporterAtlasBosses3"
+      ],
+      "Descriptions": [
+        "Area contains # additional pack of four Map Bosses"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains #-# additional packs of Frog": {
+      "BaseMods": [
+        "MapSupporterAdditionalFrogPacks"
+      ],
+      "Descriptions": [
+        "Area contains #-# additional packs of Frog"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains #-# additional packs of Sulphite Golems": {
+      "BaseMods": [
+        "MapSupporterSulphiteGolems"
+      ],
+      "Descriptions": [
+        "Area contains #-# additional packs of Sulphite Golems"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains #-# additional packs of Untainted Wild Animals": {
+      "BaseMods": [
+        "MapSupporterUntaintedPacks"
+      ],
+      "Descriptions": [
+        "Area contains #-# additional packs of Untainted Wild Animals"
+      ],
+      "Type": "Valdo"
+    },
+    "Area has # additional random Modifier": {
+      "BaseMods": [
+        "MapSupporterAdditionalModifiers1",
+        "MapSupporterAdditionalModifiers2",
+        "MapSupporterAdditionalModifiers3"
+      ],
+      "Descriptions": [
+        "Area has # additional random Modifier"
+      ],
+      "Type": "Valdo"
+    },
+    "Area is affected by a Corrupting Tempest": {
+      "BaseMods": [
+        "MapSupporterCorruptingTempest"
+      ],
+      "Descriptions": [
+        "Area is affected by a Corrupting Tempest"
+      ],
+      "Type": "Valdo"
+    },
+    "Area is infested with Maddening Tentacles": {
+      "BaseMods": [
+        "MapSupporterMaddeningTentacles"
+      ],
+      "Descriptions": [
+        "Area is infested with Maddening Tentacles"
+      ],
+      "Type": "Valdo"
+    },
+    "Area is inhabited by Bone Husks": {
+      "BaseMods": [
+        "MapSupporterInhabitedByBoneHusks"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Bone Husks"
+      ],
+      "Type": "Valdo"
+    },
+    "Area is inhabited by Kitava's Heralds": {
+      "BaseMods": [
+        "MapSupporterInhabitedByHeralds"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Kitava's Heralds"
+      ],
+      "Type": "Valdo"
+    },
+    "Area is inhabited by Porcupines": {
+      "BaseMods": [
+        "MapSupporterInhabitedBySpikers"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Porcupines"
+      ],
+      "Type": "Valdo"
+    },
+    "Debuffs on players expire % slower": {
+      "BaseMods": [
+        "MapSupporterDebuffsExpireSlower"
+      ],
+      "Descriptions": [
+        "Debuffs on players expire % slower"
+      ],
+      "Type": "Valdo"
+    },
+    "Durability of Ichor Pumps in Area is #": {
+      "BaseMods": [
+        "MapSupporterBlight"
+      ],
+      "Descriptions": [
+        "Area contains a Blight Encounter",
+        "Durability of Ichor Pumps in Area is #"
+      ],
+      "Type": "Valdo"
+    },
+    "Legion Monsters in Area have a Volatile Core": {
+      "BaseMods": [
+        "MapSupporterLegionVolatiles"
+      ],
+      "Descriptions": [
+        "All Legion monsters in Area must be released to claim Reward",
+        "Area contains an additional Legion Encounter",
+        "Legion Monsters in Area have a Volatile Core"
+      ],
+      "Type": "Valdo"
+    },
+    "Living Weapons": {
+      "BaseMods": [
+        "MapSupporterAnimatedWeapons"
+      ],
+      "Descriptions": [
+        "Living Weapons"
+      ],
+      "Type": "Valdo"
+    },
+    "Maximum number of Players in Area is one": {
+      "BaseMods": [
+        "MapSupporterSoloMode"
+      ],
+      "Descriptions": [
+        "Maximum number of Players in Area is one"
+      ],
+      "Type": "Valdo"
+    },
+    "Monster corpses cannot be Destroyed": {
+      "BaseMods": [
+        "MapSupporterNoCorpseRemoval"
+      ],
+      "Descriptions": [
+        "Monster corpses cannot be Destroyed"
+      ],
+      "Type": "Valdo"
+    },
+    "Monsters Enrage on Low Life": {
+      "BaseMods": [
+        "MapSupporterEnrage"
+      ],
+      "Descriptions": [
+        "Monsters Enrage on Low Life"
+      ],
+      "Type": "Valdo"
+    },
+    "Monsters Kill things with % or lower Life on Hit": {
+      "BaseMods": [
+        "MapSupporterSuperCull"
+      ],
+      "Descriptions": [
+        "Monsters Kill things with % or lower Life on Hit"
+      ],
+      "Type": "Valdo"
+    },
+    "Monsters can only be Damaged while within # metres of a Player\nPlayers' modifiers to Light Radius also apply to this range": {
+      "BaseMods": [
+        "MapSupporterDamageRadius"
+      ],
+      "Descriptions": [
+        "Monsters can only be Damaged while within # metres of a Player\nPlayers' modifiers to Light Radius also apply to this range"
+      ],
+      "Type": "Valdo"
+    },
+    "Monsters drop no Items": {
+      "BaseMods": [
+        "MapSupporterNoItems"
+      ],
+      "Descriptions": [
+        "Monsters drop no Items"
+      ],
+      "Type": "Valdo"
+    },
+    "Monsters have % chance to have a Volatile Core": {
+      "BaseMods": [
+        "MapSupporterVolatilesOnDeath"
+      ],
+      "Descriptions": [
+        "Monsters have % chance to have a Volatile Core"
+      ],
+      "Type": "Valdo"
+    },
+    "Monsters inflict Malediction on hit": {
+      "BaseMods": [
+        "MapSupporterMalediction"
+      ],
+      "Descriptions": [
+        "Monsters inflict Malediction on hit"
+      ],
+      "Type": "Valdo"
+    },
+    "Monsters inflict Petrification for # seconds on hit": {
+      "BaseMods": [
+        "MapSupporterPetrifyOnHit"
+      ],
+      "Descriptions": [
+        "Monsters inflict Petrification for # seconds on hit"
+      ],
+      "Type": "Valdo"
+    },
+    "Non-Unique Equipment found in Area drops as Currency instead": {
+      "BaseMods": [
+        "MapSupporterVendoredDrops"
+      ],
+      "Descriptions": [
+        "Non-Unique Equipment found in Area drops as Currency instead"
+      ],
+      "Type": "Valdo"
+    },
+    "Only opens # Portal to Area": {
+      "BaseMods": [
+        "MapSupporterPortalLimit1",
+        "MapSupporterPortalLimit2"
+      ],
+      "Descriptions": [
+        "Only opens # Portal to Area"
+      ],
+      "Type": "Valdo"
+    },
+    "Players are assaulted by Ruinous Ghosts\nReaching seven Ruin prevents Reward from being claimed": {
+      "BaseMods": [
+        "MapSupporterRuinGhosts"
+      ],
+      "Descriptions": [
+        "Area has no chance to contain Ultimatum Encounters",
+        "Players are assaulted by Ruinous Ghosts\nReaching seven Ruin prevents Reward from being claimed"
+      ],
+      "Type": "Valdo"
+    },
+    "Players are assaulted by apparitions of Al-Hezmin, the Hunter": {
+      "BaseMods": [
+        "MapSupporterAlHezminApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of Al-Hezmin, the Hunter"
+      ],
+      "Type": "Valdo"
+    },
+    "Players are assaulted by apparitions of Atziri, Queen of the Vaal": {
+      "BaseMods": [
+        "MapSupporterAtziriApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of Atziri, Queen of the Vaal"
+      ],
+      "Type": "Valdo"
+    },
+    "Players are assaulted by apparitions of Baran, the Crusader": {
+      "BaseMods": [
+        "MapSupporterBaranApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of Baran, the Crusader"
+      ],
+      "Type": "Valdo"
+    },
+    "Players are assaulted by apparitions of Drox, the Warlord": {
+      "BaseMods": [
+        "MapSupporterDroxApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of Drox, the Warlord"
+      ],
+      "Type": "Valdo"
+    },
+    "Players are assaulted by apparitions of Sirus, Awakener of Worlds": {
+      "BaseMods": [
+        "MapSupporterSirusApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of Sirus, Awakener of Worlds"
+      ],
+      "Type": "Valdo"
+    },
+    "Players are assaulted by apparitions of The Elder": {
+      "BaseMods": [
+        "MapSupporterElderApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of The Elder"
+      ],
+      "Type": "Valdo"
+    },
+    "Players are assaulted by apparitions of The Shaper": {
+      "BaseMods": [
+        "MapSupporterShaperApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of The Shaper"
+      ],
+      "Type": "Valdo"
+    },
+    "Players are assaulted by apparitions of Veritania, the Redeemer": {
+      "BaseMods": [
+        "MapSupporterVeritaniaApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of Veritania, the Redeemer"
+      ],
+      "Type": "Valdo"
+    },
+    "Players are assaulted by many dangerous Apparitions": {
+      "BaseMods": [
+        "MapSupporterAllApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by many dangerous Apparitions"
+      ],
+      "Type": "Valdo"
+    },
+    "Players are randomly targeted by Meteors": {
+      "BaseMods": [
+        "MapSupporterMeteor"
+      ],
+      "Descriptions": [
+        "Players are randomly targeted by Meteors"
+      ],
+      "Type": "Valdo"
+    },
+    "Players cannot Block": {
+      "BaseMods": [
+        "MapSupporterCannotBlock"
+      ],
+      "Descriptions": [
+        "Players cannot Block"
+      ],
+      "Type": "Valdo"
+    },
+    "Players cannot Evade": {
+      "BaseMods": [
+        "MapSupporterCannotEvade"
+      ],
+      "Descriptions": [
+        "Players cannot Evade"
+      ],
+      "Type": "Valdo"
+    },
+    "Players cannot Recover Life or Energy Shield above % during Rituals in Area": {
+      "BaseMods": [
+        "MapSupporterRitual"
+      ],
+      "Descriptions": [
+        "Areas contain Ritual Altars",
+        "Must fully complete all Ritual Encounters in Area to claim Reward",
+        "Players cannot Recover Life or Energy Shield above % during Rituals in Area"
+      ],
+      "Type": "Valdo"
+    },
+    "Players cannot Suppress Spell Damage": {
+      "BaseMods": [
+        "MapSupporterPlayerCannotSuppress"
+      ],
+      "Descriptions": [
+        "Players cannot Suppress Spell Damage"
+      ],
+      "Type": "Valdo"
+    },
+    "Players cannot choose which Ultimatum Modifier is applied each Round": {
+      "BaseMods": [
+        "MapSupporterUltimatum"
+      ],
+      "Descriptions": [
+        "Areas contain an Ultimatum Encounter",
+        "Must complete ten Ultimatum Encounter waves to claim Reward",
+        "Players cannot choose which Ultimatum Modifier is applied each Round"
+      ],
+      "Type": "Valdo"
+    },
+    "Players cannot gain Flask Charges": {
+      "BaseMods": [
+        "MapSupporterCannotGainFlasks"
+      ],
+      "Descriptions": [
+        "Players cannot gain Flask Charges"
+      ],
+      "Type": "Valdo"
+    },
+    "Players deal % increased Damage while Dead": {
+      "BaseMods": [
+        "MapSupporterPlayerDamageWhileDead"
+      ],
+      "Descriptions": [
+        "Players deal % increased Damage while Dead"
+      ],
+      "Type": "Valdo"
+    },
+    "Players do not gain Experience": {
+      "BaseMods": [
+        "MapSupporterNoExperience"
+      ],
+      "Descriptions": [
+        "Players do not gain Experience"
+      ],
+      "Type": "Valdo"
+    },
+    "Players gain Instability on Kill\nUnstable Players eventually detonate": {
+      "BaseMods": [
+        "MapSupporterInstabilityCharges"
+      ],
+      "Descriptions": [
+        "Players gain Instability on Kill\nUnstable Players eventually detonate"
+      ],
+      "Type": "Valdo"
+    },
+    "Players have % reduced Character Size": {
+      "BaseMods": [
+        "MapSupporterActorScale2"
+      ],
+      "Descriptions": [
+        "Players have % reduced Character Size"
+      ],
+      "Type": "Valdo"
+    },
+    "Players have Shroud Walker": {
+      "BaseMods": [
+        "MapSupporterShroudWalker"
+      ],
+      "Descriptions": [
+        "Players have Shroud Walker"
+      ],
+      "Type": "Valdo"
+    },
+    "Players have % chance to gain Rare Monster Modifiers for # seconds on Kill": {
+      "BaseMods": [
+        "MapSupporterRareMonsterModOnKill"
+      ],
+      "Descriptions": [
+        "Players have % chance to gain Rare Monster Modifiers for # seconds on Kill"
+      ],
+      "Type": "Valdo"
+    },
+    "Players have % increased Character Size": {
+      "BaseMods": [
+        "MapSupporterActorScale1"
+      ],
+      "Descriptions": [
+        "Players have % increased Character Size"
+      ],
+      "Type": "Valdo"
+    },
+    "Players have % increased Cost of Skills for each Skill they've used Recently": {
+      "BaseMods": [
+        "MapSupporterSkillCosts"
+      ],
+      "Descriptions": [
+        "Players have % increased Cost of Skills for each Skill they've used Recently"
+      ],
+      "Type": "Valdo"
+    },
+    "Players in Area are driven mad": {
+      "BaseMods": [
+        "MapSupporterInsanity"
+      ],
+      "Descriptions": [
+        "Players in Area are driven mad"
+      ],
+      "Type": "Valdo"
+    },
+    "Players in Area are % Delirious": {
+      "BaseMods": [
+        "MapSupporterMaxAffliction"
+      ],
+      "Descriptions": [
+        "Players in Area are % Delirious"
+      ],
+      "Type": "Valdo"
+    },
+    "Players reflect % of Melee Physical Damage taken": {
+      "BaseMods": [
+        "MapSupporterPlayerThorns"
+      ],
+      "Descriptions": [
+        "Players reflect % of Melee Physical Damage taken"
+      ],
+      "Type": "Valdo"
+    },
+    "Players who Die in area are sent to the Void": {
+      "BaseMods": [
+        "MapSupporterVoidOnDeath"
+      ],
+      "Descriptions": [
+        "Players who Die in area are sent to the Void"
+      ],
+      "Type": "Valdo"
+    },
+    "Players' Minions deal % less Damage per Item Equipped by their Master": {
+      "BaseMods": [
+        "MapSupporterDamagePerSlot"
+      ],
+      "Descriptions": [
+        "Players deal % less Damage per Equipped Item",
+        "Players' Minions deal % less Damage per Item Equipped by their Master"
+      ],
+      "Type": "Valdo"
+    },
+    "Players' Travel Skills are Disabled": {
+      "BaseMods": [
+        "MapSupporterMovement"
+      ],
+      "Descriptions": [
+        "Players have % reduced Movement Speed",
+        "Players' Travel Skills are Disabled"
+      ],
+      "Type": "Valdo"
+    },
+    "Portals to Area close over time": {
+      "BaseMods": [
+        "MapSupporterPortalLoss"
+      ],
+      "Descriptions": [
+        "Portals to Area close over time"
+      ],
+      "Type": "Valdo"
+    },
+    "Portals to Area only close when Players die": {
+      "BaseMods": [
+        "MapSupporterGenerousPortals"
+      ],
+      "Descriptions": [
+        "Portals to Area only close when Players die"
+      ],
+      "Type": "Valdo"
+    },
+    "Rare Monsters have Essence effects": {
+      "BaseMods": [
+        "MapSupporterEssence"
+      ],
+      "Descriptions": [
+        "Rare Monsters have Essence effects"
+      ],
+      "Type": "Valdo"
+    },
+    "Rare Monsters have % chance to spawn a Duplicate of Map Boss on Death": {
+      "BaseMods": [
+        "MapSupporterRareMonsterSpawnBoss"
+      ],
+      "Descriptions": [
+        "Rare Monsters have % chance to spawn a Duplicate of Map Boss on Death"
+      ],
+      "Type": "Valdo"
+    },
+    "Rare and Unique Monsters in Area are Possessed by up to # Tormented Spirit and if Possessed their Minions are Touched": {
+      "BaseMods": [
+        "MapSupporterPossessed1",
+        "MapSupporterPossessed2",
+        "MapSupporterPossessed3"
+      ],
+      "Descriptions": [
+        "Rare and Unique Monsters in Area are Possessed by up to # Tormented Spirit and if Possessed their Minions are Touched"
+      ],
+      "Type": "Valdo"
+    },
+    "Slaying Enemies close together can attract monsters from Beyond this realm": {
+      "BaseMods": [
+        "MapSupporterBeyond"
+      ],
+      "Descriptions": [
+        "Monsters from Beyond create Desecrated Ground\n Beyond Bosses cannot spawn",
+        "Slaying Enemies close together can attract monsters from Beyond this realm"
+      ],
+      "Type": "Valdo"
+    },
+    "Slaying Enemies in a kill streak grants Rampage bonuses": {
+      "BaseMods": [
+        "MapSupporterRampage"
+      ],
+      "Descriptions": [
+        "Slaying Enemies in a kill streak grants Rampage bonuses"
+      ],
+      "Type": "Valdo"
+    },
+    "Smuggler's Caches in area are guarded": {
+      "BaseMods": [
+        "MapSupporterHeist"
+      ],
+      "Descriptions": [
+        "All Smuggler's Caches must be opened to claim Reward",
+        "Area contains a Smuggler's Cache",
+        "Smuggler's Caches in area are guarded"
+      ],
+      "Type": "Valdo"
+    },
+    "Tormented Spirits can Possess Players for # seconds\nTormented Spirits cannot Possess Monsters": {
+      "BaseMods": [
+        "MapSupporterTorment"
+      ],
+      "Descriptions": [
+        "Area is haunted by #-# additional Tormented Spirit",
+        "Tormented Spirits can Possess Players for # seconds\nTormented Spirits cannot Possess Monsters"
+      ],
+      "Type": "Valdo"
+    },
+    "Unique Monsters have 2 random Shrine Buffs": {
+      "BaseMods": [
+        "MapSupporterDomination"
+      ],
+      "Descriptions": [
+        "Unique Monsters have 2 random Shrine Buffs"
+      ],
+      "Type": "Valdo"
+    },
+    "Unstable Breaches in Area contain a Boss": {
+      "BaseMods": [
+        "MapSupporterBreach"
+      ],
+      "Descriptions": [
+        "All Unstable Breaches must be Stabilised and Closed to claim Reward",
+        "Area contains an additional unstable Breach",
+        "Unstable Breaches in Area contain a Boss"
+      ],
+      "Type": "Valdo"
+    },
+    "When Hit, Players gain a random Movement Speed\nmodifier from % less to % more, until Hit again": {
+      "BaseMods": [
+        "MapSupporterVariableMovement"
+      ],
+      "Descriptions": [
+        "When Hit, Players gain a random Movement Speed\nmodifier from % less to % more, until Hit again"
+      ],
+      "Type": "Valdo"
+    },
+    "Area contains Medved, Feller of Heroes": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionSagaContainsBoss2_",
+        "ExpeditionLogbookMapExpeditionSagaContainsBoss3",
+        "ExpeditionLogbookMapExpeditionSagaContainsBoss4",
+        "ExpeditionLogbookMapExpeditionSagaContainsBoss_"
+      ],
+      "Descriptions": [
+        "Area contains Medved, Feller of Heroes"
+      ],
+      "Type": "Expedition"
+    },
+    "Area contains an additional Underground Area": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionSagaAdditionalTerrainFeatures__"
+      ],
+      "Descriptions": [
+        "Area contains an additional Underground Area"
+      ],
+      "Type": "Expedition"
+    },
+    "Area contains #-# additional Chest Marker": {
+      "BaseMods": [
+        "MapExpeditionChestCount____"
+      ],
+      "Descriptions": [
+        "Area contains #-# additional Chest Marker"
+      ],
+      "Type": "Expedition"
+    },
+    "Area contains %-% increased number of Monster Markers": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionNumberOfMonsterMarkers_"
+      ],
+      "Descriptions": [
+        "Area contains %-% increased number of Monster Markers"
+      ],
+      "Type": "Expedition"
+    },
+    "Area contains %-% increased number of Remnants": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionRelics"
+      ],
+      "Descriptions": [
+        "Area contains %-% increased number of Remnants"
+      ],
+      "Type": "Expedition"
+    },
+    "Area contains %-% increased number of Runic Monster Markers": {
+      "BaseMods": [
+        "MapExpeditionEliteMonsterQuantity"
+      ],
+      "Descriptions": [
+        "Area contains %-% increased number of Runic Monster Markers"
+      ],
+      "Type": "Expedition"
+    },
+    "Excavated Chests have a %-% chance to contain twice as many Items": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionChestDoubleDropsChance_"
+      ],
+      "Descriptions": [
+        "Excavated Chests have a %-% chance to contain twice as many Items"
+      ],
+      "Type": "Expedition"
+    },
+    "Remnants have %-% chance to have an additional Suffix Modifier": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionExtraRelicSuffixChance__"
+      ],
+      "Descriptions": [
+        "Remnants have %-% chance to have an additional Suffix Modifier"
+      ],
+      "Type": "Expedition"
+    },
+    "Runic Monsters have % more Life": {
+      "BaseMods": [
+        "MapSupporterExpedition"
+      ],
+      "Descriptions": [
+        "Area contains an Expedition Encounter",
+        "Must complete an Expedition with three or more Remnants enabled to claim Reward",
+        "Runic Monsters deal % more Damage",
+        "Runic Monsters have % more Life"
+      ],
+      "Type": "Expedition"
+    },
+    "%-% increased Explosive Placement Range": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionMaximumPlacementDistance"
+      ],
+      "Descriptions": [
+        "%-% increased Explosive Placement Range"
+      ],
+      "Type": "Expedition"
+    },
+    "%-% increased Explosive Radius": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionExplosionRadius"
+      ],
+      "Descriptions": [
+        "%-% increased Explosive Radius"
+      ],
+      "Type": "Expedition"
+    },
+    "%-% increased number of Explosives": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionExplosives"
+      ],
+      "Descriptions": [
+        "%-% increased number of Explosives"
+      ],
+      "Type": "Expedition"
+    },
+    "%-% increased quantity of Artifacts dropped by Monsters": {
+      "BaseMods": [
+        "MapExpeditionArtifactQuantity"
+      ],
+      "Descriptions": [
+        "%-% increased quantity of Artifacts dropped by Monsters"
+      ],
+      "Type": "Expedition"
     }
   }
 }

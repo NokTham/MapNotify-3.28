@@ -250,9 +250,22 @@ namespace MapNotify_3_28
             ImGui.Text($"Showing {filtered.Count} mods from database.");
             ImGui.Separator();
 
-            foreach (var modEntry in filtered)
+            string[] typeOrder = { "Generic", "Uber", "Expedition", "Valdo" };
+            foreach (var sectionType in typeOrder)
             {
-                DrawModBrowserEntry(modEntry);
+                var sectionMods = filtered.Where(m =>
+                    (string.IsNullOrEmpty(m.Type) ? "Generic" : m.Type).Equals(sectionType, StringComparison.OrdinalIgnoreCase)).ToList();
+
+                if (sectionMods.Count == 0) continue;
+
+                if (ImGui.TreeNodeEx($"{sectionType} ({sectionMods.Count})", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    foreach (var modEntry in sectionMods)
+                    {
+                        DrawModBrowserEntry(modEntry);
+                    }
+                    ImGui.TreePop();
+                }
             }
         }
 
