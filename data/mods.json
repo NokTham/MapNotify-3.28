@@ -1,0 +1,2425 @@
+{
+  "metadata": {
+    "version": "3.28",
+    "total_mods": 627,
+    "total_craftable_mods": 515,
+    "total_unique_map_mods": 112
+  },
+  "groups": {
+    "+{%} Monster Chaos Resistance": {
+      "BaseMods": [
+        "MapMonstersAllResistances1MapWorldsExpedition",
+        "MapMonstersAllResistances2MapWorlds",
+        "MapMonstersAllResistances2MapWorldsExpedition",
+        "MapMonstersAllResistances3MapWorlds",
+        "MapMonstersAllResistances3MapWorldsExpedition__",
+        "MapMonstersAllResistances3MapWorldsMaven",
+        "MapMonstersAllResistancesMapWorlds",
+        "MapMonstersAllResistancesMapWorldsExpedition",
+        "MapUberWeakMonstersAllResistances"
+      ],
+      "Descriptions": [
+        "+{%} Monster Chaos Resistance",
+        "+{%} Monster Elemental Resistances"
+      ]
+    },
+    "+{%} Monster Physical Damage Reduction": {
+      "BaseMods": [
+        "MapMonsterPhysicalResistance1MapWorldsExpedition",
+        "MapMonsterPhysicalResistance2MapWorlds",
+        "MapMonsterPhysicalResistance2MapWorldsExpedition_",
+        "MapMonsterPhysicalResistance3MapWorldsExpedition",
+        "MapMonsterPhysicalResistance3MapWorldsMaven",
+        "MapMonsterPhysicalResistance3MapWorlds_",
+        "MapMonsterPhysicalResistanceMapWorlds",
+        "MapMonsterPhysicalResistanceMapWorldsExpedition",
+        "MapUberModResistancePDR",
+        "MapUberWeakMonsterPhysicalResistance"
+      ],
+      "Descriptions": [
+        "+{%} Monster Chaos Resistance",
+        "+{%} Monster Elemental Resistances",
+        "+{%} Monster Physical Damage Reduction"
+      ]
+    },
+    "-{%} more effect of Curses on Monsters": {
+      "BaseMods": [
+        "MapMonstersCurseEffectOnSelfFinal1MapWorldsExpedition",
+        "MapMonstersCurseEffectOnSelfFinal2MapWorlds",
+        "MapMonstersCurseEffectOnSelfFinal2MapWorldsExpedition",
+        "MapMonstersCurseEffectOnSelfFinal3MapWorlds",
+        "MapMonstersCurseEffectOnSelfFinal3MapWorldsExpedition_",
+        "MapMonstersCurseEffectOnSelfFinal3MapWorldsMaven",
+        "MapMonstersCurseEffectOnSelfFinalMapWorlds",
+        "MapMonstersCurseEffectOnSelfFinalMapWorldsExpedition",
+        "MapUberWeakMonstersCurseEffectOnSelfFinal"
+      ],
+      "Descriptions": [
+        "-{%} more effect of Curses on Monsters"
+      ]
+    },
+    "All Magic and Normal Monsters in Area are in a Union of Souls": {
+      "BaseMods": [
+        "MapSupporterUnionOfSouls"
+      ],
+      "Descriptions": [
+        "All Magic and Normal Monsters in Area are in a Union of Souls"
+      ],
+      "Type": "unique_map"
+    },
+    "All Monster Damage from Hits always Ignites": {
+      "BaseMods": [
+        "MapMonstersAllDamageAlwaysIgnitesMapWorldsMaven",
+        "MapMonstersAllDamageAlwaysIgnitesMapWorlds_",
+        "MapUberWeakMonstersAllDamageAlwaysIgnites"
+      ],
+      "Descriptions": [
+        "All Monster Damage from Hits always Ignites"
+      ]
+    },
+    "Area becomes fatal after some time": {
+      "BaseMods": [
+        "MapSupporterFatal"
+      ],
+      "Descriptions": [
+        "Area becomes fatal after some time"
+      ],
+      "Type": "unique_map"
+    },
+    "Area becomes increasingly lethal": {
+      "BaseMods": [
+        "MapSupporterRampingDamage"
+      ],
+      "Descriptions": [
+        "Area becomes increasingly lethal"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains Drowning Orbs": {
+      "BaseMods": [
+        "MapUberModDrowningOrbs"
+      ],
+      "Descriptions": [
+        "Area contains Drowning Orbs"
+      ]
+    },
+    "Area contains Einhar": {
+      "BaseMods": [
+        "MapSupporterIncursion"
+      ],
+      "Descriptions": [
+        "All Incursions must be completed to claim Reward",
+        "Area contains Einhar",
+        "Incursion Architects have {%} chance to be Possessed by a Tormented Spirit"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains Einhar, Exilehunter": {
+      "BaseMods": [
+        "MapSupporterEvilEinhar"
+      ],
+      "Descriptions": [
+        "Area contains Einhar, Exilehunter"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains Labyrinth Hazards": {
+      "BaseMods": [
+        "MapUberModLabyrinthHazards"
+      ],
+      "Descriptions": [
+        "Area contains Labyrinth Hazards"
+      ]
+    },
+    "Area contains Malachai's Creeping Agony": {
+      "BaseMods": [
+        "MapSupporterCreepingAgony"
+      ],
+      "Descriptions": [
+        "Area contains Malachai's Creeping Agony"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains Medved, Feller of Heroes": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionSagaContainsBoss2_",
+        "ExpeditionLogbookMapExpeditionSagaContainsBoss3",
+        "ExpeditionLogbookMapExpeditionSagaContainsBoss4",
+        "ExpeditionLogbookMapExpeditionSagaContainsBoss_"
+      ],
+      "Descriptions": [
+        "Area contains Medved, Feller of Heroes"
+      ]
+    },
+    "Area contains Runes of the Searing Exarch": {
+      "BaseMods": [
+        "MapUberModExarch"
+      ],
+      "Descriptions": [
+        "Area contains Runes of the Searing Exarch"
+      ]
+    },
+    "Area contains Sirus' Deatomisation Storms": {
+      "BaseMods": [
+        "MapSupporterSirusStorms"
+      ],
+      "Descriptions": [
+        "Area contains Sirus' Deatomisation Storms"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains The Elderslayers": {
+      "BaseMods": [
+        "MapSupporterTheElderslayers"
+      ],
+      "Descriptions": [
+        "Area contains The Elderslayers"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains The Feared": {
+      "BaseMods": [
+        "MapSupporterTheFeared"
+      ],
+      "Descriptions": [
+        "Area contains The Feared"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains The Forgotten": {
+      "BaseMods": [
+        "MapSupporterTheForgotten"
+      ],
+      "Descriptions": [
+        "Area contains The Forgotten"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains The Formed": {
+      "BaseMods": [
+        "MapSupporterTheFormed"
+      ],
+      "Descriptions": [
+        "Area contains The Formed"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains The Remembered": {
+      "BaseMods": [
+        "MapSupporterTheHidden"
+      ],
+      "Descriptions": [
+        "Area contains The Remembered"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains The Twisted": {
+      "BaseMods": [
+        "MapSupporterTheTwisted"
+      ],
+      "Descriptions": [
+        "Area contains The Twisted"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains Unstable Tentacle Fiends": {
+      "BaseMods": [
+        "MapUberModElderNovas"
+      ],
+      "Descriptions": [
+        "Area contains Unstable Tentacle Fiends"
+      ]
+    },
+    "Area contains a Bismuth Ore Deposit": {
+      "BaseMods": [
+        "MapSupporterHarbinger"
+      ],
+      "Descriptions": [
+        "Area contains a Bismuth Ore Deposit"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains a Gigantic Rogue Exile": {
+      "BaseMods": [
+        "MapSupporterRogueGiants"
+      ],
+      "Descriptions": [
+        "Area contains a Gigantic Rogue Exile"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains additional packs of Restless Dead": {
+      "BaseMods": [
+        "MapSupporterRevivingMonsters"
+      ],
+      "Descriptions": [
+        "Area contains additional packs of Restless Dead"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains an additional Abyss": {
+      "BaseMods": [
+        "MapSupporterAbyss"
+      ],
+      "Descriptions": [
+        "Abysses in Area spawn {%} increased Monsters",
+        "All Abysses in Area must be completed to claim Reward",
+        "Area contains an additional Abyss"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains an additional Primal Harvest Boss": {
+      "BaseMods": [
+        "MapSupporterHarvestBoss3"
+      ],
+      "Descriptions": [
+        "Area contains an additional Primal Harvest Boss"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains an additional Underground Area": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionSagaAdditionalTerrainFeatures__"
+      ],
+      "Descriptions": [
+        "Area contains an additional Underground Area"
+      ]
+    },
+    "Area contains an additional Vivid Harvest Boss": {
+      "BaseMods": [
+        "MapSupporterHarvestBoss2"
+      ],
+      "Descriptions": [
+        "Area contains an additional Vivid Harvest Boss"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains an additional Wild Harvest Boss": {
+      "BaseMods": [
+        "MapSupporterHarvestBoss1"
+      ],
+      "Descriptions": [
+        "Area contains an additional Wild Harvest Boss"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains {0} additional guarded Exquisite Vaal Vessels": {
+      "BaseMods": [
+        "MapCorruptionVaalVessel",
+        "MapSupporterVaalEmpoweredChests"
+      ],
+      "Descriptions": [
+        "All Strongboxes in Area must be opened to claim Reward",
+        "Area contains {0} additional guarded Exquisite Vaal Vessels"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains enemies of all influence types": {
+      "BaseMods": [
+        "MapSupporterInfluencePacks"
+      ],
+      "Descriptions": [
+        "Area contains enemies of all influence types"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains many Detonation Totems": {
+      "BaseMods": [
+        "MapSupporterDetonateTotems"
+      ],
+      "Descriptions": [
+        "Area contains many Detonation Totems"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains many Totems": {
+      "BaseMods": [
+        "MapTotemsMapWorlds"
+      ],
+      "Descriptions": [
+        "Area contains many Totems"
+      ]
+    },
+    "Area contains patches of moving Marked Ground, inflicting random Marks": {
+      "BaseMods": [
+        "MapUberModPlayerMarked"
+      ],
+      "Descriptions": [
+        "Area contains patches of moving Marked Ground, inflicting random Marks"
+      ]
+    },
+    "Area contains roaming Hexfields": {
+      "BaseMods": [
+        "MapSupporterRoamingCurses"
+      ],
+      "Descriptions": [
+        "Area contains roaming Hexfields"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains two Unique Bosses": {
+      "BaseMods": [
+        "MapTwoBossesMapWorlds"
+      ],
+      "Descriptions": [
+        "Area contains two Unique Bosses"
+      ]
+    },
+    "Area contains {#} additional Rare Monsters that create Frost Walls and Flee": {
+      "BaseMods": [
+        "MapSupporterTricksters"
+      ],
+      "Descriptions": [
+        "Area contains {#} additional Rare Monsters that create Frost Walls and Flee"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains {#} additional pack of four Map Bosses": {
+      "BaseMods": [
+        "MapSupporterAtlasBosses1",
+        "MapSupporterAtlasBosses2",
+        "MapSupporterAtlasBosses3"
+      ],
+      "Descriptions": [
+        "Area contains {#} additional pack of four Map Bosses"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains {#}-{#} additional Chest Marker": {
+      "BaseMods": [
+        "MapExpeditionChestCount____"
+      ],
+      "Descriptions": [
+        "Area contains {#}-{#} additional Chest Marker"
+      ]
+    },
+    "Area contains {#}-{#} additional packs of Frog": {
+      "BaseMods": [
+        "MapSupporterAdditionalFrogPacks"
+      ],
+      "Descriptions": [
+        "Area contains {#}-{#} additional packs of Frog"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains {#}-{#} additional packs of Sulphite Golems": {
+      "BaseMods": [
+        "MapSupporterSulphiteGolems"
+      ],
+      "Descriptions": [
+        "Area contains {#}-{#} additional packs of Sulphite Golems"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains {#}-{#} additional packs of Untainted Wild Animals": {
+      "BaseMods": [
+        "MapSupporterUntaintedPacks"
+      ],
+      "Descriptions": [
+        "Area contains {#}-{#} additional packs of Untainted Wild Animals"
+      ],
+      "Type": "unique_map"
+    },
+    "Area contains {%}-{%} increased number of Monster Markers": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionNumberOfMonsterMarkers_"
+      ],
+      "Descriptions": [
+        "Area contains {%}-{%} increased number of Monster Markers"
+      ]
+    },
+    "Area contains {%}-{%} increased number of Remnants": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionRelics"
+      ],
+      "Descriptions": [
+        "Area contains {%}-{%} increased number of Remnants"
+      ]
+    },
+    "Area contains {%}-{%} increased number of Runic Monster Markers": {
+      "BaseMods": [
+        "MapExpeditionEliteMonsterQuantity"
+      ],
+      "Descriptions": [
+        "Area contains {%}-{%} increased number of Runic Monster Markers"
+      ]
+    },
+    "Area has an additional random Scarab effect": {
+      "BaseMods": [
+        "MapCorruptionRandomScarab"
+      ],
+      "Descriptions": [
+        "Area has an additional random Scarab effect"
+      ]
+    },
+    "Area has increased monster variety": {
+      "BaseMods": [
+        "MapMoreMonsterPackVarietyMapWorlds_"
+      ],
+      "Descriptions": [
+        "Area has increased monster variety"
+      ]
+    },
+    "Area has patches of Burning Ground": {
+      "BaseMods": [
+        "MapBurningGround1MapWorldsExpedition_",
+        "MapBurningGround1MapWorlds_",
+        "MapBurningGround2MapWorlds",
+        "MapBurningGround2MapWorldsExpedition",
+        "MapBurningGround3MapWorlds",
+        "MapBurningGround3MapWorldsExpedition_",
+        "MapBurningGround3MapWorldsMaven",
+        "MapBurningGroundMapWorldsExpedition",
+        "MapUberWeakBurningGround"
+      ],
+      "Descriptions": [
+        "Area has patches of Burning Ground",
+        "Ground Effect has a radius of {#}",
+        "{#} patches with Ground Effect per {#} tiles"
+      ]
+    },
+    "Area has patches of Chilled Ground": {
+      "BaseMods": [
+        "MapChilledGroundSuffix1MapWorlds",
+        "MapChilledGroundSuffix1MapWorldsExpedition",
+        "MapChilledGroundSuffix2MapWorlds",
+        "MapChilledGroundSuffix2MapWorldsExpedition",
+        "MapChilledGroundSuffix3MapWorldsExpedition",
+        "MapChilledGroundSuffix3MapWorldsMaven",
+        "MapChilledGroundSuffix3MapWorlds_",
+        "MapChilledGroundSuffixMapWorldsExpedition",
+        "MapUberWeakChilledGroundSuffix"
+      ],
+      "Descriptions": [
+        "Area has patches of Chilled Ground",
+        "Ground Effect has a radius of {#}",
+        "{#} patches with Ground Effect per {#} tiles"
+      ]
+    },
+    "Area has patches of Consecrated Ground": {
+      "BaseMods": [
+        "MapConsecratedGround1MapWorldsExpedition_",
+        "MapConsecratedGround2MapWorlds",
+        "MapConsecratedGround2MapWorldsExpedition_______",
+        "MapConsecratedGround3MapWorldsExpedition",
+        "MapConsecratedGround3MapWorldsMaven",
+        "MapConsecratedGround3MapWorlds__",
+        "MapConsecratedGroundMapWorlds",
+        "MapConsecratedGroundMapWorldsExpedition",
+        "MapUberWeakConsecratedGround"
+      ],
+      "Descriptions": [
+        "Area has patches of Consecrated Ground",
+        "Ground Effect has a radius of {#}",
+        "{#} patches with Ground Effect per {#} tiles"
+      ]
+    },
+    "Area has patches of Shocked Ground which increase Damage taken by {%}": {
+      "BaseMods": [
+        "MapShockedGround1MapWorlds",
+        "MapShockedGround1MapWorldsExpedition_",
+        "MapShockedGround2MapWorlds",
+        "MapShockedGround2MapWorldsExpedition",
+        "MapShockedGround3MapWorlds",
+        "MapShockedGround3MapWorldsExpedition",
+        "MapShockedGround3MapWorldsMaven",
+        "MapShockedGroundMapWorldsExpedition",
+        "MapUberWeakShockedGround"
+      ],
+      "Descriptions": [
+        "Area has patches of Shocked Ground which increase Damage taken by {%}",
+        "Ground Effect has a radius of {#}",
+        "{#} patches with Ground Effect per {#} tiles"
+      ]
+    },
+    "Area has patches of desecrated ground": {
+      "BaseMods": [
+        "MapDesecratedGround1MapWorlds",
+        "MapDesecratedGround1MapWorldsExpedition",
+        "MapDesecratedGround2MapWorldsExpedition",
+        "MapDesecratedGround2MapWorlds__",
+        "MapDesecratedGround3MapWorlds",
+        "MapDesecratedGround3MapWorldsExpedition",
+        "MapDesecratedGround3MapWorldsMaven",
+        "MapDesecratedGroundMapWorldsExpedition",
+        "MapUberWeakDesecratedGround"
+      ],
+      "Descriptions": [
+        "Area has patches of desecrated ground",
+        "Ground Effect has a radius of {#}",
+        "{#} patches with Ground Effect per {#} tiles"
+      ]
+    },
+    "Area has {#} additional random Modifier": {
+      "BaseMods": [
+        "MapSupporterAdditionalModifiers1",
+        "MapSupporterAdditionalModifiers2",
+        "MapSupporterAdditionalModifiers3"
+      ],
+      "Descriptions": [
+        "Area has {#} additional random Modifier"
+      ],
+      "Type": "unique_map"
+    },
+    "Area is affected by a Corrupting Tempest": {
+      "BaseMods": [
+        "MapSupporterCorruptingTempest"
+      ],
+      "Descriptions": [
+        "Area is affected by a Corrupting Tempest"
+      ],
+      "Type": "unique_map"
+    },
+    "Area is affected by an additional random Unallocated Notable Atlas Passives": {
+      "BaseMods": [
+        "MapCorruptionRandomAtlasNotables"
+      ],
+      "Descriptions": [
+        "Area is affected by an additional random Unallocated Notable Atlas Passives"
+      ]
+    },
+    "Area is infested with Maddening Tentacles": {
+      "BaseMods": [
+        "MapSupporterMaddeningTentacles"
+      ],
+      "Descriptions": [
+        "Area is infested with Maddening Tentacles"
+      ],
+      "Type": "unique_map"
+    },
+    "Area is inhabited by Abominations": {
+      "BaseMods": [
+        "MapMonsterPacksAbominationMapWorlds"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Abominations"
+      ]
+    },
+    "Area is inhabited by Animals": {
+      "BaseMods": [
+        "MapMonsterPacksAnimalsMapWorlds"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Animals"
+      ]
+    },
+    "Area is inhabited by Bone Husks": {
+      "BaseMods": [
+        "MapSupporterInhabitedByBoneHusks"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Bone Husks"
+      ],
+      "Type": "unique_map"
+    },
+    "Area is inhabited by Cultists of Kitava": {
+      "BaseMods": [
+        "MapMonsterPacksKitavaMapWorlds_"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Cultists of Kitava"
+      ]
+    },
+    "Area is inhabited by Demons": {
+      "BaseMods": [
+        "MapMonsterPacksDemonsMapWorlds"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Demons"
+      ]
+    },
+    "Area is inhabited by Ghosts": {
+      "BaseMods": [
+        "MapMonsterPacksGhostsMapWorlds"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Ghosts"
+      ]
+    },
+    "Area is inhabited by Goatmen": {
+      "BaseMods": [
+        "MapMonsterPacksGoatmenMapWorlds"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Goatmen"
+      ]
+    },
+    "Area is inhabited by Humanoids": {
+      "BaseMods": [
+        "MapMonsterPacksHumanoidsMapWorlds"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Humanoids"
+      ]
+    },
+    "Area is inhabited by Kitava's Heralds": {
+      "BaseMods": [
+        "MapSupporterInhabitedByHeralds"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Kitava's Heralds"
+      ],
+      "Type": "unique_map"
+    },
+    "Area is inhabited by Lunaris fanatics": {
+      "BaseMods": [
+        "MapMonsterPacksLunarisMapWorlds_"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Lunaris fanatics"
+      ]
+    },
+    "Area is inhabited by Porcupines": {
+      "BaseMods": [
+        "MapSupporterInhabitedBySpikers"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Porcupines"
+      ],
+      "Type": "unique_map"
+    },
+    "Area is inhabited by Sea Witches and their Spawn": {
+      "BaseMods": [
+        "MapMonsterPacksSpawnsSeaWitchesMapWorlds"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Sea Witches and their Spawn"
+      ]
+    },
+    "Area is inhabited by Skeletons": {
+      "BaseMods": [
+        "MapMonsterPacksSkeletonsMapWorlds_"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Skeletons"
+      ]
+    },
+    "Area is inhabited by Solaris fanatics": {
+      "BaseMods": [
+        "MapMonsterPacksSolarisMapWorlds_"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Solaris fanatics"
+      ]
+    },
+    "Area is inhabited by Undead": {
+      "BaseMods": [
+        "MapMonsterPacksUndeadMapWorlds_"
+      ],
+      "Descriptions": [
+        "Area is inhabited by Undead"
+      ]
+    },
+    "Area is inhabited by ranged monsters": {
+      "BaseMods": [
+        "MapMonsterPacksRangedMapWorlds"
+      ],
+      "Descriptions": [
+        "Area is inhabited by ranged monsters"
+      ]
+    },
+    "Atlas Passives have {%}-{%} reduced Effect on Area": {
+      "BaseMods": [
+        "MapCorruptionAtlasEffect"
+      ],
+      "Descriptions": [
+        "Atlas Passives have {%}-{%} reduced Effect on Area"
+      ]
+    },
+    "Auras from Player Skills which affect Allies also affect Enemies": {
+      "BaseMods": [
+        "MapUberModAurasAffectMonsters"
+      ],
+      "Descriptions": [
+        "Auras from Player Skills which affect Allies also affect Enemies"
+      ]
+    },
+    "Buffs on Players expire {%} faster": {
+      "BaseMods": [
+        "MapPlayersBuffsExpireFaster1MapWorldsExpedition___",
+        "MapPlayersBuffsExpireFaster2MapWorldsExpedition",
+        "MapPlayersBuffsExpireFaster2MapWorlds___",
+        "MapPlayersBuffsExpireFaster3MapWorlds",
+        "MapPlayersBuffsExpireFaster3MapWorldsExpedition_",
+        "MapPlayersBuffsExpireFaster3MapWorldsMaven",
+        "MapPlayersBuffsExpireFasterMapWorlds",
+        "MapPlayersBuffsExpireFasterMapWorldsExpedition",
+        "MapUberModBuffExpiry",
+        "MapUberWeakPlayersBuffsExpireFaster"
+      ],
+      "Descriptions": [
+        "Buffs on Players expire {%} faster"
+      ]
+    },
+    "Debuffs on Monsters expire {%} faster": {
+      "BaseMods": [
+        "MapUberModMonsterDebuffSpeed"
+      ],
+      "Descriptions": [
+        "Debuffs on Monsters expire {%} faster"
+      ]
+    },
+    "Debuffs on players expire -{%} faster": {
+      "BaseMods": [
+        "MapSupporterDebuffsExpireSlower"
+      ],
+      "Descriptions": [
+        "Debuffs on players expire -{%} faster"
+      ],
+      "Type": "unique_map"
+    },
+    "Durability of Ichor Pumps in Area is {#}": {
+      "BaseMods": [
+        "MapSupporterBlight"
+      ],
+      "Descriptions": [
+        "Area contains a Blight Encounter",
+        "Durability of Ichor Pumps in Area is {#}"
+      ],
+      "Type": "unique_map"
+    },
+    "Excavated Chests have a {%}-{%} chance to contain twice as many Items": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionChestDoubleDropsChance_"
+      ],
+      "Descriptions": [
+        "Excavated Chests have a {%}-{%} chance to contain twice as many Items"
+      ]
+    },
+    "Final Boss drops an additional Currency Item": {
+      "BaseMods": [
+        "MemoryAltarMapBossAdditionalCurrency"
+      ],
+      "Descriptions": [
+        "Final Boss drops an additional Currency Item"
+      ]
+    },
+    "Final Boss drops an additional Scarab": {
+      "BaseMods": [
+        "MemoryAltarMapBossAdditionalScarabs"
+      ],
+      "Descriptions": [
+        "Final Boss drops an additional Scarab"
+      ]
+    },
+    "Final Boss drops an additional Unique Item": {
+      "BaseMods": [
+        "MemoryAltarMapBossAdditionalUniques"
+      ],
+      "Descriptions": [
+        "Final Boss drops an additional Unique Item"
+      ]
+    },
+    "Legion Monsters in Area have a Volatile Core": {
+      "BaseMods": [
+        "MapSupporterLegionVolatiles"
+      ],
+      "Descriptions": [
+        "All Legion monsters in Area must be released to claim Reward",
+        "Area contains an additional Legion Encounter",
+        "Legion Monsters in Area have a Volatile Core"
+      ],
+      "Type": "unique_map"
+    },
+    "Living Weapons": {
+      "BaseMods": [
+        "MapSupporterAnimatedWeapons"
+      ],
+      "Descriptions": [
+        "Living Weapons"
+      ],
+      "Type": "unique_map"
+    },
+    "Map Boss is accompanied by a Synthesis Boss": {
+      "BaseMods": [
+        "MapUberModSynthMiniboss"
+      ],
+      "Descriptions": [
+        "Map Boss is accompanied by a Synthesis Boss"
+      ]
+    },
+    "Map Bosses have {%} chance to be surrounded by Tormented Spirits": {
+      "BaseMods": [
+        "MemoryAltarMapBossSurroundedBySpirits"
+      ],
+      "Descriptions": [
+        "Map Bosses have {%} chance to be surrounded by Tormented Spirits"
+      ]
+    },
+    "Map has {#} additional random Prefix": {
+      "BaseMods": [
+        "UniqueWatchstoneMapAdditionalPrefix_"
+      ],
+      "Descriptions": [
+        "Map has {#} additional random Prefix"
+      ]
+    },
+    "Map has {#} additional random Suffix": {
+      "BaseMods": [
+        "UniqueWatchstoneMapAdditionalSuffix"
+      ],
+      "Descriptions": [
+        "Map has {#} additional random Suffix"
+      ]
+    },
+    "Maven releases all Bosses at once": {
+      "BaseMods": [
+        "MapMonsterAllBossesAtOnceMaven",
+        "MapMonsterAllBossesAtOnceMavenFeared",
+        "MapMonsterAllBossesAtOnceMavenHidden",
+        "MapMonsterAllBossesAtOnceMavenVoid"
+      ],
+      "Descriptions": [
+        "Maven releases all Bosses at once"
+      ]
+    },
+    "Maximum number of Players in Area is one": {
+      "BaseMods": [
+        "MapSupporterSoloMode"
+      ],
+      "Descriptions": [
+        "Maximum number of Players in Area is one"
+      ],
+      "Type": "unique_map"
+    },
+    "Monster Damage Penetrates {%} Elemental Resistances": {
+      "BaseMods": [
+        "MapUberModEleDamagePenetration"
+      ],
+      "Descriptions": [
+        "Monster Damage Penetrates {%} Elemental Resistances"
+      ]
+    },
+    "Monster corpses cannot be Destroyed": {
+      "BaseMods": [
+        "MapSupporterNoCorpseRemoval"
+      ],
+      "Descriptions": [
+        "Monster corpses cannot be Destroyed"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters Enrage on Low Life": {
+      "BaseMods": [
+        "MapSupporterEnrage"
+      ],
+      "Descriptions": [
+        "Monsters Enrage on Low Life"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters Kill things with {%} or lower Life on Hit": {
+      "BaseMods": [
+        "MapSupporterSuperCull"
+      ],
+      "Descriptions": [
+        "Monsters Kill things with {%} or lower Life on Hit"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters Poison on Hit": {
+      "BaseMods": [
+        "MapPoisoningMapWorlds",
+        "MapPoisoningMapWorldsExpedition",
+        "MapPoisoningMapWorldsMaven",
+        "MapUberModPoison"
+      ],
+      "Descriptions": [
+        "All Damage from Monsters' Hits can Poison",
+        "Monsters Poison on Hit",
+        "Monsters have {%} increased Poison Duration"
+      ]
+    },
+    "Monsters are Hexproof": {
+      "BaseMods": [
+        "MapHexproofMapWorlds",
+        "MapHexproofMapWorldsMaven_",
+        "MapUberWeakHexproof"
+      ],
+      "Descriptions": [
+        "Monsters are Hexproof"
+      ]
+    },
+    "Monsters can only be Damaged while within {#} metres of a Player\nPlayers' modifiers to Light Radius also apply to this range": {
+      "BaseMods": [
+        "MapSupporterDamageRadius"
+      ],
+      "Descriptions": [
+        "Monsters can only be Damaged while within {#} metres of a Player\nPlayers' modifiers to Light Radius also apply to this range"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters cannot be Leeched from": {
+      "BaseMods": [
+        "MapMonsterLifeLeechImmunityMapWorlds",
+        "MapMonsterLifeLeechImmunityMapWorldsMaven"
+      ],
+      "Descriptions": [
+        "",
+        "Monsters cannot be Leeched from"
+      ]
+    },
+    "Monsters cannot be Stunned": {
+      "BaseMods": [
+        "MapMonsterCannotBeStunned1MapWorldsExpedition_",
+        "MapMonsterCannotBeStunned2MapWorlds",
+        "MapMonsterCannotBeStunned2MapWorldsExpedition",
+        "MapMonsterCannotBeStunned3MapWorldsExpedition__",
+        "MapMonsterCannotBeStunned3MapWorldsMaven___",
+        "MapMonsterCannotBeStunned3MapWorlds_",
+        "MapMonsterCannotBeStunnedMapWorldsExpedition",
+        "MapMonsterCannotBeStunnedMapWorlds_",
+        "MapUberModJuggernaut",
+        "MapUberWeakMonsterCannotBeStunned"
+      ],
+      "Descriptions": [
+        "Monsters cannot be Stunned",
+        "Monsters' Action Speed cannot be modified to below Base Value",
+        "Monsters' Movement Speed cannot be modified to below Base Value",
+        "{%}-{%} more Monster Life"
+      ]
+    },
+    "Monsters deal {%}-{%} extra Physical Damage as Cold": {
+      "BaseMods": [
+        "MapMonsterColdDamage1MapWorldsExpedition",
+        "MapMonsterColdDamage2MapWorlds",
+        "MapMonsterColdDamage2MapWorldsExpedition",
+        "MapMonsterColdDamage3MapWorldsExpedition",
+        "MapMonsterColdDamage3MapWorldsMaven",
+        "MapMonsterColdDamage3MapWorlds_",
+        "MapMonsterColdDamageMapWorlds",
+        "MapMonsterColdDamageMapWorldsExpedition",
+        "MapUberWeakMonsterColdDamage"
+      ],
+      "Descriptions": [
+        "Monsters deal {%}-{%} extra Physical Damage as Cold"
+      ]
+    },
+    "Monsters deal {%}-{%} extra Physical Damage as Fire": {
+      "BaseMods": [
+        "MapMonsterFireDamage1MapWorldsExpedition",
+        "MapMonsterFireDamage2MapWorlds",
+        "MapMonsterFireDamage2MapWorldsExpedition",
+        "MapMonsterFireDamage3MapWorlds",
+        "MapMonsterFireDamage3MapWorldsExpedition",
+        "MapMonsterFireDamage3MapWorldsMaven_",
+        "MapMonsterFireDamageMapWorlds",
+        "MapMonsterFireDamageMapWorldsExpedition",
+        "MapUberWeakMonsterFireDamage"
+      ],
+      "Descriptions": [
+        "Monsters deal {%}-{%} extra Physical Damage as Fire"
+      ]
+    },
+    "Monsters deal {%}-{%} extra Physical Damage as Lightning": {
+      "BaseMods": [
+        "MapMonsterLightningDamage1MapWorldsExpedition",
+        "MapMonsterLightningDamage2MapWorldsExpedition_",
+        "MapMonsterLightningDamage2MapWorlds__",
+        "MapMonsterLightningDamage3MapWorlds",
+        "MapMonsterLightningDamage3MapWorldsExpedition_",
+        "MapMonsterLightningDamage3MapWorldsMaven",
+        "MapMonsterLightningDamageMapWorlds",
+        "MapMonsterLightningDamageMapWorldsExpedition",
+        "MapUberWeakMonsterLightningDamage"
+      ],
+      "Descriptions": [
+        "Monsters deal {%}-{%} extra Physical Damage as Lightning"
+      ]
+    },
+    "Monsters drop no Items": {
+      "BaseMods": [
+        "MapSupporterNoItems"
+      ],
+      "Descriptions": [
+        "Monsters drop no Items"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters fire {#} additional Projectiles": {
+      "BaseMods": [
+        "MapMonsterMultipleProjectilesWorlds",
+        "MapMonsterMultipleProjectilesWorldsExpedition_",
+        "MapMonsterMultipleProjectilesWorldsMaven",
+        "MapSupporterMultipleProjectiles",
+        "MapUberModProjAOE"
+      ],
+      "Descriptions": [
+        "Monsters fire {#} additional Projectiles",
+        "Monsters have {%} increased Area of Effect"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters gain {%}-{%} of Maximum Life as Extra Maximum Energy Shield": {
+      "BaseMods": [
+        "MapMonstersMaximumLifeAddedEnergyShield1MapWorldsExpedition_",
+        "MapMonstersMaximumLifeAddedEnergyShield2MapWorldsExpedition",
+        "MapMonstersMaximumLifeAddedEnergyShield2MapWorlds_____",
+        "MapMonstersMaximumLifeAddedEnergyShield3MapWorlds",
+        "MapMonstersMaximumLifeAddedEnergyShield3MapWorldsExpedition__",
+        "MapMonstersMaximumLifeAddedEnergyShield3MapWorldsMaven",
+        "MapMonstersMaximumLifeAddedEnergyShieldMapWorlds",
+        "MapMonstersMaximumLifeAddedEnergyShieldMapWorldsExpedition",
+        "MapUberModLifeAsEnergyShield",
+        "MapUberWeakMonstersMaximumLifeAddedEnergyShield"
+      ],
+      "Descriptions": [
+        "Monsters gain {%}-{%} of Maximum Life as Extra Maximum Energy Shield"
+      ]
+    },
+    "Monsters gain {%}-{%} of their Physical Damage as Extra Chaos Damage": {
+      "BaseMods": [
+        "MapMonsterChaosDamage2MapWorlds",
+        "MapMonsterChaosDamage2MapWorldsExpedition",
+        "MapMonsterChaosDamage3MapWorlds",
+        "MapMonsterChaosDamage3MapWorldsExpedition",
+        "MapMonsterChaosDamage3MapWorldsMaven",
+        "MapUberModDamageAsChaos",
+        "MapUberWeakMonsterChaosDamage"
+      ],
+      "Descriptions": [
+        "Monsters gain {%}-{%} of their Physical Damage as Extra Chaos Damage",
+        "Monsters have {%} chance to inflict Withered for {#} seconds on Hit"
+      ]
+    },
+    "Monsters gain {%}-{%} of their Physical Damage as Extra Damage of a random Element": {
+      "BaseMods": [
+        "MapUberModDamageAsElemental"
+      ],
+      "Descriptions": [
+        "Monsters gain {%}-{%} of their Physical Damage as Extra Damage of a random Element"
+      ]
+    },
+    "Monsters have a {%} chance to Ignite, Freeze and Shock on Hit": {
+      "BaseMods": [
+        "MapMonstersChanceToInflictStatusAilments1MapWorldsExpedition__",
+        "MapMonstersChanceToInflictStatusAilments2MapWorlds",
+        "MapMonstersChanceToInflictStatusAilments2MapWorldsExpedition",
+        "MapMonstersChanceToInflictStatusAilments2MapWorldsMaven",
+        "MapMonstersChanceToInflictStatusAilmentsMapWorlds",
+        "MapMonstersChanceToInflictStatusAilmentsMapWorldsExpedition",
+        "MapUberModMonsterAilments",
+        "MapUberWeakMonstersChanceToInflictStatusAilments"
+      ],
+      "Descriptions": [
+        "All Monster Damage can Ignite, Freeze and Shock",
+        "Monsters have a {%} chance to Ignite, Freeze and Shock on Hit"
+      ]
+    },
+    "Monsters have a {%} chance to avoid Poison, Impale, and Bleeding": {
+      "BaseMods": [
+        "MapMonstersAvoidPoisonBleedBlind1MapWorldsExpedition",
+        "MapMonstersAvoidPoisonBleedBlind2MapWorlds",
+        "MapMonstersAvoidPoisonBleedBlind2MapWorldsExpedition_",
+        "MapMonstersAvoidPoisonBleedBlind3MapWorlds",
+        "MapMonstersAvoidPoisonBleedBlind3MapWorldsExpedition",
+        "MapMonstersAvoidPoisonBleedBlind3MapWorldsMaven",
+        "MapMonstersAvoidPoisonBleedBlindMapWorlds",
+        "MapMonstersAvoidPoisonBleedBlindMapWorldsExpedition__",
+        "MapUberWeakMonstersAvoidPoisonBleedBlind"
+      ],
+      "Descriptions": [
+        "Monsters have a {%} chance to avoid Poison, Impale, and Bleeding"
+      ]
+    },
+    "Monsters have {#} to Maximum Endurance Charges": {
+      "BaseMods": [
+        "MapUberModEnduranceCharges"
+      ],
+      "Descriptions": [
+        "Monsters have a {%} chance to gain an Endurance Charge when hit",
+        "Monsters have {#} to Maximum Endurance Charges"
+      ]
+    },
+    "Monsters have {%} Chance to Block Attack Damage": {
+      "BaseMods": [
+        "MapUberModMonsterAttackBlock"
+      ],
+      "Descriptions": [
+        "Monsters have {%} Chance to Block Attack Damage"
+      ]
+    },
+    "Monsters have {%} chance to Avoid Elemental Ailments": {
+      "BaseMods": [
+        "MapMonsterStatusAilmentAvoidance2MapWorlds",
+        "MapMonsterStatusAilmentAvoidanceMapWorlds",
+        "MapMonsterStatusAilmentImmunityMapWorlds",
+        "MapMonsterStatusAilmentImmunityMapWorldsMaven_",
+        "MapUberWeakMonsterStatusAilmentImmunity"
+      ],
+      "Descriptions": [
+        "Monsters have {%} chance to Avoid Elemental Ailments"
+      ]
+    },
+    "Monsters have {%} chance to Blind on Hit": {
+      "BaseMods": [
+        "MapMonstersBlindOnHitMapWorlds",
+        "MapMonstersBlindOnHitMapWorldsExpedition__",
+        "MapMonstersBlindOnHitMapWorldsMaven__",
+        "MapUberWeakMonstersBlindOnHit"
+      ],
+      "Descriptions": [
+        "Monsters have {%} chance to Blind on Hit"
+      ]
+    },
+    "Monsters have {%} chance to Hinder on Hit with Spells": {
+      "BaseMods": [
+        "MapMonstersHinderOnHitMapWorlds",
+        "MapMonstersHinderOnHitMapWorldsExpedition",
+        "MapMonstersHinderOnHitMapWorldsMaven"
+      ],
+      "Descriptions": [
+        "Monsters have {%} chance to Hinder on Hit with Spells"
+      ]
+    },
+    "Monsters have {%} chance to Maim on Hit with Attacks": {
+      "BaseMods": [
+        "MapMonstersMaimOnHitMapWorlds",
+        "MapMonstersMaimOnHitMapWorldsExpedition_",
+        "MapMonstersMaimOnHitMapWorldsMaven__",
+        "MapUberWeakMonstersMaimOnHit"
+      ],
+      "Descriptions": [
+        "Monsters have {%} chance to Maim on Hit with Attacks"
+      ]
+    },
+    "Monsters have {%} chance to Suppress Spell Damage": {
+      "BaseMods": [
+        "MapMonstersChanceToSuppressSpells1MapWorldsExpedition__",
+        "MapMonstersChanceToSuppressSpells2MapWorlds",
+        "MapMonstersChanceToSuppressSpells2MapWorldsExpedition",
+        "MapMonstersChanceToSuppressSpells3MapWorlds",
+        "MapMonstersChanceToSuppressSpells3MapWorldsExpedition",
+        "MapMonstersChanceToSuppressSpells3MapWorldsMaven_",
+        "MapMonstersChanceToSuppressSpellsMapWorlds",
+        "MapMonstersChanceToSuppressSpellsMapWorldsExpedition",
+        "MapUberModMonsterSuppress",
+        "MapUberWeakMonstersChanceToSuppressSpells"
+      ],
+      "Descriptions": [
+        "Monsters have {%} chance to Suppress Spell Damage"
+      ]
+    },
+    "Monsters have {%} chance to gain a Frenzy Charge on Hit": {
+      "BaseMods": [
+        "MapMonstersFrenzyChargeOnHitMapWorlds",
+        "MapMonstersFrenzyChargeOnHitMapWorldsExpedition_",
+        "MapMonstersFrenzyChargeOnHitMapWorldsMaven",
+        "MapSupporterFrenzyOnHit",
+        "MapUberModFrenzyCharges",
+        "MapUberWeakMonstersFrenzyChargeOnHit"
+      ],
+      "Descriptions": [
+        "Monsters have {#} to Maximum Frenzy Charges",
+        "Monsters have {%} chance to gain a Frenzy Charge on Hit"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters have {%} chance to gain a Power Charge on Hit": {
+      "BaseMods": [
+        "MapMonstersPowerChargeOnHitMapWorlds",
+        "MapMonstersPowerChargeOnHitMapWorldsExpedition",
+        "MapMonstersPowerChargeOnHitMapWorldsMaven",
+        "MapSupporterPowerOnHit",
+        "MapUberModPowerCharges",
+        "MapUberWeakMonstersPowerChargeOnHit"
+      ],
+      "Descriptions": [
+        "Monsters have {#} to Maximum Power Charges",
+        "Monsters have {%} chance to gain a Power Charge on Hit"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters have {%} chance to gain an Endurance Charge on Hit": {
+      "BaseMods": [
+        "MapMonstersEnduranceChargeOnHitMapWorlds",
+        "MapMonstersEnduranceChargeOnHitMapWorldsExpedition",
+        "MapMonstersEnduranceChargeOnHitMapWorldsMaven",
+        "MapSupporterEnduranceOnHit",
+        "MapUberWeakMonstersEnduranceChargeOnHit"
+      ],
+      "Descriptions": [
+        "Monsters have {#} to Maximum Endurance Charges",
+        "Monsters have {%} chance to gain an Endurance Charge on Hit"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters have {%} chance to have a Volatile Core": {
+      "BaseMods": [
+        "MapSupporterVolatilesOnDeath"
+      ],
+      "Descriptions": [
+        "Monsters have {%} chance to have a Volatile Core"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters have {%} chance to steal Power, Frenzy and Endurance charges on Hit": {
+      "BaseMods": [
+        "MapMonstersStealChargesOnHitMapWorlds",
+        "MapMonstersStealChargesOnHitMapWorldsExpedition",
+        "MapMonstersStealChargesOnHitMapWorldsMaven__",
+        "MapUberWeakMonstersStealChargesOnHit"
+      ],
+      "Descriptions": [
+        "Monsters have {%} chance to steal Power, Frenzy and Endurance charges on Hit"
+      ]
+    },
+    "Monsters have {%} increased Area of Effect": {
+      "BaseMods": [
+        "MapMonsterAreaOfEffect1MapWorldsExpedition_",
+        "MapMonsterAreaOfEffect2MapWorlds",
+        "MapMonsterAreaOfEffect2MapWorldsExpedition",
+        "MapMonsterAreaOfEffect3MapWorlds",
+        "MapMonsterAreaOfEffect3MapWorldsExpedition__",
+        "MapMonsterAreaOfEffect3MapWorldsMaven__",
+        "MapMonsterAreaOfEffectMapWorlds",
+        "MapMonsterAreaOfEffectMapWorldsExpedition",
+        "MapUberWeakMonsterAreaOfEffect"
+      ],
+      "Descriptions": [
+        "Monsters have {%} increased Area of Effect"
+      ]
+    },
+    "Monsters have {%}-{%} increased Critical Strike Chance": {
+      "BaseMods": [
+        "MapMonsterCriticalStrikesAndDamage1MapWorldsExpedition_",
+        "MapMonsterCriticalStrikesAndDamage2MapWorlds",
+        "MapMonsterCriticalStrikesAndDamage2MapWorldsExpedition",
+        "MapMonsterCriticalStrikesAndDamage3MapWorlds",
+        "MapMonsterCriticalStrikesAndDamage3MapWorldsExpedition",
+        "MapMonsterCriticalStrikesAndDamage3MapWorldsMaven",
+        "MapMonsterCriticalStrikesAndDamageMapWorlds",
+        "MapMonsterCriticalStrikesAndDamageMapWorldsExpedition",
+        "MapUberWeakMonsterCriticalStrikesAndDamage"
+      ],
+      "Descriptions": [
+        "Monsters have {%}-{%} increased Critical Strike Chance",
+        "{%}-{%} to Monster Critical Strike Multiplier"
+      ]
+    },
+    "Monsters inflict Malediction on hit": {
+      "BaseMods": [
+        "MapSupporterMalediction"
+      ],
+      "Descriptions": [
+        "Monsters inflict Malediction on hit"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters inflict Petrification for {#} seconds on hit": {
+      "BaseMods": [
+        "MapSupporterPetrifyOnHit"
+      ],
+      "Descriptions": [
+        "Monsters inflict Petrification for {#} seconds on hit"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters inflict {#} Grasping Vine on Hit": {
+      "BaseMods": [
+        "MapSupporterGraspingVines",
+        "MapUberModVines"
+      ],
+      "Descriptions": [
+        "Monsters inflict {#} Grasping Vine on Hit"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters reflect {%} of Elemental Damage": {
+      "BaseMods": [
+        "MapMonsterElementalReflection1MapWorldsExpedition",
+        "MapMonsterElementalReflection2MapWorlds",
+        "MapMonsterElementalReflection2MapWorldsExpedition",
+        "MapMonsterElementalReflection3MapWorlds",
+        "MapMonsterElementalReflection3MapWorldsExpedition",
+        "MapMonsterElementalReflection3MapWorldsMaven",
+        "MapMonsterElementalReflectionMapWorlds",
+        "MapUberWeakMonsterElementalReflection"
+      ],
+      "Descriptions": [
+        "Monsters reflect {%} of Elemental Damage"
+      ]
+    },
+    "Monsters reflect {%} of Physical Damage": {
+      "BaseMods": [
+        "MapMonsterPhysicalReflection1MapWorldsExpedition",
+        "MapMonsterPhysicalReflection2MapWorlds",
+        "MapMonsterPhysicalReflection2MapWorldsExpedition",
+        "MapMonsterPhysicalReflection3MapWorlds",
+        "MapMonsterPhysicalReflection3MapWorldsExpedition___",
+        "MapMonsterPhysicalReflection3MapWorldsMaven",
+        "MapMonsterPhysicalReflectionMapWorlds",
+        "MapSupporterGigaReflect",
+        "MapUberModReflect",
+        "MapUberWeakMonsterPhysicalReflection"
+      ],
+      "Descriptions": [
+        "Monsters reflect {%} of Elemental Damage",
+        "Monsters reflect {%} of Physical Damage"
+      ],
+      "Type": "unique_map"
+    },
+    "Monsters take {%}-{%} reduced Extra Damage from Critical Strikes": {
+      "BaseMods": [
+        "MapMonstersBaseSelfCriticalMultiplier1MapWorldsExpedition",
+        "MapMonstersBaseSelfCriticalMultiplier2MapWorlds",
+        "MapMonstersBaseSelfCriticalMultiplier2MapWorldsExpedition_",
+        "MapMonstersBaseSelfCriticalMultiplier3MapWorlds",
+        "MapMonstersBaseSelfCriticalMultiplier3MapWorldsExpedition___",
+        "MapMonstersBaseSelfCriticalMultiplier3MapWorldsMaven",
+        "MapMonstersBaseSelfCriticalMultiplierMapWorlds",
+        "MapMonstersBaseSelfCriticalMultiplierMapWorldsExpedition",
+        "MapUberModCritDefence",
+        "MapUberWeakMonstersBaseSelfCriticalMultiplier"
+      ],
+      "Descriptions": [
+        "Monsters take {%}-{%} reduced Extra Damage from Critical Strikes"
+      ]
+    },
+    "Monsters' Action Speed cannot be modified to below Base Value\nMonsters' Movement Speed cannot be modified to below Base Value": {
+      "BaseMods": [
+        "MapMonstersCantBeSlowedOrTauntedMapWorldsExpedition_",
+        "MapMonstersCantBeSlowedOrTauntedMapWorldsMaven",
+        "MapMonstersCantBeSlowedOrTauntedMapWorlds_",
+        "MapUberWeakMonstersCantBeSlowedOrTaunted"
+      ],
+      "Descriptions": [
+        "Monsters cannot be Taunted",
+        "Monsters' Action Speed cannot be modified to below Base Value\nMonsters' Movement Speed cannot be modified to below Base Value"
+      ]
+    },
+    "Monsters' Attacks have {%} chance to Impale on Hit": {
+      "BaseMods": [
+        "MapMonstersImpaleOnHit1MapWorldsExpedition__",
+        "MapMonstersImpaleOnHit2MapWorlds",
+        "MapMonstersImpaleOnHit2MapWorldsExpedition_",
+        "MapMonstersImpaleOnHit3MapWorldsExpedition",
+        "MapMonstersImpaleOnHit3MapWorldsMaven",
+        "MapMonstersImpaleOnHit3MapWorlds_",
+        "MapMonstersImpaleOnHitMapWorlds",
+        "MapMonstersImpaleOnHitMapWorldsExpedition_",
+        "MapUberWeakMonstersImpaleOnHit"
+      ],
+      "Descriptions": [
+        "Monsters' Attacks have {%} chance to Impale on Hit"
+      ]
+    },
+    "Monsters' skills Chain {#} additional times": {
+      "BaseMods": [
+        "MapMonsterChainMapWorlds",
+        "MapMonsterChainMapWorldsExpedition",
+        "MapMonsterChainMapWorldsMaven",
+        "MapUberModChain"
+      ],
+      "Descriptions": [
+        "Monsters' Projectiles have {%} chance to be able to Chain when colliding with Terrain",
+        "Monsters' skills Chain {#} additional times"
+      ]
+    },
+    "Non-Unique Equipment found in Area drops as Currency instead": {
+      "BaseMods": [
+        "MapSupporterVendoredDrops"
+      ],
+      "Descriptions": [
+        "Non-Unique Equipment found in Area drops as Currency instead"
+      ],
+      "Type": "unique_map"
+    },
+    "Only opens {#} Portal to Area": {
+      "BaseMods": [
+        "MapSupporterPortalLimit1",
+        "MapSupporterPortalLimit2"
+      ],
+      "Descriptions": [
+        "Only opens {#} Portal to Area"
+      ],
+      "Type": "unique_map"
+    },
+    "Players Prevent -{%} of Suppressed Spell Damage": {
+      "BaseMods": [
+        "MapPlayersEvasionAndUnluckyDodge1MapWorlds",
+        "MapPlayersEvasionAndUnluckyDodge1MapWorldsExpedition",
+        "MapPlayersEvasionAndUnluckyDodge2MapWorlds",
+        "MapPlayersEvasionAndUnluckyDodge2MapWorldsExpedition",
+        "MapPlayersEvasionAndUnluckyDodge3MapWorlds",
+        "MapPlayersEvasionAndUnluckyDodge3MapWorldsExpedition",
+        "MapPlayersEvasionAndUnluckyDodge3MapWorldsMaven_",
+        "MapPlayersEvasionAndUnluckyDodgeMapWorldsExpedition",
+        "MapUberWeakPlayersEvasionAndUnluckyDodge"
+      ],
+      "Descriptions": [
+        "Monsters have {%} increased Accuracy Rating",
+        "Players Prevent -{%} of Suppressed Spell Damage"
+      ]
+    },
+    "Players are Cursed with Elemental Weakness": {
+      "BaseMods": [
+        "MapPlayerCurseElementalWeakness1MapWorlds",
+        "MapPlayerCurseElementalWeakness1MapWorldsExpedition_",
+        "MapPlayerCurseElementalWeakness2MapWorlds",
+        "MapPlayerCurseElementalWeakness2MapWorldsExpedition_",
+        "MapPlayerCurseElementalWeakness2MapWorldsMaven__",
+        "MapPlayerCurseElementalWeaknessMapWorldsExpedition__",
+        "MapUberWeakPlayerCurseElementalWeakness"
+      ],
+      "Descriptions": [
+        "Players are Cursed with Elemental Weakness"
+      ]
+    },
+    "Players are Cursed with Enfeeble": {
+      "BaseMods": [
+        "MapPlayerCurseEnfeeblement1MapWorlds",
+        "MapPlayerCurseEnfeeblement1MapWorldsExpedition_",
+        "MapPlayerCurseEnfeeblement2MapWorlds",
+        "MapPlayerCurseEnfeeblement2MapWorldsExpedition_",
+        "MapPlayerCurseEnfeeblement2MapWorldsMaven_",
+        "MapPlayerCurseEnfeeblementMapWorldsExpedition_",
+        "MapUberWeakPlayerCurseEnfeeblement"
+      ],
+      "Descriptions": [
+        "Players are Cursed with Enfeeble"
+      ]
+    },
+    "Players are Cursed with Temporal Chains": {
+      "BaseMods": [
+        "MapPlayerCurseTemporalChains1MapWorlds",
+        "MapPlayerCurseTemporalChains1MapWorldsExpedition_",
+        "MapPlayerCurseTemporalChains2MapWorlds",
+        "MapPlayerCurseTemporalChains2MapWorldsExpedition",
+        "MapPlayerCurseTemporalChains2MapWorldsMaven",
+        "MapPlayerCurseTemporalChainsMapWorldsExpedition_",
+        "MapUberWeakPlayerCurseTemporalChains"
+      ],
+      "Descriptions": [
+        "Players are Cursed with Temporal Chains"
+      ]
+    },
+    "Players are Cursed with Vulnerability": {
+      "BaseMods": [
+        "MapPlayerCurseVulnerability1MapWorlds",
+        "MapPlayerCurseVulnerability1MapWorldsExpedition_",
+        "MapPlayerCurseVulnerability2MapWorlds",
+        "MapPlayerCurseVulnerability2MapWorldsExpedition_",
+        "MapPlayerCurseVulnerability2MapWorldsMaven",
+        "MapPlayerCurseVulnerabilityMapWorldsExpedition__",
+        "MapUberWeakPlayerCurseVulnerability"
+      ],
+      "Descriptions": [
+        "Players are Cursed with Vulnerability"
+      ]
+    },
+    "Players are Cursed with Ele/Temp/Vuln": {
+      "BaseMods": [
+        "MapUberModCurses"
+      ],
+      "Descriptions": [
+        "Players are Cursed with Elemental Weakness",
+        "Players are Cursed with Temporal Chains",
+        "Players are Cursed with Vulnerability"
+      ]
+    },
+    "Players are assaulted by Bloodstained Sawblades": {
+      "BaseMods": [
+        "MapUberModSawblades"
+      ],
+      "Descriptions": [
+        "Players are assaulted by Bloodstained Sawblades"
+      ]
+    },
+    "Players are assaulted by Ruinous Ghosts\nReaching seven Ruin prevents Reward from being claimed": {
+      "BaseMods": [
+        "MapSupporterRuinGhosts"
+      ],
+      "Descriptions": [
+        "Area has no chance to contain Ultimatum Encounters",
+        "Players are assaulted by Ruinous Ghosts\nReaching seven Ruin prevents Reward from being claimed"
+      ],
+      "Type": "unique_map"
+    },
+    "Players are assaulted by apparitions of Al-Hezmin, the Hunter": {
+      "BaseMods": [
+        "MapSupporterAlHezminApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of Al-Hezmin, the Hunter"
+      ],
+      "Type": "unique_map"
+    },
+    "Players are assaulted by apparitions of Atziri, Queen of the Vaal": {
+      "BaseMods": [
+        "MapSupporterAtziriApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of Atziri, Queen of the Vaal"
+      ],
+      "Type": "unique_map"
+    },
+    "Players are assaulted by apparitions of Baran, the Crusader": {
+      "BaseMods": [
+        "MapSupporterBaranApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of Baran, the Crusader"
+      ],
+      "Type": "unique_map"
+    },
+    "Players are assaulted by apparitions of Drox, the Warlord": {
+      "BaseMods": [
+        "MapSupporterDroxApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of Drox, the Warlord"
+      ],
+      "Type": "unique_map"
+    },
+    "Players are assaulted by apparitions of Sirus, Awakener of Worlds": {
+      "BaseMods": [
+        "MapSupporterSirusApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of Sirus, Awakener of Worlds"
+      ],
+      "Type": "unique_map"
+    },
+    "Players are assaulted by apparitions of The Elder": {
+      "BaseMods": [
+        "MapSupporterElderApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of The Elder"
+      ],
+      "Type": "unique_map"
+    },
+    "Players are assaulted by apparitions of The Shaper": {
+      "BaseMods": [
+        "MapSupporterShaperApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of The Shaper"
+      ],
+      "Type": "unique_map"
+    },
+    "Players are assaulted by apparitions of Veritania, the Redeemer": {
+      "BaseMods": [
+        "MapSupporterVeritaniaApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by apparitions of Veritania, the Redeemer"
+      ],
+      "Type": "unique_map"
+    },
+    "Players are assaulted by many dangerous Apparitions": {
+      "BaseMods": [
+        "MapSupporterAllApparitions"
+      ],
+      "Descriptions": [
+        "Players are assaulted by many dangerous Apparitions"
+      ],
+      "Type": "unique_map"
+    },
+    "Players are randomly targeted by Meteors": {
+      "BaseMods": [
+        "MapSupporterMeteor"
+      ],
+      "Descriptions": [
+        "Players are randomly targeted by Meteors"
+      ],
+      "Type": "unique_map"
+    },
+    "Players cannot Block": {
+      "BaseMods": [
+        "MapSupporterCannotBlock"
+      ],
+      "Descriptions": [
+        "Players cannot Block"
+      ],
+      "Type": "unique_map"
+    },
+    "Players cannot Evade": {
+      "BaseMods": [
+        "MapSupporterCannotEvade"
+      ],
+      "Descriptions": [
+        "Players cannot Evade"
+      ],
+      "Type": "unique_map"
+    },
+    "Players cannot Recover Life or Energy Shield above {%} during Rituals in Area": {
+      "BaseMods": [
+        "MapSupporterRitual"
+      ],
+      "Descriptions": [
+        "Areas contain Ritual Altars",
+        "Must fully complete all Ritual Encounters in Area to claim Reward",
+        "Players cannot Recover Life or Energy Shield above {%} during Rituals in Area"
+      ],
+      "Type": "unique_map"
+    },
+    "Players cannot Regenerate Life, Mana or Energy Shield": {
+      "BaseMods": [
+        "MapPlayerNoLifeESRegenMapWorlds",
+        "MapPlayerNoLifeESRegenMapWorldsExpedition",
+        "MapUberWeakPlayerNoLifeESRegen"
+      ],
+      "Descriptions": [
+        "Players cannot Regenerate Life, Mana or Energy Shield"
+      ]
+    },
+    "Players cannot Suppress Spell Damage": {
+      "BaseMods": [
+        "MapSupporterPlayerCannotSuppress"
+      ],
+      "Descriptions": [
+        "Players cannot Suppress Spell Damage"
+      ],
+      "Type": "unique_map"
+    },
+    "Players cannot choose which Ultimatum Modifier is applied each Round": {
+      "BaseMods": [
+        "MapSupporterUltimatum"
+      ],
+      "Descriptions": [
+        "Areas contain an Ultimatum Encounter",
+        "Must complete ten Ultimatum Encounter waves to claim Reward",
+        "Players cannot choose which Ultimatum Modifier is applied each Round"
+      ],
+      "Type": "unique_map"
+    },
+    "Players cannot gain Flask Charges": {
+      "BaseMods": [
+        "MapSupporterCannotGainFlasks"
+      ],
+      "Descriptions": [
+        "Players cannot gain Flask Charges"
+      ],
+      "Type": "unique_map"
+    },
+    "Players cannot inflict Exposure": {
+      "BaseMods": [
+        "MapPlayerElementalEquilibriumMapWorlds",
+        "MapPlayerElementalEquilibriumMapWorldsExpedition__",
+        "MapPlayerElementalEquilibriumMapWorldsMaven"
+      ],
+      "Descriptions": [
+        "Players cannot inflict Exposure"
+      ]
+    },
+    "Players deal {%} increased Damage while Dead": {
+      "BaseMods": [
+        "MapSupporterPlayerDamageWhileDead"
+      ],
+      "Descriptions": [
+        "Players deal {%} increased Damage while Dead"
+      ],
+      "Type": "unique_map"
+    },
+    "Players do not gain Experience": {
+      "BaseMods": [
+        "MapSupporterNoExperience"
+      ],
+      "Descriptions": [
+        "Players do not gain Experience"
+      ],
+      "Type": "unique_map"
+    },
+    "Players gain -{%} increased Flask Charges": {
+      "BaseMods": [
+        "MapPlayersGainReducedFlaskCharges1MapWorldsExpedition",
+        "MapPlayersGainReducedFlaskCharges2MapWorldsExpedition___",
+        "MapPlayersGainReducedFlaskCharges2MapWorlds_",
+        "MapPlayersGainReducedFlaskCharges3MapWorldsExpedition_",
+        "MapPlayersGainReducedFlaskCharges3MapWorldsMaven",
+        "MapPlayersGainReducedFlaskCharges3MapWorlds_",
+        "MapPlayersGainReducedFlaskChargesMapWorlds",
+        "MapPlayersGainReducedFlaskChargesMapWorldsExpedition_",
+        "MapUberWeakPlayersGainReducedFlaskCharges"
+      ],
+      "Descriptions": [
+        "Players gain -{%} increased Flask Charges"
+      ]
+    },
+    "Players gain Instability on Kill\nUnstable Players eventually detonate": {
+      "BaseMods": [
+        "MapSupporterInstabilityCharges"
+      ],
+      "Descriptions": [
+        "Players gain Instability on Kill\nUnstable Players eventually detonate"
+      ],
+      "Type": "unique_map"
+    },
+    "Players have -{#}--{%} increased Maximum total Life, Mana and Energy Shield Recovery per second from Leech": {
+      "BaseMods": [
+        "MapUberModLessPlayerLeech"
+      ],
+      "Descriptions": [
+        "Players have -{#}--{%} increased Maximum total Life, Mana and Energy Shield Recovery per second from Leech"
+      ]
+    },
+    "Players have -{#}--{%} more Area of Effect": {
+      "BaseMods": [
+        "MapUberModAOEPlayer"
+      ],
+      "Descriptions": [
+        "Players have -{#}--{%} more Area of Effect"
+      ]
+    },
+    "Players have -{#}--{%} more Defences": {
+      "BaseMods": [
+        "MapUberModGlobalDefences"
+      ],
+      "Descriptions": [
+        "Players have -{#}--{%} more Defences"
+      ]
+    },
+    "Players have -{#}--{%} to all maximum Resistances": {
+      "BaseMods": [
+        "MapPlayerMaxResists1MapWorlds",
+        "MapPlayerMaxResists1MapWorldsExpedition",
+        "MapPlayerMaxResists2MapWorlds",
+        "MapPlayerMaxResists2MapWorldsExpedition",
+        "MapPlayerMaxResists2MapWorldsMaven",
+        "MapUberWeakPlayerMaxResists"
+      ],
+      "Descriptions": [
+        "Players have -{#}--{%} to all maximum Resistances"
+      ]
+    },
+    "Players have -{%} increased Chance to Block": {
+      "BaseMods": [
+        "MapPlayersBlockAndArmour1MapWorldsExpedition",
+        "MapPlayersBlockAndArmour2MapWorlds",
+        "MapPlayersBlockAndArmour2MapWorldsExpedition",
+        "MapPlayersBlockAndArmour3MapWorlds",
+        "MapPlayersBlockAndArmour3MapWorldsExpedition",
+        "MapPlayersBlockAndArmour3MapWorldsMaven",
+        "MapPlayersBlockAndArmourMapWorlds",
+        "MapPlayersBlockAndArmourMapWorldsExpedition",
+        "MapUberWeakPlayersBlockAndArmour"
+      ],
+      "Descriptions": [
+        "Players have -{%} increased Chance to Block",
+        "Players have -{%} more Armour"
+      ]
+    },
+    "Players have -{%} increased Character Size": {
+      "BaseMods": [
+        "MapSupporterActorScale2"
+      ],
+      "Descriptions": [
+        "Players have -{%} increased Character Size"
+      ],
+      "Type": "unique_map"
+    },
+    "Players have -{%} increased effect of Non-Curse Auras from Skills": {
+      "BaseMods": [
+        "MapPlayersReducedAuraEffect1MapWorldsExpedition",
+        "MapPlayersReducedAuraEffect2MapWorlds",
+        "MapPlayersReducedAuraEffect2MapWorldsExpedition",
+        "MapPlayersReducedAuraEffect3MapWorldsExpedition",
+        "MapPlayersReducedAuraEffect3MapWorldsMaven",
+        "MapPlayersReducedAuraEffect3MapWorlds_",
+        "MapPlayersReducedAuraEffectMapWorlds",
+        "MapPlayersReducedAuraEffectMapWorldsExpedition_",
+        "MapSupporterAuraEffect",
+        "MapUberWeakPlayersReducedAuraEffect"
+      ],
+      "Descriptions": [
+        "Players have -{%} increased effect of Non-Curse Auras from Skills"
+      ],
+      "Type": "unique_map"
+    },
+    "Players have -{%} more Accuracy Rating": {
+      "BaseMods": [
+        "MapPlayersAccuracyRating1MapWorldsExpedition_",
+        "MapPlayersAccuracyRating2MapWorlds",
+        "MapPlayersAccuracyRating2MapWorldsExpedition",
+        "MapPlayersAccuracyRating3MapWorlds",
+        "MapPlayersAccuracyRating3MapWorldsExpedition_",
+        "MapPlayersAccuracyRating3MapWorldsMaven_",
+        "MapPlayersAccuracyRatingMapWorldsExpedition__",
+        "MapPlayersAccuracyRatingMapWorlds_",
+        "MapUberWeakPlayersAccuracyRating"
+      ],
+      "Descriptions": [
+        "Players have -{%} more Accuracy Rating"
+      ]
+    },
+    "Players have -{%} more Area of Effect": {
+      "BaseMods": [
+        "MapPlayersLessAoERadius1MapWorldsExpedition",
+        "MapPlayersLessAoERadius2MapWorlds",
+        "MapPlayersLessAoERadius2MapWorldsExpedition",
+        "MapPlayersLessAoERadius3MapWorlds",
+        "MapPlayersLessAoERadius3MapWorldsExpedition",
+        "MapPlayersLessAoERadius3MapWorldsMaven",
+        "MapPlayersLessAoERadiusMapWorlds",
+        "MapPlayersLessAoERadiusMapWorldsExpedition",
+        "MapUberWeakPlayersLessAoERadius"
+      ],
+      "Descriptions": [
+        "Players have -{%} more Area of Effect"
+      ]
+    },
+    "Players have -{%} more Cooldown Recovery Rate": {
+      "BaseMods": [
+        "MapPlayersLessCooldownRecovery1MapWorldsExpedition_",
+        "MapPlayersLessCooldownRecovery2MapWorlds",
+        "MapPlayersLessCooldownRecovery2MapWorldsExpedition",
+        "MapPlayersLessCooldownRecovery3MapWorlds",
+        "MapPlayersLessCooldownRecovery3MapWorldsExpedition_",
+        "MapPlayersLessCooldownRecovery3MapWorldsMaven",
+        "MapPlayersLessCooldownRecoveryMapWorlds",
+        "MapPlayersLessCooldownRecoveryMapWorldsExpedition__",
+        "MapUberWeakPlayersLessCooldownRecovery"
+      ],
+      "Descriptions": [
+        "Players have -{%} more Cooldown Recovery Rate"
+      ]
+    },
+    "Players have -{%} more Recovery Rate of Life and Energy Shield": {
+      "BaseMods": [
+        "MapPlayerReducedRegen1MapWorlds",
+        "MapPlayerReducedRegen1MapWorldsExpedition_",
+        "MapPlayerReducedRegen2MapWorldsExpedition_",
+        "MapPlayerReducedRegen2MapWorlds_",
+        "MapPlayerReducedRegen3MapWorlds",
+        "MapPlayerReducedRegen3MapWorldsExpedition",
+        "MapPlayerReducedRegen3MapWorldsMaven",
+        "MapPlayerReducedRegenMapWorldsExpedition",
+        "MapUberWeakPlayerReducedRegen"
+      ],
+      "Descriptions": [
+        "Players have -{%} more Recovery Rate of Life and Energy Shield"
+      ]
+    },
+    "Players have -{%} more effect of Flasks applied to them": {
+      "BaseMods": [
+        "MapUberModLessFlaskEffect"
+      ],
+      "Descriptions": [
+        "Players have -{%} more effect of Flasks applied to them"
+      ]
+    },
+    "Players have -{%} to all maximum Resistances": {
+      "BaseMods": [
+        "MapUberModMinusMax"
+      ],
+      "Descriptions": [
+        "Players have -{%} to all maximum Resistances"
+      ]
+    },
+    "Players have Shroud Walker": {
+      "BaseMods": [
+        "MapSupporterShroudWalker"
+      ],
+      "Descriptions": [
+        "Players have Shroud Walker"
+      ],
+      "Type": "unique_map"
+    },
+    "Players have {%} chance to be targeted by a Meteor when they use a Flask": {
+      "BaseMods": [
+        "MapUberModFlaskMeteor"
+      ],
+      "Descriptions": [
+        "Players have {%} chance to be targeted by a Meteor when they use a Flask"
+      ]
+    },
+    "Players have {%} chance to gain Rare Monster Modifiers for {#} seconds on Kill": {
+      "BaseMods": [
+        "MapSupporterRareMonsterModOnKill"
+      ],
+      "Descriptions": [
+        "Players have {%} chance to gain Rare Monster Modifiers for {#} seconds on Kill"
+      ],
+      "Type": "unique_map"
+    },
+    "Players have {%} increased Character Size": {
+      "BaseMods": [
+        "MapSupporterActorScale1"
+      ],
+      "Descriptions": [
+        "Players have {%} increased Character Size"
+      ],
+      "Type": "unique_map"
+    },
+    "Players have {%} increased Cost of Skills for each Skill they've used Recently": {
+      "BaseMods": [
+        "MapSupporterSkillCosts"
+      ],
+      "Descriptions": [
+        "Players have {%} increased Cost of Skills for each Skill they've used Recently"
+      ],
+      "Type": "unique_map"
+    },
+    "Players in Area are driven mad": {
+      "BaseMods": [
+        "MapSupporterInsanity"
+      ],
+      "Descriptions": [
+        "Players in Area are driven mad"
+      ],
+      "Type": "unique_map"
+    },
+    "Players in Area are {%} Delirious": {
+      "BaseMods": [
+        "MapSupporterMaxAffliction"
+      ],
+      "Descriptions": [
+        "Players in Area are {%} Delirious"
+      ],
+      "Type": "unique_map"
+    },
+    "Players reflect {%} of Melee Physical Damage taken": {
+      "BaseMods": [
+        "MapSupporterPlayerThorns"
+      ],
+      "Descriptions": [
+        "Players reflect {%} of Melee Physical Damage taken"
+      ],
+      "Type": "unique_map"
+    },
+    "Players who Die in area are sent to the Void": {
+      "BaseMods": [
+        "MapSupporterVoidOnDeath"
+      ],
+      "Descriptions": [
+        "Players who Die in area are sent to the Void"
+      ],
+      "Type": "unique_map"
+    },
+    "Players' Minions deal -{%} more Damage per Item Equipped by their Master": {
+      "BaseMods": [
+        "MapSupporterDamagePerSlot"
+      ],
+      "Descriptions": [
+        "Players deal -{%} more Damage per Equipped Item",
+        "Players' Minions deal -{%} more Damage per Item Equipped by their Master"
+      ],
+      "Type": "unique_map"
+    },
+    "Players' Travel Skills are Disabled": {
+      "BaseMods": [
+        "MapSupporterMovement"
+      ],
+      "Descriptions": [
+        "Players have -{%} increased Movement Speed",
+        "Players' Travel Skills are Disabled"
+      ],
+      "Type": "unique_map"
+    },
+    "Players' Vaal Skills do not apply Soul Gain Prevention": {
+      "BaseMods": [
+        "MapCorruptionSoulGainPrevention"
+      ],
+      "Descriptions": [
+        "Players' Vaal Skills do not apply Soul Gain Prevention"
+      ]
+    },
+    "Portals to Area close over time": {
+      "BaseMods": [
+        "MapSupporterPortalLoss"
+      ],
+      "Descriptions": [
+        "Portals to Area close over time"
+      ],
+      "Type": "unique_map"
+    },
+    "Portals to Area only close when Players die": {
+      "BaseMods": [
+        "MapSupporterGenerousPortals"
+      ],
+      "Descriptions": [
+        "Portals to Area only close when Players die"
+      ],
+      "Type": "unique_map"
+    },
+    "Rare Monsters each have {#} additional Modifier": {
+      "BaseMods": [
+        "MapSupporterAdditionalRareMonsterMods1",
+        "MapSupporterAdditionalRareMonsterMods2",
+        "MapSupporterAdditionalRareMonsterMods3",
+        "MapUberModRareMonsters"
+      ],
+      "Descriptions": [
+        "Rare Monsters each have {#} additional Modifier",
+        "{%}-{%} increased number of Rare Monsters"
+      ],
+      "Type": "unique_map"
+    },
+    "Rare Monsters have Essence effects": {
+      "BaseMods": [
+        "MapSupporterEssence"
+      ],
+      "Descriptions": [
+        "Rare Monsters have Essence effects"
+      ],
+      "Type": "unique_map"
+    },
+    "Rare Monsters have {%} chance to have a Volatile Core": {
+      "BaseMods": [
+        "MapUberModVolatiles"
+      ],
+      "Descriptions": [
+        "Rare Monsters have {%} chance to have a Volatile Core"
+      ]
+    },
+    "Rare Monsters have {%} chance to spawn a Duplicate of Map Boss on Death": {
+      "BaseMods": [
+        "MapSupporterRareMonsterSpawnBoss"
+      ],
+      "Descriptions": [
+        "Rare Monsters have {%} chance to spawn a Duplicate of Map Boss on Death"
+      ],
+      "Type": "unique_map"
+    },
+    "Rare and Unique Monsters in Area are Possessed by up to {{#}} Tormented Spirit and if Possessed their Minions are Touched": {
+      "BaseMods": [
+        "MapSupporterPossessed1",
+        "MapSupporterPossessed2",
+        "MapSupporterPossessed3"
+      ],
+      "Descriptions": [
+        "Rare and Unique Monsters in Area are Possessed by up to {{#}} Tormented Spirit and if Possessed their Minions are Touched"
+      ],
+      "Type": "unique_map"
+    },
+    "Rare monsters in area Temporarily Revive on death": {
+      "BaseMods": [
+        "MapUberModRaresLastGasp"
+      ],
+      "Descriptions": [
+        "Rare monsters in area Temporarily Revive on death"
+      ]
+    },
+    "Rare monsters in area are Shaper-Touched": {
+      "BaseMods": [
+        "MapUberModShaperTouched"
+      ],
+      "Descriptions": [
+        "Rare monsters in area are Shaper-Touched"
+      ]
+    },
+    "Remnants have {%}-{%} chance to have an additional Suffix Modifier": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionExtraRelicSuffixChance__"
+      ],
+      "Descriptions": [
+        "Remnants have {%}-{%} chance to have an additional Suffix Modifier"
+      ]
+    },
+    "Runic Monsters have {%} more Life": {
+      "BaseMods": [
+        "MapSupporterExpedition"
+      ],
+      "Descriptions": [
+        "Area contains an Expedition Encounter",
+        "Must complete an Expedition with three or more Remnants enabled to claim Reward",
+        "Runic Monsters deal {%} more Damage",
+        "Runic Monsters have {%} more Life"
+      ],
+      "Type": "unique_map"
+    },
+    "Slaying Enemies close together can attract monsters from Beyond this realm": {
+      "BaseMods": [
+        "MapSupporterBeyond"
+      ],
+      "Descriptions": [
+        "Monsters from Beyond create Desecrated Ground\n Beyond Bosses cannot spawn",
+        "Slaying Enemies close together can attract monsters from Beyond this realm"
+      ],
+      "Type": "unique_map"
+    },
+    "Slaying Enemies in a kill streak grants Rampage bonuses": {
+      "BaseMods": [
+        "MapSupporterRampage"
+      ],
+      "Descriptions": [
+        "Slaying Enemies in a kill streak grants Rampage bonuses"
+      ],
+      "Type": "unique_map"
+    },
+    "Smuggler's Caches in area are guarded": {
+      "BaseMods": [
+        "MapSupporterHeist"
+      ],
+      "Descriptions": [
+        "All Smuggler's Caches must be opened to claim Reward",
+        "Area contains a Smuggler's Cache",
+        "Smuggler's Caches in area are guarded"
+      ],
+      "Type": "unique_map"
+    },
+    "The Maven interferes with Players": {
+      "BaseMods": [
+        "MapSupporterMavenFollower",
+        "MapUberModMavenFollower"
+      ],
+      "Descriptions": [
+        "The Maven interferes with Players"
+      ],
+      "Type": "unique_map"
+    },
+    "Tormented Spirits can Possess Players for {#} seconds\nTormented Spirits cannot Possess Monsters": {
+      "BaseMods": [
+        "MapSupporterTorment"
+      ],
+      "Descriptions": [
+        "Area is haunted by {#}-{#} additional Tormented Spirit",
+        "Tormented Spirits can Possess Players for {#} seconds\nTormented Spirits cannot Possess Monsters"
+      ],
+      "Type": "unique_map"
+    },
+    "Unique Boss deals {%} increased Damage": {
+      "BaseMods": [
+        "MapDangerousBoss1MapWorlds",
+        "MapDangerousBoss2MapWorlds",
+        "MapDangerousBoss3MapWorlds",
+        "MapDangerousBoss3MapWorldsMaven",
+        "MapUberWeakDangerousBoss"
+      ],
+      "Descriptions": [
+        "Unique Boss deals {%} increased Damage",
+        "Unique Boss has {%} increased Attack and Cast Speed"
+      ]
+    },
+    "Unique Boss has {%} increased Life": {
+      "BaseMods": [
+        "MapMassiveBoss1MapWorlds",
+        "MapMassiveBoss2MapWorlds",
+        "MapMassiveBoss3MapWorlds",
+        "MapMassiveBoss3MapWorldsMaven",
+        "MapUberWeakMassiveBoss"
+      ],
+      "Descriptions": [
+        "Unique Boss has {%} increased Area of Effect",
+        "Unique Boss has {%} increased Life"
+      ]
+    },
+    "Unique Bosses are Possessed": {
+      "BaseMods": [
+        "MapBossPossessedMapWorlds",
+        "MapUberModPossessedBoss"
+      ],
+      "Descriptions": [
+        "Unique Bosses are Possessed"
+      ]
+    },
+    "Unique Monsters drop Corrupted Items": {
+      "BaseMods": [
+        "MapCorruptionBossCorruption"
+      ],
+      "Descriptions": [
+        "Unique Monsters drop Corrupted Items"
+      ]
+    },
+    "Unique Monsters have a random Shrine Buff": {
+      "BaseMods": [
+        "MapSupporterDomination",
+        "MapUberModShrineBuff"
+      ],
+      "Descriptions": [
+        "Unique Monsters have a random Shrine Buff"
+      ],
+      "Type": "unique_map"
+    },
+    "UniqueWatchstoneMapModEffect": {
+      "BaseMods": [
+        "UniqueWatchstoneMapModEffect_"
+      ],
+      "Descriptions": []
+    },
+    "UniqueWatchstoneMapPackSize": {
+      "BaseMods": [
+        "UniqueWatchstoneMapPackSize"
+      ],
+      "Descriptions": []
+    },
+    "Unstable Breaches in Area contain a Boss": {
+      "BaseMods": [
+        "MapSupporterBreach"
+      ],
+      "Descriptions": [
+        "All Unstable Breaches must be Stabilised and Closed to claim Reward",
+        "Area contains an additional unstable Breach",
+        "Unstable Breaches in Area contain a Boss"
+      ],
+      "Type": "unique_map"
+    },
+    "When Hit, Players gain a random Movement Speed\nmodifier from {%} less to {%} more, until Hit again": {
+      "BaseMods": [
+        "MapSupporterVariableMovement"
+      ],
+      "Descriptions": [
+        "When Hit, Players gain a random Movement Speed\nmodifier from {%} less to {%} more, until Hit again"
+      ],
+      "Type": "unique_map"
+    },
+    "{%} chance for Rare Monsters to Fracture on death": {
+      "BaseMods": [
+        "MapUberModRareFracture"
+      ],
+      "Descriptions": [
+        "{%} chance for Rare Monsters to Fracture on death"
+      ]
+    },
+    "{%}-{%} Item Quantity": {
+      "BaseMods": [
+        "MapCorruptionItemQuantity"
+      ],
+      "Descriptions": [
+        "{%}-{%} Item Quantity"
+      ]
+    },
+    "{%}-{%} Item Rarity": {
+      "BaseMods": [
+        "MapCorruptionItemRarity"
+      ],
+      "Descriptions": [
+        "{%}-{%} Item Rarity"
+      ]
+    },
+    "{%}-{%} Pack Size": {
+      "BaseMods": [
+        "MapCorruptionPackSize"
+      ],
+      "Descriptions": [
+        "{%}-{%} Pack Size"
+      ]
+    },
+    "{%}-{%} increased Explicit Modifier magnitudes": {
+      "BaseMods": [
+        "MapCorruptionModEffect"
+      ],
+      "Descriptions": [
+        "{%}-{%} increased Explicit Modifier magnitudes"
+      ]
+    },
+    "{%}-{%} increased Explosive Placement Range": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionMaximumPlacementDistance"
+      ],
+      "Descriptions": [
+        "{%}-{%} increased Explosive Placement Range"
+      ]
+    },
+    "{%}-{%} increased Explosive Radius": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionExplosionRadius"
+      ],
+      "Descriptions": [
+        "{%}-{%} increased Explosive Radius"
+      ]
+    },
+    "{%}-{%} increased Magic Monsters": {
+      "BaseMods": [
+        "MapBloodlinesModOnMagicsMapWorlds"
+      ],
+      "Descriptions": [
+        "{%}-{%} increased Magic Monsters"
+      ]
+    },
+    "{%}-{%} increased Monster Cast Speed": {
+      "BaseMods": [
+        "MapUberModTurbo"
+      ],
+      "Descriptions": [
+        "{%}-{%} increased Monster Attack Speed",
+        "{%}-{%} increased Monster Cast Speed",
+        "{%}-{%} increased Monster Movement Speed"
+      ]
+    },
+    "{%}-{%} increased Monster Damage": {
+      "BaseMods": [
+        "MapMonsterDamage1MapWorldsExpedition",
+        "MapMonsterDamage2MapWorlds",
+        "MapMonsterDamage2MapWorldsExpedition",
+        "MapMonsterDamage3MapWorlds",
+        "MapMonsterDamage3MapWorldsExpedition",
+        "MapMonsterDamage3MapWorldsMaven",
+        "MapMonsterDamageMapWorldsExpedition",
+        "MapMonsterDamageMapWorlds_",
+        "MapUberModMonsterDamage",
+        "MapUberWeakMonsterDamage"
+      ],
+      "Descriptions": [
+        "{%}-{%} increased Monster Damage"
+      ]
+    },
+    "{%}-{%} increased Monster Movement Speed": {
+      "BaseMods": [
+        "MapMonsterFast1MapWorldsExpedition",
+        "MapMonsterFast2MapWorlds",
+        "MapMonsterFast2MapWorldsExpedition",
+        "MapMonsterFast3MapWorlds",
+        "MapMonsterFast3MapWorldsExpedition__",
+        "MapMonsterFast3MapWorldsMaven_",
+        "MapMonsterFastMapWorlds",
+        "MapMonsterFastMapWorldsExpedition"
+      ],
+      "Descriptions": [
+        "{%}-{%} increased Monster Attack Speed",
+        "{%}-{%} increased Monster Cast Speed",
+        "{%}-{%} increased Monster Movement Speed"
+      ]
+    },
+    "{%}-{%} increased number of Explosives": {
+      "BaseMods": [
+        "ExpeditionLogbookMapExpeditionExplosives"
+      ],
+      "Descriptions": [
+        "{%}-{%} increased number of Explosives"
+      ]
+    },
+    "{%}-{%} increased number of Rare Monsters": {
+      "BaseMods": [
+        "MapNemesisModOnRaresMapWorlds"
+      ],
+      "Descriptions": [
+        "{%}-{%} increased number of Rare Monsters"
+      ]
+    },
+    "{%}-{%} increased quantity of Artifacts dropped by Monsters": {
+      "BaseMods": [
+        "MapExpeditionArtifactQuantity"
+      ],
+      "Descriptions": [
+        "{%}-{%} increased quantity of Artifacts dropped by Monsters"
+      ]
+    },
+    "{%}-{%} increased quantity of Petals found on Monsters in Area": {
+      "BaseMods": [
+        "MemoryAltarMapMonsterRosePetalQuantity"
+      ],
+      "Descriptions": [
+        "{%}-{%} increased quantity of Petals found on Monsters in Area"
+      ]
+    },
+    "{%}-{%} more Monster Life": {
+      "BaseMods": [
+        "MapMonsterLife1MapWorldsExpedition",
+        "MapMonsterLife2MapWorlds",
+        "MapMonsterLife2MapWorldsExpedition",
+        "MapMonsterLife3MapWorlds",
+        "MapMonsterLife3MapWorldsExpedition",
+        "MapMonsterLife3MapWorldsMaven",
+        "MapMonsterLifeMapWorlds",
+        "MapMonsterLifeMapWorldsExpedition",
+        "MapUberModMonsterLife",
+        "MapUberWeakMonsterLife"
+      ],
+      "Descriptions": [
+        "{%}-{%} more Monster Life"
+      ]
+    },
+    "{%}-{%} to Monster Critical Strike Multiplier": {
+      "BaseMods": [
+        "MapUberModCrit"
+      ],
+      "Descriptions": [
+        "Monsters have {%}-{%} increased Critical Strike Chance",
+        "{%}-{%} to Monster Critical Strike Multiplier"
+      ]
+    }
+  }
+}

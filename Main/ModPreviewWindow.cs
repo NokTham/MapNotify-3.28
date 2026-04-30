@@ -1,4 +1,6 @@
+using System;
 using ImGuiNET;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using nuVector4 = System.Numerics.Vector4;
@@ -8,6 +10,8 @@ namespace MapNotify_3_28
 {
     partial class MapNotify_3_28
     {
+        private Dictionary<string, string> _browserDisplayNameEdits = new Dictionary<string, string>();
+
         /// <summary>
         /// Renders the ImGui interface for the Map Mod Preview window.
         /// This allows users to filter, categorize, and save captured mods to config files.
@@ -31,6 +35,7 @@ namespace MapNotify_3_28
                             Settings.SelectedProfile.Value = profile;
                             GoodModsDictionary = LoadConfigGoodMod();
                             BadModsDictionary = LoadConfigBadMod();
+                            _browserDisplayNameEdits.Clear();
                         }
                     }
                     ImGui.EndCombo();
@@ -71,141 +76,45 @@ namespace MapNotify_3_28
 
                 if (ImGui.TreeNodeEx("Active Mods", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    if (GoodModsDictionary != null && GoodModsDictionary.Count > 0)
-                    {
-                        var filteredGood = GoodModsDictionary
-                            .Where(m => string.IsNullOrEmpty(_modFilter) || m.Key.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) || m.Value.Text.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase))
-                            .ToList();
-                        ImGui.TextColored(new nuVector4(0.4f, 1f, 0.4f, 1f), "Good Mods:");
-                        ImGui.Indent();
-                        foreach (var mod in filteredGood)
-                        {
-                            ImGui.PushID($"active_good_{mod.Key}");
-                            if (ImGui.Button("X")) DeleteModFromConfig(mod.Key);
-                            ImGui.SameLine();
-                            var col = mod.Value.Color;
-                            string conflictStatus = (BadModsDictionary?.ContainsKey(mod.Key) ?? false) ? " [!] CONFLICT" : "";
-                            string brickStatus = mod.Value.Bricking ? " [BRICKED]" : "";
-                            string cleanText = EscapeImGui(mod.Value.Text);
-                            ImGui.TextColored(col, $"{cleanText} ({mod.Key}){brickStatus}{conflictStatus}");
-                            ImGui.PopID();
-                        }
-                        ImGui.Unindent();
-                    }
-
-                    if (BadModsDictionary != null && BadModsDictionary.Count > 0)
-                    {
-                        var filteredBad = BadModsDictionary
-                            .Where(m => string.IsNullOrEmpty(_modFilter) || m.Key.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) || m.Value.Text.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase))
-                            .ToList();
-                        ImGui.TextColored(new nuVector4(1f, 0.4f, 0.4f, 1f), "Bad Mods:");
-                        ImGui.Indent();
-                        foreach (var mod in filteredBad)
-                        {
-                            ImGui.PushID($"active_bad_{mod.Key}");
-                            if (ImGui.Button("X")) DeleteModFromConfig(mod.Key);
-                            ImGui.SameLine();
-                            var col = mod.Value.Color;
-                            string conflictStatus = (GoodModsDictionary?.ContainsKey(mod.Key) ?? false) ? " [!] CONFLICT" : "";
-                            string brickPrefix = mod.Value.Bricking ? "[B] " : "";
-                            string cleanText = EscapeImGui(mod.Value.Text);
-                            ImGui.TextColored(col, $"{brickPrefix}{cleanText} ({mod.Key}){conflictStatus}");
-                            ImGui.PopID();
-                        }
-                        ImGui.Unindent();
-                    }
+                    DrawActiveMods();
                     ImGui.TreePop();
                 }
                 ImGui.Separator();
 
-                if (ImGui.BeginChild("ScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Border))
+                if (ImGui.BeginTabBar("ModPreviewTabs"))
                 {
-                    if (_capturedMods.Count == 0)
+                    bool opened;
+                    if (_forceCapturedTab)
                     {
-                        ImGui.PushStyleColor(ImGuiCol.Text, new nuVector4(0.7f, 0.7f, 0.7f, 1f));
-                        ImGui.TextWrapped("No mods captured. Hover over a map and press your hotkey to see and configure its modifiers.");
-                        ImGui.PopStyleColor();
+                        bool p_open = true;
+                        opened = ImGui.BeginTabItem("Captured Mods", ref p_open, ImGuiTabItemFlags.SetSelected);
+                        if (opened) _forceCapturedTab = false;
                     }
-                    string lastAffixType = null;
-                    for (int i = 0; i < _capturedMods.Count; i++)
+                    else
                     {
-                        var mod = _capturedMods[i];
-                        if (!string.IsNullOrEmpty(_modFilter) &&
-                            !mod.RawName.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) &&
-                            !mod.Description.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) &&
-                            !mod.DisplayName.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase)) continue;
-
-                        // Visual Headers for Hierarchy (Prefix/Suffix/Implicit)
-                        if (mod.AffixType != lastAffixType)
-                        {
-                            if (i > 0) ImGui.Dummy(new System.Numerics.Vector2(0, 10));
-                            ImGui.SetWindowFontScale(1.0f);
-                            ImGui.TextColored(new nuVector4(0.502f, 0.8f, 1f, 1f), $"--- {mod.AffixType} ---");
-                            ImGui.SetWindowFontScale(1.0f);
-                            ImGui.Separator();
-                            lastAffixType = mod.AffixType;
-                        }
-                        ImGui.PushID(mod.RawName);
-
-                        bool inGood = GoodModsDictionary?.Any(x => BaseModExtractor.AreEquivalent(mod.RawName, x.Key)) ?? false;
-                        bool inBad = BadModsDictionary?.Any(x => BaseModExtractor.AreEquivalent(mod.RawName, x.Key)) ?? false;
-                        if (inGood && inBad) ImGui.TextColored(new nuVector4(1f, 1f, 0f, 1f), "[!] CONFLICT: Present in both Good and Bad lists.");
-                        
-                        HelpMarker($"Internal Name: {mod.RawName}");
-                        ImGui.SameLine();
-                        string displayDesc = EscapeImGui(string.IsNullOrEmpty(mod.Description) ? mod.RawName : mod.Description);
-
-                        ImGui.TextWrapped(displayDesc);
-                        var dispName = mod.DisplayName;
-                        if (ImGui.InputText("##displayname", ref dispName, 100))
-                        {
-                            mod.DisplayName = dispName;
-                            AutoSaveIfExisting(mod);
-                        }
-                        ImGui.SameLine();
-                        var color = mod.Color;
-                        if (ImGui.ColorEdit4("", ref color, ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.NoInputs))
-                        {
-                            mod.Color = color;
-                            AutoSaveIfExisting(mod);
-                        }
-                        ImGui.Dummy(new nuVector2(0, 5));
-                        if (ImGui.Button("Add Good"))
-                        {
-                            // If color is White, Soft Red (UI), or Pure Red (Config Template), switch to Good default
-                            if (mod.Color == new nuVector4(1f, 1f, 1f, 1f) || 
-                                mod.Color == new nuVector4(1f, 0.4f, 0.4f, 1f) || 
-                                mod.Color == new nuVector4(1f, 0f, 0f, 1f))
-                            {
-                                mod.Color = new nuVector4(0.4f, 1f, 0.4f, 1f);
-                            }
-                            SaveModToConfig(mod, "GoodMods.txt");
-                        }
-                        ImGui.SameLine();
-                        if (ImGui.Button("Add Bad"))
-                        {
-                            // If color is White, Soft Green (UI), or Pure Green (Config Template), switch to Bad default
-                            if (mod.Color == new nuVector4(1f, 1f, 1f, 1f) || 
-                                mod.Color == new nuVector4(0.4f, 1f, 0.4f, 1f) || 
-                                mod.Color == new nuVector4(0f, 1f, 0f, 1f))
-                            {
-                                mod.Color = new nuVector4(1f, 0.4f, 0.4f, 1f);
-                            }
-                            SaveModToConfig(mod, "BadMods.txt");
-                        }
-                        ImGui.SameLine();
-                        if (ImGui.Button("Delete")) DeleteModFromConfig(mod.RawName);
-                        ImGui.SameLine();
-                        var brick = mod.IsBricking;
-                        if (ImGui.Checkbox("Brick", ref brick))
-                        {
-                            mod.IsBricking = brick;
-                            AutoSaveIfExisting(mod);
-                        }
-                        ImGui.Separator();
-                        ImGui.PopID();
+                        opened = ImGui.BeginTabItem("Captured Mods");
                     }
-                    ImGui.EndChild();
+
+                    if (opened)
+                    {
+                        if (ImGui.BeginChild("CapturedScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Border))
+                        {
+                            DrawCapturedMods();
+                            ImGui.EndChild();
+                        }
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Mod Browser"))
+                    {
+                        if (ImGui.BeginChild("BrowserScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Border))
+                        {
+                            DrawModBrowser();
+                            ImGui.EndChild();
+                        }
+                        ImGui.EndTabItem();
+                    }
+                    ImGui.EndTabBar();
                 }
 
                 if (ImGui.Button("Close Window", new nuVector2(-1, 0)))
@@ -217,10 +126,304 @@ namespace MapNotify_3_28
             }
         }
 
+        private void DrawActiveMods()
+        {
+            void DrawSection(Dictionary<string, StyledText> dict, string label, nuVector4 color, Dictionary<string, StyledText> otherDict)
+            {
+                if (dict == null || dict.Count == 0) return;
+                var groups = dict
+                    .Where(m => string.IsNullOrEmpty(_modFilter) ||
+                                m.Key.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) ||
+                                m.Value.Text.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase))
+                    .GroupBy(m => m.Value.Text)
+                    .ToList();
+
+                if (groups.Count == 0) return;
+                ImGui.TextColored(color, label);
+                ImGui.Indent();
+                foreach (var group in groups)
+                {
+                    ImGui.PushID($"{label}_{group.Key}");
+                    if (ImGui.Button("X")) { foreach (var m in group) DeleteModFromConfig(m.Key); }
+                    ImGui.SameLine();
+                    HelpMarker($"{string.Join("\n", group.Select(m => m.Key))}");
+                    ImGui.SameLine();
+                    var firstMod = group.First().Value;
+                    bool isAnyBricked = group.Any(m => m.Value.Bricking);
+                    bool hasConflict = group.Any(m => otherDict?.ContainsKey(m.Key) ?? false);
+                    ImGui.TextColored(firstMod.Color, $"{EscapeImGui(group.Key)}{(isAnyBricked ? " [B]" : "")}{(hasConflict ? " [!] CONFLICT" : "")}");
+                    ImGui.PopID();
+                }
+                ImGui.Unindent();
+            }
+
+            DrawSection(GoodModsDictionary, "Good Mods:", new nuVector4(0.4f, 1f, 0.4f, 1f), BadModsDictionary);
+            DrawSection(BadModsDictionary, "Bad Mods:", new nuVector4(1f, 0.4f, 0.4f, 1f), GoodModsDictionary);
+        }
+
+        private void DrawCapturedMods()
+        {
+            if (_capturedMods.Count == 0)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, new nuVector4(0.7f, 0.7f, 0.7f, 1f));
+                ImGui.TextWrapped("No mods captured. Hover over a map and press your hotkey to see and configure its modifiers.");
+                ImGui.PopStyleColor();
+            }
+            string lastAffixType = null;
+            for (int i = 0; i < _capturedMods.Count; i++)
+            {
+                var mod = _capturedMods[i];
+                if (!string.IsNullOrEmpty(_modFilter) &&
+                    !mod.RawName.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) &&
+                    !mod.Description.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) &&
+                    !mod.DisplayName.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase)) continue;
+
+                if (mod.AffixType != lastAffixType)
+                {
+                    if (i > 0) ImGui.Dummy(new System.Numerics.Vector2(0, 10));
+                    ImGui.TextColored(new nuVector4(0.502f, 0.8f, 1f, 1f), $"--- {mod.AffixType} ---");
+                    ImGui.Separator();
+                    lastAffixType = mod.AffixType;
+                }
+                DrawModEntry(mod);
+            }
+        }
+
+        private void DrawModEntry(CapturedMod mod)
+        {
+            ImGui.PushID(mod.RawName + mod.AffixType);
+            bool inGood = GoodModsDictionary?.Any(x => BaseModExtractor.AreEquivalent(mod.RawName, x.Key)) ?? false;
+            bool inBad = BadModsDictionary?.Any(x => BaseModExtractor.AreEquivalent(mod.RawName, x.Key)) ?? false;
+            if (inGood && inBad) ImGui.TextColored(new nuVector4(1f, 1f, 0f, 1f), "[!] CONFLICT: Present in both Good and Bad lists.");
+            
+            HelpMarker($"{mod.RawName}");
+            ImGui.SameLine();
+            ImGui.TextWrapped(EscapeImGui(string.IsNullOrEmpty(mod.Description) ? mod.RawName : mod.Description).Replace("\\n", "\n"));
+
+            var displayName = mod.DisplayName;
+            if (ImGui.InputText("##displayname", ref displayName, 100))
+            {
+                mod.DisplayName = displayName;
+                AutoSaveIfExisting(mod);
+            }
+
+            ImGui.SameLine();
+            var color = mod.Color;
+            if (ImGui.ColorEdit4("", ref color, ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.NoInputs))
+            {
+                mod.Color = color;
+                AutoSaveIfExisting(mod);
+            }
+
+            ImGui.Dummy(new nuVector2(0, 5));
+            if (ImGui.Button("Add Good")) { UpdateColorForCategory(mod, true); SaveModToConfig(mod, "GoodMods.txt"); }
+            ImGui.SameLine();
+            if (ImGui.Button("Add Bad")) { UpdateColorForCategory(mod, false); SaveModToConfig(mod, "BadMods.txt"); }
+            ImGui.SameLine();
+            if (ImGui.Button("Delete")) DeleteModFromConfig(mod.RawName);
+            ImGui.SameLine();
+            var isBricking = mod.IsBricking;
+            if (ImGui.Checkbox("Brick", ref isBricking))
+            {
+                mod.IsBricking = isBricking;
+                AutoSaveIfExisting(mod);
+            }
+            ImGui.Separator();
+            ImGui.PopID();
+        }
+
+        private void DrawModBrowser()
+        {
+            if (_allModsList.Count == 0)
+            {
+                ImGui.Text("Mod database not loaded or empty.");
+                return;
+            }
+
+            var filtered = _modEntries
+                .Where(entry => string.IsNullOrEmpty(_modFilter) ||
+                                entry.GroupKey.Contains(_modFilter, StringComparison.OrdinalIgnoreCase) ||
+                                (entry.Descriptions != null && entry.Descriptions.Any(d => d.Contains(_modFilter, StringComparison.OrdinalIgnoreCase))) ||
+                                (entry.BaseMods != null && entry.BaseMods.Any(bm => bm.Contains(_modFilter, StringComparison.OrdinalIgnoreCase))))
+                .ToList();
+
+            ImGui.Text($"Showing {filtered.Count} mods from database.");
+            ImGui.Separator();
+
+            foreach (var modEntry in filtered)
+            {
+                DrawModBrowserEntry(modEntry);
+            }
+        }
+
+        private void DrawModBrowserEntry(ModEntry modEntry)
+        {
+            ImGui.PushID(modEntry.GroupKey);
+
+            // Determine overall status for the ModEntry
+            bool anyGood = modEntry.BaseMods.Any(bm => GoodModsDictionary?.Any(x => BaseModExtractor.AreEquivalent(bm, x.Key)) ?? false);
+            bool anyBad = modEntry.BaseMods.Any(bm => BadModsDictionary?.Any(x => BaseModExtractor.AreEquivalent(bm, x.Key)) ?? false);
+            bool anyBricking = modEntry.BaseMods.Any(bm => ((GoodModsDictionary?.TryGetValue(bm, out var goodMod) ?? false) && goodMod.Bricking) ||
+                                                           ((BadModsDictionary?.TryGetValue(bm, out var badMod) ?? false) && badMod.Bricking));
+
+            nuVector4 displayColor = new nuVector4(1, 1, 1, 1); // Default white
+            if (anyGood && !anyBad) displayColor = new nuVector4(0.4f, 1f, 0.4f, 1f); // Green for good
+            if (anyBad && !anyGood) displayColor = new nuVector4(1f, 0.4f, 0.4f, 1f); // Red for bad
+            if (anyGood && anyBad) ImGui.TextColored(new nuVector4(1f, 1f, 0f, 1f), "[!] CONFLICT: Present in both Good and Bad lists."); // Yellow for conflict
+
+            HelpMarker($"{string.Join(", ", modEntry.BaseMods)}");
+            ImGui.SameLine();
+
+            for (int i = 0; i < modEntry.Descriptions.Count; i++)
+            {
+                if (i > 0) ImGui.Indent(30f);
+                ImGui.PushStyleColor(ImGuiCol.Text, displayColor);
+                ImGui.TextWrapped(EscapeImGui(modEntry.Descriptions[i]).Replace("\\n", "\n"));
+                ImGui.PopStyleColor();
+                if (i > 0) ImGui.Unindent(30f);
+            }
+
+            // Tooltipname field: pre-filled with nothing
+            if (!_browserDisplayNameEdits.TryGetValue(modEntry.GroupKey, out var currentEditName))
+            {
+                // Find if any of the BaseMods for this description have a custom display name
+                string defaultDisplayName = string.Empty;
+                foreach (var bm in modEntry.BaseMods)
+                {
+                    var (existing, _) = MatchMod(bm);
+                    if (existing != null && !string.Equals(existing.Text, bm, StringComparison.OrdinalIgnoreCase))
+                    {
+                        defaultDisplayName = existing.Text;
+                        break; // Found one, use it
+                    }
+                }
+                currentEditName = defaultDisplayName;
+                _browserDisplayNameEdits[modEntry.GroupKey] = currentEditName;
+            }
+
+            if (ImGui.InputText("##displayname", ref currentEditName, 100))
+            {
+                _browserDisplayNameEdits[modEntry.GroupKey] = currentEditName;
+                // If any of these BaseMods already exist in config, update their DisplayName
+                foreach (var bm in modEntry.BaseMods)
+                {
+                    var (existing, isGood) = MatchMod(bm);
+                    if (existing != null)
+                    {
+                        // Create a temp CapturedMod to pass to SaveModToConfig for updating
+                        SaveModToConfig(new CapturedMod { RawName = bm, DisplayName = currentEditName, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = existing.Color, IsBricking = existing.Bricking }, isGood ? "GoodMods.txt" : "BadMods.txt", bm);
+                    }
+                }
+            }
+
+            ImGui.SameLine();
+            var colorForPicker = displayColor; // Use the determined status color for the picker's initial state
+            if (ImGui.ColorEdit4("", ref colorForPicker, ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.NoInputs))
+            {
+                displayColor = colorForPicker; // Update the display color immediately
+                // If any of these BaseMods already exist in config, update their Color
+                foreach (var bm in modEntry.BaseMods)
+                {
+                    var (existing, isGood) = MatchMod(bm);
+                    if (existing != null)
+                    {
+                        SaveModToConfig(new CapturedMod { RawName = bm, DisplayName = existing.Text, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = colorForPicker, IsBricking = existing.Bricking }, isGood ? "GoodMods.txt" : "BadMods.txt", bm);
+                    }
+                }
+            }
+
+            ImGui.Dummy(new nuVector2(0, 5));
+
+            if (ImGui.Button("Add Good"))
+            {
+                foreach (var bm in modEntry.BaseMods)
+                {
+                    var tempMod = new CapturedMod { RawName = bm, DisplayName = currentEditName, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = displayColor, IsBricking = anyBricking };
+                    UpdateColorForCategory(tempMod, true);
+                    SaveModToConfig(tempMod, "GoodMods.txt", bm);
+                }
+                _browserDisplayNameEdits.Remove(modEntry.GroupKey); // Clear edit after action
+                GoodModsDictionary = LoadConfigGoodMod(); // Reload dictionaries to reflect changes
+                BadModsDictionary = LoadConfigBadMod();
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Add Bad"))
+            {
+                foreach (var bm in modEntry.BaseMods)
+                {
+                var tempMod = new CapturedMod
+                {
+                    RawName = bm, DisplayName = currentEditName, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = displayColor, IsBricking = anyBricking
+                };
+                    UpdateColorForCategory(tempMod, false);
+                    SaveModToConfig(tempMod, "BadMods.txt", bm);
+                }
+                _browserDisplayNameEdits.Remove(modEntry.GroupKey); // Clear edit after action
+                GoodModsDictionary = LoadConfigGoodMod(); // Reload dictionaries to reflect changes
+                BadModsDictionary = LoadConfigBadMod();
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Delete"))
+            {
+                foreach (var bm in modEntry.BaseMods)
+                {
+                    DeleteModFromConfig(bm);
+                }
+                _browserDisplayNameEdits.Remove(modEntry.GroupKey); // Clear edit after action
+                GoodModsDictionary = LoadConfigGoodMod(); // Reload dictionaries to reflect changes
+                BadModsDictionary = LoadConfigBadMod();
+            }
+            ImGui.SameLine();
+            var isBricking = anyBricking; // Use the aggregated bricking status
+            if (ImGui.Checkbox("Brick", ref isBricking))
+            {
+                foreach (var bm in modEntry.BaseMods)
+                {
+                    // Need to create a CapturedMod to pass to AutoSaveIfExisting
+                    var tempMod = new CapturedMod { RawName = bm, DisplayName = currentEditName, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = displayColor, IsBricking = isBricking };
+                    // AutoSaveIfExisting will handle finding if it's good/bad and saving
+                    AutoSaveIfExisting(tempMod);
+                }
+                GoodModsDictionary = LoadConfigGoodMod(); // Reload dictionaries to reflect changes
+                BadModsDictionary = LoadConfigBadMod();
+            }
+
+            ImGui.Separator();
+            ImGui.PopID();
+        }
+
+        private void UpdateColorForCategory(CapturedMod mod, bool isGood)
+        {
+            if (mod.Color == new nuVector4(1f, 1f, 1f, 1f))
+                mod.Color = isGood ? new nuVector4(0.4f, 1f, 0.4f, 1f) : new nuVector4(1f, 0.4f, 0.4f, 1f);
+            else if (isGood && (mod.Color == new nuVector4(1f, 0.4f, 0.4f, 1f) || mod.Color == new nuVector4(1f, 0f, 0f, 1f)))
+                mod.Color = new nuVector4(0.4f, 1f, 0.4f, 1f);
+            else if (!isGood && (mod.Color == new nuVector4(0.4f, 1f, 0.4f, 1f) || mod.Color == new nuVector4(0f, 1f, 0f, 1f)))
+                mod.Color = new nuVector4(1f, 0.4f, 0.4f, 1f);
+        }
+
         private void AutoSaveIfExisting(CapturedMod mod)
         {
             var (match, isGood) = MatchMod(mod.RawName);
-            if (match != null) SaveModToConfig(mod, isGood ? "GoodMods.txt" : "BadMods.txt");
+            if (match != null)
+            {
+                // Update the existing entry in the dictionary directly
+                if (isGood)
+                {
+                    GoodModsDictionary[mod.RawName].Text = mod.DisplayName;
+                    GoodModsDictionary[mod.RawName].Color = mod.Color;
+                    GoodModsDictionary[mod.RawName].Bricking = mod.IsBricking;
+                }
+                else
+                {
+                    BadModsDictionary[mod.RawName].Text = mod.DisplayName;
+                    BadModsDictionary[mod.RawName].Color = mod.Color;
+                    BadModsDictionary[mod.RawName].Bricking = mod.IsBricking;
+                }
+                // Then save to file to persist the updated values
+                SaveModToConfig(mod, isGood ? "GoodMods.txt" : "BadMods.txt", mod.RawName);
+            }
+            // If it doesn't exist, AutoSaveIfExisting doesn't add it, which is correct behavior.
         }
 
         /// <summary>

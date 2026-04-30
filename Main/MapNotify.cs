@@ -21,6 +21,12 @@ namespace MapNotify_3_28;
 
 public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 {
+    // JSON Database helper classes
+    public class ModsJson { public Dictionary<string, ModGroup> groups { get; set; } }
+    public class ModGroup { public List<string> BaseMods { get; set; } public List<string> Descriptions { get; set; } }
+    public class ModEntry { public string GroupKey { get; set; } public List<string> Descriptions { get; set; } public List<string> BaseMods { get; set; } }
+    public class ModData { public string BaseMod { get; set; } public string Description { get; set; } }
+
     private static readonly Regex TooltipTagsRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
 
     public static class UIIndices
@@ -78,6 +84,9 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     private List<CapturedMod> _capturedMods = new List<CapturedMod>();
     private List<string> _availableProfiles = new List<string>();
     private string _newProfileName = string.Empty;
+    private List<ModData> _allModsList = new List<ModData>();
+    private bool _forceCapturedTab;
+    private List<ModEntry> _modEntries = new List<ModEntry>(); // Store grouped mod entries for browser
 
     public MapNotify_3_28()
     {
@@ -131,8 +140,62 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             GetExpeditionLockerItems,
             Settings.StashCacheInterval.Value
         );
+        LoadModsDatabase();
         InitializeAtlasHighlighter(); // Call the new method to initialize Atlas-related caches
         return true;
+    }
+
+    private void LoadModsDatabase()
+    {
+        // First, try the standard location relative to the plugin's DLL (for compiled plugins)
+        var path = Path.Combine(DirectoryFullName, "data", "mods.json");
+        LogMessage($"MapNotify: Attempting to load mods database from standard path: {path}", 5);
+
+        if (!File.Exists(path))
+        {
+            // If not found, try the source directory location (for development/source plugins)
+            var sourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins", "Source", "MapNotify-3.28", "data", "mods.json");
+            LogMessage($"MapNotify: mods.json not found at standard path. Trying source path: {sourcePath}", 5);
+            path = sourcePath;
+        }
+
+        if (File.Exists(path))
+        {
+            try
+            {
+                var json = File.ReadAllText(path);
+                var database = Newtonsoft.Json.JsonConvert.DeserializeObject<ModsJson>(json);
+
+                if (database?.groups != null)
+                {
+                    _modEntries = database.groups.Select(kvp => new ModEntry
+                    {
+                        GroupKey = kvp.Key,
+                        Descriptions = kvp.Value.Descriptions ?? new List<string>(),
+                        BaseMods = kvp.Value.BaseMods
+                    }).ToList();
+
+                    _allModsList = _modEntries
+                        .Where(m => m.BaseMods != null)
+                        .SelectMany(m => m.BaseMods.Select(bm => new ModData { BaseMod = bm, Description = m.Descriptions.FirstOrDefault() ?? m.GroupKey }))
+                        .ToList();
+
+                    LogMessage($"MapNotify: Successfully loaded {_allModsList.Count} mods from database at {path}.", 5);
+                }
+                else
+                {
+                    LogError($"MapNotify: mods.json loaded but 'groups' section is null or empty at {path}.", 10);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError($"MapNotify: Error parsing mods.json at {path}: {ex.Message}", 10);
+            }
+        }
+        else
+        {
+            LogError($"MapNotify: mods.json not found at either standard or source path: {path}", 10);
+        }
     }
 
     public static nuVector2 boxSize;
@@ -161,7 +224,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     {
         if (!File.Exists(path)) return false;
         var lines = File.ReadAllLines(path).ToList();
-        bool removed = lines.RemoveAll(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith("#") && 
+        bool removed = lines.RemoveAll(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith("#") &&
                                             BaseModExtractor.AreEquivalent(rawName, l.Split(';')[0].Trim())) > 0;
         if (removed) File.WriteAllLines(path, lines);
         return removed;
@@ -174,7 +237,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     public override void Render()
     {
         windowArea = GameController.Window.GetWindowRectangle();
-        
+
         ProcessHotkeys();
 
         if (_showPreviewWindow) DrawPreviewWindow();
@@ -204,7 +267,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         bool modifiersMatch = (Settings.UseControl == ctrlHeld) &&
                              (Settings.UseShift == shiftHeld) &&
                              (Settings.UseAlt == altHeld);
-        
+
         if (modifiersMatch && Settings.CaptureHotkey.PressedOnce()) HandleCaptureHotkey();
     }
 
@@ -242,13 +305,13 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         var tradeWindow = ui.TradeWindow;
         bool isTradeWindowVisible = tradeWindow != null && tradeWindow.IsVisible;
 
-        if (Settings.FilterTrade && (isShopVisible || isTradeWindowVisible)) 
+        if (Settings.FilterTrade && (isShopVisible || isTradeWindowVisible))
             DrawBordersForItems(_purchaseWindowItems.Value, "Shop/Trade");
     }
 
     private void RenderMapDevice()
     {
-        if (Settings.ShowForInvitations.Value || Settings.FilterTrade.Value) 
+        if (Settings.ShowForInvitations.Value || Settings.FilterTrade.Value)
         {
             var deviceItems = _mapDeviceItems.Value;
             foreach (var item in deviceItems)
@@ -258,7 +321,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                 // Separate logic for invitation slot vs regular map pieces in the device
                 var path = item.Item.Path;
                 bool isInvitation = path != null && (path.Contains("MavenMap") || path.Contains("Invitations/Maven") || path.Contains("MavenInvitation"));
-                
+
                 if (isInvitation && !Settings.ShowForInvitations.Value) continue;
                 if (!isInvitation && !Settings.FilterTrade.Value) continue;
                 DrawBordersForItems(new[] { item }, "Map Device");
@@ -321,7 +384,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
         _capturedMods.Clear();
         var descriptions = GetModDescriptionsFromTooltip(hoverItem.Tooltip);
         var availableDescriptions = new List<string>(descriptions);
-        
+
         _capturedMods = GetCapturableMods(mods, availableDescriptions);
 
         // Capture Logbook Implicits from ExpeditionSaga
@@ -329,6 +392,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 
         _modFilter = string.Empty;
         _showPreviewWindow = true;
+        _forceCapturedTab = true;
     }
 
     private List<CapturedMod> GetCapturableMods(Mods mods, List<string> availableDescriptions)
@@ -337,16 +401,17 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 
         var explicitModsFromItem = mods.ItemMods
             .Where(m => m.ModRecord != null)
-            .Where(m => m.ModRecord.AffixType.ToString().Contains("Prefix") || 
-                        m.ModRecord.AffixType.ToString().Contains("Suffix") || 
-                        m.ModRecord.AffixType.ToString().Contains("Implicit") || 
+            .Where(m => m.ModRecord.AffixType.ToString().Contains("Prefix") ||
+                        m.ModRecord.AffixType.ToString().Contains("Suffix") ||
+                        m.ModRecord.AffixType.ToString().Contains("Implicit") ||
                         m.ModRecord.AffixType.ToString().Contains("Unique") || // Include Unique modifiers for Valdo maps
                         m.ModRecord.AffixType.ToString().Contains("Enchant"))
             .Where(m => !string.IsNullOrEmpty(m.Name))
             .Where(m => !ModNameBlacklist.Any(black => m.RawName.Contains(black)))
             .GroupBy(m => Regex.Replace(m.RawName, @"\s+", ""), StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
-            .OrderBy(m => {
+            .OrderBy(m =>
+            {
                 var type = m.ModRecord.AffixType.ToString();
                 if (type.Contains("Enchant")) return 0;
                 if (type.Contains("Implicit")) return 1;
@@ -362,7 +427,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             string matchedDescription = null;
             int descIndex = -1;
             string nameToMatch = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
-            
+
             if (!string.IsNullOrEmpty(nameToMatch))
             {
                 var cleanModName = TooltipTagsRegex.Replace(nameToMatch, "").Replace("{", "").Replace("}", "").Replace("%%", "%").Replace("..", ".").Trim();
