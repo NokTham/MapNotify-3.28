@@ -214,11 +214,17 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     /// </summary>
     private static (StyledText match, bool isGood) MatchMod(string rawName)
     {
-        if (string.IsNullOrEmpty(rawName)) return (null, false);
-        var goodMatch = GoodModsDictionary.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key)).Value;
-        if (goodMatch != null) return (goodMatch, true);
-        var badMatch = BadModsDictionary.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key)).Value;
-        return (badMatch, false);
+        var result = MatchModWithKey(rawName);
+        return (result.match, result.isGood);
+    }
+
+    private static (string matchedKey, StyledText match, bool isGood) MatchModWithKey(string rawName)
+    {
+        if (string.IsNullOrEmpty(rawName)) return (null, null, false);
+        var goodMatch = GoodModsDictionary.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key));
+        if (goodMatch.Value != null) return (goodMatch.Key, goodMatch.Value, true);
+        var badMatch = BadModsDictionary.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key));
+        return (badMatch.Key, badMatch.Value, false);
     }
 
     private static bool RemoveModFromFile(string path, string rawName)

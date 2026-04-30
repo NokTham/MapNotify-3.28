@@ -320,11 +320,11 @@ namespace MapNotify_3_28
                 // If any of these BaseMods already exist in config, update their DisplayName
                 foreach (var bm in modEntry.BaseMods)
                 {
-                    var (existing, isGood) = MatchMod(bm);
+                    var (matchedKey, existing, isGood) = MatchModWithKey(bm);
                     if (existing != null)
                     {
                         // Create a temp CapturedMod to pass to SaveModToConfig for updating
-                        SaveModToConfig(new CapturedMod { RawName = bm, DisplayName = currentEditName, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = existing.Color, IsBricking = existing.Bricking }, isGood ? "GoodMods.txt" : "BadMods.txt", bm);
+                        SaveModToConfig(new CapturedMod { RawName = bm, DisplayName = currentEditName, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = existing.Color, IsBricking = existing.Bricking }, isGood ? "GoodMods.txt" : "BadMods.txt", matchedKey);
                     }
                 }
             }
@@ -337,10 +337,10 @@ namespace MapNotify_3_28
                 // If any of these BaseMods already exist in config, update their Color
                 foreach (var bm in modEntry.BaseMods)
                 {
-                    var (existing, isGood) = MatchMod(bm);
+                    var (matchedKey, existing, isGood) = MatchModWithKey(bm);
                     if (existing != null)
                     {
-                        SaveModToConfig(new CapturedMod { RawName = bm, DisplayName = existing.Text, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = colorForPicker, IsBricking = existing.Bricking }, isGood ? "GoodMods.txt" : "BadMods.txt", bm);
+                        SaveModToConfig(new CapturedMod { RawName = bm, DisplayName = existing.Text, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = colorForPicker, IsBricking = existing.Bricking }, isGood ? "GoodMods.txt" : "BadMods.txt", matchedKey);
                     }
                 }
             }
@@ -417,26 +417,17 @@ namespace MapNotify_3_28
 
         private void AutoSaveIfExisting(CapturedMod mod)
         {
-            var (match, isGood) = MatchMod(mod.RawName);
+            var (matchedKey, match, isGood) = MatchModWithKey(mod.RawName);
             if (match != null)
             {
                 // Update the existing entry in the dictionary directly
-                if (isGood)
-                {
-                    GoodModsDictionary[mod.RawName].Text = mod.DisplayName;
-                    GoodModsDictionary[mod.RawName].Color = mod.Color;
-                    GoodModsDictionary[mod.RawName].Bricking = mod.IsBricking;
-                }
-                else
-                {
-                    BadModsDictionary[mod.RawName].Text = mod.DisplayName;
-                    BadModsDictionary[mod.RawName].Color = mod.Color;
-                    BadModsDictionary[mod.RawName].Bricking = mod.IsBricking;
-                }
+                match.Text = mod.DisplayName;
+                match.Color = mod.Color;
+                match.Bricking = mod.IsBricking;
+
                 // Then save to file to persist the updated values
-                SaveModToConfig(mod, isGood ? "GoodMods.txt" : "BadMods.txt", mod.RawName);
+                SaveModToConfig(mod, isGood ? "GoodMods.txt" : "BadMods.txt", matchedKey);
             }
-            // If it doesn't exist, AutoSaveIfExisting doesn't add it, which is correct behavior.
         }
 
         /// <summary>
