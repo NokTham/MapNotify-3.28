@@ -3,7 +3,7 @@
     "version": "3.28"
   },
   "groups": {
-    "+{%} Monster Chaos Resistance": {
+    "+% Monster Chaos Resistance": {
       "BaseMods": [
         "MapMonstersAllResistances2MapWorlds",
         "MapMonstersAllResistances3MapWorlds",
@@ -12,11 +12,11 @@
         "MapUberWeakMonstersAllResistances"
       ],
       "Descriptions": [
-        "+{%} Monster Chaos Resistance",
-        "+{%} Monster Elemental Resistances"
+        "+% Monster Chaos Resistance",
+        "+% Monster Elemental Resistances"
       ]
     },
-    "+{%} Monster Physical Damage Reduction": {
+    "+% Monster Physical Damage Reduction": {
       "BaseMods": [
         "MapMonsterPhysicalResistance2MapWorlds",
         "MapMonsterPhysicalResistance3MapWorldsMaven",
@@ -26,12 +26,12 @@
         "MapUberWeakMonsterPhysicalResistance"
       ],
       "Descriptions": [
-        "+{%} Monster Chaos Resistance",
-        "+{%} Monster Elemental Resistances",
-        "+{%} Monster Physical Damage Reduction"
+        "+% Monster Chaos Resistance",
+        "+% Monster Elemental Resistances",
+        "+% Monster Physical Damage Reduction"
       ]
     },
-    "{%} reduced effect of Curses on Monsters": {
+    "% reduced effect of Curses on Monsters": {
       "BaseMods": [
         "MapMonstersCurseEffectOnSelfFinal2MapWorlds",
         "MapMonstersCurseEffectOnSelfFinal3MapWorlds",
@@ -40,7 +40,7 @@
         "MapUberWeakMonstersCurseEffectOnSelfFinal"
       ],
       "Descriptions": [
-        "{%} reduced effect of Curses on Monsters"
+        "% reduced effect of Curses on Monsters"
       ]
     },
     "All Magic and Normal Monsters in Area are in a Union of Souls": {
@@ -95,7 +95,7 @@
       "Descriptions": [
         "All Incursions must be completed to claim Reward",
         "Area contains Einhar",
-        "Incursion Architects have {%} chance to be Possessed by a Tormented Spirit"
+        "Incursion Architects have % chance to be Possessed by a Tormented Spirit"
       ],
       "Type": "unique_map"
     },
@@ -236,7 +236,7 @@
         "MapSupporterAbyss"
       ],
       "Descriptions": [
-        "Abysses in Area spawn {%} increased Monsters",
+        "Abysses in Area spawn % increased Monsters",
         "All Abysses in Area must be completed to claim Reward",
         "Area contains an additional Abyss"
       ],
@@ -331,50 +331,50 @@
         "Area contains two Unique Bosses"
       ]
     },
-    "Area contains {#} additional Rare Monsters that create Frost Walls and Flee": {
+    "Area contains # additional Rare Monsters that create Frost Walls and Flee": {
       "BaseMods": [
         "MapSupporterTricksters"
       ],
       "Descriptions": [
-        "Area contains {#} additional Rare Monsters that create Frost Walls and Flee"
+        "Area contains # additional Rare Monsters that create Frost Walls and Flee"
       ],
       "Type": "unique_map"
     },
-    "Area contains {#} additional pack of four Map Bosses": {
+    "Area contains # additional pack of four Map Bosses": {
       "BaseMods": [
         "MapSupporterAtlasBosses1",
         "MapSupporterAtlasBosses2",
         "MapSupporterAtlasBosses3"
       ],
       "Descriptions": [
-        "Area contains {#} additional pack of four Map Bosses"
+        "Area contains # additional pack of four Map Bosses"
       ],
       "Type": "unique_map"
     },
-    "Area contains {#}-{#} additional packs of Frog": {
+    "Area contains #-# additional packs of Frog": {
       "BaseMods": [
         "MapSupporterAdditionalFrogPacks"
       ],
       "Descriptions": [
-        "Area contains {#}-{#} additional packs of Frog"
+        "Area contains #-# additional packs of Frog"
       ],
       "Type": "unique_map"
     },
-    "Area contains {#}-{#} additional packs of Sulphite Golems": {
+    "Area contains #-# additional packs of Sulphite Golems": {
       "BaseMods": [
         "MapSupporterSulphiteGolems"
       ],
       "Descriptions": [
-        "Area contains {#}-{#} additional packs of Sulphite Golems"
+        "Area contains #-# additional packs of Sulphite Golems"
       ],
       "Type": "unique_map"
     },
-    "Area contains {#}-{#} additional packs of Untainted Wild Animals": {
+    "Area contains #-# additional packs of Untainted Wild Animals": {
       "BaseMods": [
         "MapSupporterUntaintedPacks"
       ],
       "Descriptions": [
-        "Area contains {#}-{#} additional packs of Untainted Wild Animals"
+        "Area contains #-# additional packs of Untainted Wild Animals"
       ],
       "Type": "unique_map"
     },
@@ -404,8 +404,8 @@
       ],
       "Descriptions": [
         "Area has patches of Burning Ground",
-        "Ground Effect has a radius of {#}",
-        "{#} patches with Ground Effect per {#} tiles"
+        "Ground Effect has a radius of #",
+        "# patches with Ground Effect per # tiles"
       ]
     },
     "Area has patches of Chilled Ground": {
@@ -418,8 +418,8 @@
       ],
       "Descriptions": [
         "Area has patches of Chilled Ground",
-        "Ground Effect has a radius of {#}",
-        "{#} patches with Ground Effect per {#} tiles"
+        "Ground Effect has a radius of #",
+        "# patches with Ground Effect per # tiles"
       ]
     },
     "Area has patches of Consecrated Ground": {
@@ -432,11 +432,11 @@
       ],
       "Descriptions": [
         "Area has patches of Consecrated Ground",
-        "Ground Effect has a radius of {#}",
-        "{#} patches with Ground Effect per {#} tiles"
+        "Ground Effect has a radius of #",
+        "# patches with Ground Effect per # tiles"
       ]
     },
-    "Area has patches of Shocked Ground which increase Damage taken by {%}": {
+    "Area has patches of Shocked Ground which increase Damage taken by %": {
       "BaseMods": [
         "MapShockedGround1MapWorlds",
         "MapShockedGround2MapWorlds",
@@ -445,9 +445,9 @@
         "MapUberWeakShockedGround"
       ],
       "Descriptions": [
-        "Area has patches of Shocked Ground which increase Damage taken by {%}",
-        "Ground Effect has a radius of {#}",
-        "{#} patches with Ground Effect per {#} tiles"
+        "Area has patches of Shocked Ground which increase Damage taken by %",
+        "Ground Effect has a radius of #",
+        "# patches with Ground Effect per # tiles"
       ]
     },
     "Area has patches of desecrated ground": {
@@ -460,18 +460,18 @@
       ],
       "Descriptions": [
         "Area has patches of desecrated ground",
-        "Ground Effect has a radius of {#}",
-        "{#} patches with Ground Effect per {#} tiles"
+        "Ground Effect has a radius of #",
+        "# patches with Ground Effect per # tiles"
       ]
     },
-    "Area has {#} additional random Modifier": {
+    "Area has # additional random Modifier": {
       "BaseMods": [
         "MapSupporterAdditionalModifiers1",
         "MapSupporterAdditionalModifiers2",
         "MapSupporterAdditionalModifiers3"
       ],
       "Descriptions": [
-        "Area has {#} additional random Modifier"
+        "Area has # additional random Modifier"
       ],
       "Type": "unique_map"
     },
@@ -632,12 +632,12 @@
         "Area is inhabited by ranged monsters"
       ]
     },
-    "Atlas Passives have {%}-{%} reduced Effect on Area": {
+    "Atlas Passives have %-% reduced Effect on Area": {
       "BaseMods": [
         "MapCorruptionAtlasEffect"
       ],
       "Descriptions": [
-        "Atlas Passives have {%}-{%} reduced Effect on Area"
+        "Atlas Passives have %-% reduced Effect on Area"
       ]
     },
     "Auras from Player Skills which affect Allies also affect Enemies": {
@@ -648,7 +648,7 @@
         "Auras from Player Skills which affect Allies also affect Enemies"
       ]
     },
-    "Buffs on Players expire {%} faster": {
+    "Buffs on Players expire % faster": {
       "BaseMods": [
         "MapPlayersBuffsExpireFaster2MapWorlds___",
         "MapPlayersBuffsExpireFaster3MapWorlds",
@@ -658,33 +658,33 @@
         "MapUberWeakPlayersBuffsExpireFaster"
       ],
       "Descriptions": [
-        "Buffs on Players expire {%} faster"
+        "Buffs on Players expire % faster"
       ]
     },
-    "Debuffs on Monsters expire {%} faster": {
+    "Debuffs on Monsters expire % faster": {
       "BaseMods": [
         "MapUberModMonsterDebuffSpeed"
       ],
       "Descriptions": [
-        "Debuffs on Monsters expire {%} faster"
+        "Debuffs on Monsters expire % faster"
       ]
     },
-    "Debuffs on players expire {%} slower": {
+    "Debuffs on players expire % slower": {
       "BaseMods": [
         "MapSupporterDebuffsExpireSlower"
       ],
       "Descriptions": [
-        "Debuffs on players expire {%} slower"
+        "Debuffs on players expire % slower"
       ],
       "Type": "unique_map"
     },
-    "Durability of Ichor Pumps in Area is {#}": {
+    "Durability of Ichor Pumps in Area is #": {
       "BaseMods": [
         "MapSupporterBlight"
       ],
       "Descriptions": [
         "Area contains a Blight Encounter",
-        "Durability of Ichor Pumps in Area is {#}"
+        "Durability of Ichor Pumps in Area is #"
       ],
       "Type": "unique_map"
     },
@@ -740,28 +740,28 @@
         "Map Boss is accompanied by a Synthesis Boss"
       ]
     },
-    "Map Bosses have {%} chance to be surrounded by Tormented Spirits": {
+    "Map Bosses have % chance to be surrounded by Tormented Spirits": {
       "BaseMods": [
         "MemoryAltarMapBossSurroundedBySpirits"
       ],
       "Descriptions": [
-        "Map Bosses have {%} chance to be surrounded by Tormented Spirits"
+        "Map Bosses have % chance to be surrounded by Tormented Spirits"
       ]
     },
-    "Map has {#} additional random Prefix": {
+    "Map has # additional random Prefix": {
       "BaseMods": [
         "UniqueWatchstoneMapAdditionalPrefix_"
       ],
       "Descriptions": [
-        "Map has {#} additional random Prefix"
+        "Map has # additional random Prefix"
       ]
     },
-    "Map has {#} additional random Suffix": {
+    "Map has # additional random Suffix": {
       "BaseMods": [
         "UniqueWatchstoneMapAdditionalSuffix"
       ],
       "Descriptions": [
-        "Map has {#} additional random Suffix"
+        "Map has # additional random Suffix"
       ]
     },
     "Maven releases all Bosses at once": {
@@ -784,12 +784,12 @@
       ],
       "Type": "unique_map"
     },
-    "Monster Damage Penetrates {%} Elemental Resistances": {
+    "Monster Damage Penetrates % Elemental Resistances": {
       "BaseMods": [
         "MapUberModEleDamagePenetration"
       ],
       "Descriptions": [
-        "Monster Damage Penetrates {%} Elemental Resistances"
+        "Monster Damage Penetrates % Elemental Resistances"
       ]
     },
     "Monster corpses cannot be Destroyed": {
@@ -810,12 +810,12 @@
       ],
       "Type": "unique_map"
     },
-    "Monsters Kill things with {%} or lower Life on Hit": {
+    "Monsters Kill things with % or lower Life on Hit": {
       "BaseMods": [
         "MapSupporterSuperCull"
       ],
       "Descriptions": [
-        "Monsters Kill things with {%} or lower Life on Hit"
+        "Monsters Kill things with % or lower Life on Hit"
       ],
       "Type": "unique_map"
     },
@@ -828,7 +828,7 @@
       "Descriptions": [
         "All Damage from Monsters' Hits can Poison",
         "Monsters Poison on Hit",
-        "Monsters have {%} increased Poison Duration"
+        "Monsters have % increased Poison Duration"
       ]
     },
     "Monsters are Hexproof": {
@@ -841,12 +841,12 @@
         "Monsters are Hexproof"
       ]
     },
-    "Monsters can only be Damaged while within {#} metres of a Player\nPlayers' modifiers to Light Radius also apply to this range": {
+    "Monsters can only be Damaged while within # metres of a Player\nPlayers' modifiers to Light Radius also apply to this range": {
       "BaseMods": [
         "MapSupporterDamageRadius"
       ],
       "Descriptions": [
-        "Monsters can only be Damaged while within {#} metres of a Player\nPlayers' modifiers to Light Radius also apply to this range"
+        "Monsters can only be Damaged while within # metres of a Player\nPlayers' modifiers to Light Radius also apply to this range"
       ],
       "Type": "unique_map"
     },
@@ -873,10 +873,10 @@
         "Monsters cannot be Stunned",
         "Monsters' Action Speed cannot be modified to below Base Value",
         "Monsters' Movement Speed cannot be modified to below Base Value",
-        "{%}-{%} more Monster Life"
+        "%-% more Monster Life"
       ]
     },
-    "Monsters deal {%}-{%} extra Physical Damage as Cold": {
+    "Monsters deal %-% extra Physical Damage as Cold": {
       "BaseMods": [
         "MapMonsterColdDamage2MapWorlds",
         "MapMonsterColdDamage3MapWorldsMaven",
@@ -885,10 +885,10 @@
         "MapUberWeakMonsterColdDamage"
       ],
       "Descriptions": [
-        "Monsters deal {%}-{%} extra Physical Damage as Cold"
+        "Monsters deal %-% extra Physical Damage as Cold"
       ]
     },
-    "Monsters deal {%}-{%} extra Physical Damage as Fire": {
+    "Monsters deal %-% extra Physical Damage as Fire": {
       "BaseMods": [
         "MapMonsterFireDamage2MapWorlds",
         "MapMonsterFireDamage3MapWorlds",
@@ -897,10 +897,10 @@
         "MapUberWeakMonsterFireDamage"
       ],
       "Descriptions": [
-        "Monsters deal {%}-{%} extra Physical Damage as Fire"
+        "Monsters deal %-% extra Physical Damage as Fire"
       ]
     },
-    "Monsters deal {%}-{%} extra Physical Damage as Lightning": {
+    "Monsters deal %-% extra Physical Damage as Lightning": {
       "BaseMods": [
         "MapMonsterLightningDamage2MapWorlds__",
         "MapMonsterLightningDamage3MapWorlds",
@@ -909,7 +909,7 @@
         "MapUberWeakMonsterLightningDamage"
       ],
       "Descriptions": [
-        "Monsters deal {%}-{%} extra Physical Damage as Lightning"
+        "Monsters deal %-% extra Physical Damage as Lightning"
       ]
     },
     "Monsters drop no Items": {
@@ -921,7 +921,7 @@
       ],
       "Type": "unique_map"
     },
-    "Monsters fire {#} additional Projectiles": {
+    "Monsters fire # additional Projectiles": {
       "BaseMods": [
         "MapMonsterMultipleProjectilesWorlds",
         "MapMonsterMultipleProjectilesWorldsMaven",
@@ -929,12 +929,12 @@
         "MapUberModProjAOE"
       ],
       "Descriptions": [
-        "Monsters fire {#} additional Projectiles",
-        "Monsters have {%} increased Area of Effect"
+        "Monsters fire # additional Projectiles",
+        "Monsters have % increased Area of Effect"
       ],
       "Type": "unique_map"
     },
-    "Monsters gain {%}-{%} of Maximum Life as Extra Maximum Energy Shield": {
+    "Monsters gain %-% of Maximum Life as Extra Maximum Energy Shield": {
       "BaseMods": [
         "MapMonstersMaximumLifeAddedEnergyShield2MapWorlds_____",
         "MapMonstersMaximumLifeAddedEnergyShield3MapWorlds",
@@ -944,10 +944,10 @@
         "MapUberWeakMonstersMaximumLifeAddedEnergyShield"
       ],
       "Descriptions": [
-        "Monsters gain {%}-{%} of Maximum Life as Extra Maximum Energy Shield"
+        "Monsters gain %-% of Maximum Life as Extra Maximum Energy Shield"
       ]
     },
-    "Monsters gain {%}-{%} of their Physical Damage as Extra Chaos Damage": {
+    "Monsters gain %-% of their Physical Damage as Extra Chaos Damage": {
       "BaseMods": [
         "MapMonsterChaosDamage2MapWorlds",
         "MapMonsterChaosDamage3MapWorlds",
@@ -956,19 +956,19 @@
         "MapUberWeakMonsterChaosDamage"
       ],
       "Descriptions": [
-        "Monsters gain {%}-{%} of their Physical Damage as Extra Chaos Damage",
-        "Monsters have {%} chance to inflict Withered for {#} seconds on Hit"
+        "Monsters gain %-% of their Physical Damage as Extra Chaos Damage",
+        "Monsters have % chance to inflict Withered for # seconds on Hit"
       ]
     },
-    "Monsters gain {%}-{%} of their Physical Damage as Extra Damage of a random Element": {
+    "Monsters gain %-% of their Physical Damage as Extra Damage of a random Element": {
       "BaseMods": [
         "MapUberModDamageAsElemental"
       ],
       "Descriptions": [
-        "Monsters gain {%}-{%} of their Physical Damage as Extra Damage of a random Element"
+        "Monsters gain %-% of their Physical Damage as Extra Damage of a random Element"
       ]
     },
-    "Monsters have a {%} chance to Ignite, Freeze and Shock on Hit": {
+    "Monsters have a % chance to Ignite, Freeze and Shock on Hit": {
       "BaseMods": [
         "MapMonstersChanceToInflictStatusAilments2MapWorlds",
         "MapMonstersChanceToInflictStatusAilments2MapWorldsMaven",
@@ -978,10 +978,10 @@
       ],
       "Descriptions": [
         "All Monster Damage can Ignite, Freeze and Shock",
-        "Monsters have a {%} chance to Ignite, Freeze and Shock on Hit"
+        "Monsters have a % chance to Ignite, Freeze and Shock on Hit"
       ]
     },
-    "Monsters have a {%} chance to avoid Poison, Impale, and Bleeding": {
+    "Monsters have a % chance to avoid Poison, Impale, and Bleeding": {
       "BaseMods": [
         "MapMonstersAvoidPoisonBleedBlind2MapWorlds",
         "MapMonstersAvoidPoisonBleedBlind3MapWorlds",
@@ -990,27 +990,27 @@
         "MapUberWeakMonstersAvoidPoisonBleedBlind"
       ],
       "Descriptions": [
-        "Monsters have a {%} chance to avoid Poison, Impale, and Bleeding"
+        "Monsters have a % chance to avoid Poison, Impale, and Bleeding"
       ]
     },
-    "Monsters have {#} to Maximum Endurance Charges": {
+    "Monsters have # to Maximum Endurance Charges": {
       "BaseMods": [
         "MapUberModEnduranceCharges"
       ],
       "Descriptions": [
-        "Monsters have a {%} chance to gain an Endurance Charge when hit",
-        "Monsters have {#} to Maximum Endurance Charges"
+        "Monsters have a % chance to gain an Endurance Charge when hit",
+        "Monsters have # to Maximum Endurance Charges"
       ]
     },
-    "Monsters have {%} Chance to Block Attack Damage": {
+    "Monsters have % Chance to Block Attack Damage": {
       "BaseMods": [
         "MapUberModMonsterAttackBlock"
       ],
       "Descriptions": [
-        "Monsters have {%} Chance to Block Attack Damage"
+        "Monsters have % Chance to Block Attack Damage"
       ]
     },
-    "Monsters have {%} chance to Avoid Elemental Ailments": {
+    "Monsters have % chance to Avoid Elemental Ailments": {
       "BaseMods": [
         "MapMonsterStatusAilmentAvoidance2MapWorlds",
         "MapMonsterStatusAilmentAvoidanceMapWorlds",
@@ -1019,39 +1019,39 @@
         "MapUberWeakMonsterStatusAilmentImmunity"
       ],
       "Descriptions": [
-        "Monsters have {%} chance to Avoid Elemental Ailments"
+        "Monsters have % chance to Avoid Elemental Ailments"
       ]
     },
-    "Monsters have {%} chance to Blind on Hit": {
+    "Monsters have % chance to Blind on Hit": {
       "BaseMods": [
         "MapMonstersBlindOnHitMapWorlds",
         "MapMonstersBlindOnHitMapWorldsMaven__",
         "MapUberWeakMonstersBlindOnHit"
       ],
       "Descriptions": [
-        "Monsters have {%} chance to Blind on Hit"
+        "Monsters have % chance to Blind on Hit"
       ]
     },
-    "Monsters have {%} chance to Hinder on Hit with Spells": {
+    "Monsters have % chance to Hinder on Hit with Spells": {
       "BaseMods": [
         "MapMonstersHinderOnHitMapWorlds",
         "MapMonstersHinderOnHitMapWorldsMaven"
       ],
       "Descriptions": [
-        "Monsters have {%} chance to Hinder on Hit with Spells"
+        "Monsters have % chance to Hinder on Hit with Spells"
       ]
     },
-    "Monsters have {%} chance to Maim on Hit with Attacks": {
+    "Monsters have % chance to Maim on Hit with Attacks": {
       "BaseMods": [
         "MapMonstersMaimOnHitMapWorlds",
         "MapMonstersMaimOnHitMapWorldsMaven__",
         "MapUberWeakMonstersMaimOnHit"
       ],
       "Descriptions": [
-        "Monsters have {%} chance to Maim on Hit with Attacks"
+        "Monsters have % chance to Maim on Hit with Attacks"
       ]
     },
-    "Monsters have {%} chance to Suppress Spell Damage": {
+    "Monsters have % chance to Suppress Spell Damage": {
       "BaseMods": [
         "MapMonstersChanceToSuppressSpells2MapWorlds",
         "MapMonstersChanceToSuppressSpells3MapWorlds",
@@ -1061,10 +1061,10 @@
         "MapUberWeakMonstersChanceToSuppressSpells"
       ],
       "Descriptions": [
-        "Monsters have {%} chance to Suppress Spell Damage"
+        "Monsters have % chance to Suppress Spell Damage"
       ]
     },
-    "Monsters have {%} chance to gain a Frenzy Charge on Hit": {
+    "Monsters have % chance to gain a Frenzy Charge on Hit": {
       "BaseMods": [
         "MapMonstersFrenzyChargeOnHitMapWorlds",
         "MapMonstersFrenzyChargeOnHitMapWorldsMaven",
@@ -1073,12 +1073,12 @@
         "MapUberWeakMonstersFrenzyChargeOnHit"
       ],
       "Descriptions": [
-        "Monsters have {#} to Maximum Frenzy Charges",
-        "Monsters have {%} chance to gain a Frenzy Charge on Hit"
+        "Monsters have # to Maximum Frenzy Charges",
+        "Monsters have % chance to gain a Frenzy Charge on Hit"
       ],
       "Type": "unique_map"
     },
-    "Monsters have {%} chance to gain a Power Charge on Hit": {
+    "Monsters have % chance to gain a Power Charge on Hit": {
       "BaseMods": [
         "MapMonstersPowerChargeOnHitMapWorlds",
         "MapMonstersPowerChargeOnHitMapWorldsMaven",
@@ -1087,12 +1087,12 @@
         "MapUberWeakMonstersPowerChargeOnHit"
       ],
       "Descriptions": [
-        "Monsters have {#} to Maximum Power Charges",
-        "Monsters have {%} chance to gain a Power Charge on Hit"
+        "Monsters have # to Maximum Power Charges",
+        "Monsters have % chance to gain a Power Charge on Hit"
       ],
       "Type": "unique_map"
     },
-    "Monsters have {%} chance to gain an Endurance Charge on Hit": {
+    "Monsters have % chance to gain an Endurance Charge on Hit": {
       "BaseMods": [
         "MapMonstersEnduranceChargeOnHitMapWorlds",
         "MapMonstersEnduranceChargeOnHitMapWorldsMaven",
@@ -1100,31 +1100,31 @@
         "MapUberWeakMonstersEnduranceChargeOnHit"
       ],
       "Descriptions": [
-        "Monsters have {#} to Maximum Endurance Charges",
-        "Monsters have {%} chance to gain an Endurance Charge on Hit"
+        "Monsters have # to Maximum Endurance Charges",
+        "Monsters have % chance to gain an Endurance Charge on Hit"
       ],
       "Type": "unique_map"
     },
-    "Monsters have {%} chance to have a Volatile Core": {
+    "Monsters have % chance to have a Volatile Core": {
       "BaseMods": [
         "MapSupporterVolatilesOnDeath"
       ],
       "Descriptions": [
-        "Monsters have {%} chance to have a Volatile Core"
+        "Monsters have % chance to have a Volatile Core"
       ],
       "Type": "unique_map"
     },
-    "Monsters have {%} chance to steal Power, Frenzy and Endurance charges on Hit": {
+    "Monsters have % chance to steal Power, Frenzy and Endurance charges on Hit": {
       "BaseMods": [
         "MapMonstersStealChargesOnHitMapWorlds",
         "MapMonstersStealChargesOnHitMapWorldsMaven__",
         "MapUberWeakMonstersStealChargesOnHit"
       ],
       "Descriptions": [
-        "Monsters have {%} chance to steal Power, Frenzy and Endurance charges on Hit"
+        "Monsters have % chance to steal Power, Frenzy and Endurance charges on Hit"
       ]
     },
-    "Monsters have {%} increased Area of Effect": {
+    "Monsters have % increased Area of Effect": {
       "BaseMods": [
         "MapMonsterAreaOfEffect2MapWorlds",
         "MapMonsterAreaOfEffect3MapWorlds",
@@ -1133,10 +1133,10 @@
         "MapUberWeakMonsterAreaOfEffect"
       ],
       "Descriptions": [
-        "Monsters have {%} increased Area of Effect"
+        "Monsters have % increased Area of Effect"
       ]
     },
-    "Monsters have {%}-{%} increased Critical Strike Chance": {
+    "Monsters have %-% increased Critical Strike Chance": {
       "BaseMods": [
         "MapMonsterCriticalStrikesAndDamage2MapWorlds",
         "MapMonsterCriticalStrikesAndDamage3MapWorlds",
@@ -1145,8 +1145,8 @@
         "MapUberWeakMonsterCriticalStrikesAndDamage"
       ],
       "Descriptions": [
-        "Monsters have {%}-{%} increased Critical Strike Chance",
-        "{%}-{%} to Monster Critical Strike Multiplier"
+        "Monsters have %-% increased Critical Strike Chance",
+        "%-% to Monster Critical Strike Multiplier"
       ]
     },
     "Monsters inflict Malediction on hit": {
@@ -1158,26 +1158,26 @@
       ],
       "Type": "unique_map"
     },
-    "Monsters inflict Petrification for {#} seconds on hit": {
+    "Monsters inflict Petrification for # seconds on hit": {
       "BaseMods": [
         "MapSupporterPetrifyOnHit"
       ],
       "Descriptions": [
-        "Monsters inflict Petrification for {#} seconds on hit"
+        "Monsters inflict Petrification for # seconds on hit"
       ],
       "Type": "unique_map"
     },
-    "Monsters inflict {#} Grasping Vine on Hit": {
+    "Monsters inflict # Grasping Vine on Hit": {
       "BaseMods": [
         "MapSupporterGraspingVines",
         "MapUberModVines"
       ],
       "Descriptions": [
-        "Monsters inflict {#} Grasping Vine on Hit"
+        "Monsters inflict # Grasping Vine on Hit"
       ],
       "Type": "unique_map"
     },
-    "Monsters reflect {%} of Elemental Damage": {
+    "Monsters reflect % of Elemental Damage": {
       "BaseMods": [
         "MapMonsterElementalReflection2MapWorlds",
         "MapMonsterElementalReflection3MapWorlds",
@@ -1186,10 +1186,10 @@
         "MapUberWeakMonsterElementalReflection"
       ],
       "Descriptions": [
-        "Monsters reflect {%} of Elemental Damage"
+        "Monsters reflect % of Elemental Damage"
       ]
     },
-    "Monsters reflect {%} of Physical Damage": {
+    "Monsters reflect % of Physical Damage": {
       "BaseMods": [
         "MapMonsterPhysicalReflection2MapWorlds",
         "MapMonsterPhysicalReflection3MapWorlds",
@@ -1200,12 +1200,12 @@
         "MapUberWeakMonsterPhysicalReflection"
       ],
       "Descriptions": [
-        "Monsters reflect {%} of Elemental Damage",
-        "Monsters reflect {%} of Physical Damage"
+        "Monsters reflect % of Elemental Damage",
+        "Monsters reflect % of Physical Damage"
       ],
       "Type": "unique_map"
     },
-    "Monsters take {%}-{%} reduced Extra Damage from Critical Strikes": {
+    "Monsters take %-% reduced Extra Damage from Critical Strikes": {
       "BaseMods": [
         "MapMonstersBaseSelfCriticalMultiplier2MapWorlds",
         "MapMonstersBaseSelfCriticalMultiplier3MapWorlds",
@@ -1215,7 +1215,7 @@
         "MapUberWeakMonstersBaseSelfCriticalMultiplier"
       ],
       "Descriptions": [
-        "Monsters take {%}-{%} reduced Extra Damage from Critical Strikes"
+        "Monsters take %-% reduced Extra Damage from Critical Strikes"
       ]
     },
     "Monsters' Action Speed cannot be modified to below Base Value\nMonsters' Movement Speed cannot be modified to below Base Value": {
@@ -1229,7 +1229,7 @@
         "Monsters' Action Speed cannot be modified to below Base Value\nMonsters' Movement Speed cannot be modified to below Base Value"
       ]
     },
-    "Monsters' Attacks have {%} chance to Impale on Hit": {
+    "Monsters' Attacks have % chance to Impale on Hit": {
       "BaseMods": [
         "MapMonstersImpaleOnHit2MapWorlds",
         "MapMonstersImpaleOnHit3MapWorldsMaven",
@@ -1238,18 +1238,18 @@
         "MapUberWeakMonstersImpaleOnHit"
       ],
       "Descriptions": [
-        "Monsters' Attacks have {%} chance to Impale on Hit"
+        "Monsters' Attacks have % chance to Impale on Hit"
       ]
     },
-    "Monsters' skills Chain {#} additional times": {
+    "Monsters' skills Chain # additional times": {
       "BaseMods": [
         "MapMonsterChainMapWorlds",
         "MapMonsterChainMapWorldsMaven",
         "MapUberModChain"
       ],
       "Descriptions": [
-        "Monsters' Projectiles have {%} chance to be able to Chain when colliding with Terrain",
-        "Monsters' skills Chain {#} additional times"
+        "Monsters' Projectiles have % chance to be able to Chain when colliding with Terrain",
+        "Monsters' skills Chain # additional times"
       ]
     },
     "Non-Unique Equipment found in Area drops as Currency instead": {
@@ -1261,17 +1261,17 @@
       ],
       "Type": "unique_map"
     },
-    "Only opens {#} Portal to Area": {
+    "Only opens # Portal to Area": {
       "BaseMods": [
         "MapSupporterPortalLimit1",
         "MapSupporterPortalLimit2"
       ],
       "Descriptions": [
-        "Only opens {#} Portal to Area"
+        "Only opens # Portal to Area"
       ],
       "Type": "unique_map"
     },
-    "Players Prevent -{%} of Suppressed Spell Damage": {
+    "Players Prevent -% of Suppressed Spell Damage": {
       "BaseMods": [
         "MapPlayersEvasionAndUnluckyDodge1MapWorlds",
         "MapPlayersEvasionAndUnluckyDodge2MapWorlds",
@@ -1280,8 +1280,8 @@
         "MapUberWeakPlayersEvasionAndUnluckyDodge"
       ],
       "Descriptions": [
-        "Monsters have {%} increased Accuracy Rating",
-        "Players Prevent -{%} of Suppressed Spell Damage"
+        "Monsters have % increased Accuracy Rating",
+        "Players Prevent -% of Suppressed Spell Damage"
       ]
     },
     "Players are Cursed with Elemental Weakness": {
@@ -1464,14 +1464,14 @@
       ],
       "Type": "unique_map"
     },
-    "Players cannot Recover Life or Energy Shield above {%} during Rituals in Area": {
+    "Players cannot Recover Life or Energy Shield above % during Rituals in Area": {
       "BaseMods": [
         "MapSupporterRitual"
       ],
       "Descriptions": [
         "Areas contain Ritual Altars",
         "Must fully complete all Ritual Encounters in Area to claim Reward",
-        "Players cannot Recover Life or Energy Shield above {%} during Rituals in Area"
+        "Players cannot Recover Life or Energy Shield above % during Rituals in Area"
       ],
       "Type": "unique_map"
     },
@@ -1522,12 +1522,12 @@
         "Players cannot inflict Exposure"
       ]
     },
-    "Players deal {%} increased Damage while Dead": {
+    "Players deal % increased Damage while Dead": {
       "BaseMods": [
         "MapSupporterPlayerDamageWhileDead"
       ],
       "Descriptions": [
-        "Players deal {%} increased Damage while Dead"
+        "Players deal % increased Damage while Dead"
       ],
       "Type": "unique_map"
     },
@@ -1540,7 +1540,7 @@
       ],
       "Type": "unique_map"
     },
-    "Players gain {%} reduced Flask Charges": {
+    "Players gain % reduced Flask Charges": {
       "BaseMods": [
         "MapPlayersGainReducedFlaskCharges2MapWorlds_",
         "MapPlayersGainReducedFlaskCharges3MapWorldsMaven",
@@ -1549,7 +1549,7 @@
         "MapUberWeakPlayersGainReducedFlaskCharges"
       ],
       "Descriptions": [
-        "Players gain {%} reduced Flask Charges"
+        "Players gain % reduced Flask Charges"
       ]
     },
     "Players gain Instability on Kill\nUnstable Players eventually detonate": {
@@ -1561,31 +1561,31 @@
       ],
       "Type": "unique_map"
     },
-    "Players have {%}-{%} reduced Maximum total Life, Mana and Energy Shield Recovery per second from Leech": {
+    "Players have %-% reduced Maximum total Life, Mana and Energy Shield Recovery per second from Leech": {
       "BaseMods": [
         "MapUberModLessPlayerLeech"
       ],
       "Descriptions": [
-        "Players have {%}-{%} reduced Maximum total Life, Mana and Energy Shield Recovery per second from Leech"
+        "Players have %-% reduced Maximum total Life, Mana and Energy Shield Recovery per second from Leech"
       ]
     },
-    "Players have {%}-{%} less Area of Effect": {
+    "Players have %-% less Area of Effect": {
       "BaseMods": [
         "MapUberModAOEPlayer"
       ],
       "Descriptions": [
-        "Players have {%}-{%} less Area of Effect"
+        "Players have %-% less Area of Effect"
       ]
     },
-    "Players have {%}-{%} less Defences": {
+    "Players have %-% less Defences": {
       "BaseMods": [
         "MapUberModGlobalDefences"
       ],
       "Descriptions": [
-        "Players have {%}-{%} less Defences"
+        "Players have %-% less Defences"
       ]
     },
-    "Players have -{%}-{%} to all maximum Resistances": {
+    "Players have -%-% to all maximum Resistances": {
       "BaseMods": [
         "MapPlayerMaxResists1MapWorlds",
         "MapPlayerMaxResists2MapWorlds",
@@ -1593,10 +1593,10 @@
         "MapUberWeakPlayerMaxResists"
       ],
       "Descriptions": [
-        "Players have -{%}-{%} to all maximum Resistances"
+        "Players have -%-% to all maximum Resistances"
       ]
     },
-    "Players have {%} reduced Chance to Block": {
+    "Players have % reduced Chance to Block": {
       "BaseMods": [
         "MapPlayersBlockAndArmour2MapWorlds",
         "MapPlayersBlockAndArmour3MapWorlds",
@@ -1605,20 +1605,20 @@
         "MapUberWeakPlayersBlockAndArmour"
       ],
       "Descriptions": [
-        "Players have {%} reduced Chance to Block",
-        "Players have {%} less Armour"
+        "Players have % reduced Chance to Block",
+        "Players have % less Armour"
       ]
     },
-    "Players have {%} reduced Character Size": {
+    "Players have % reduced Character Size": {
       "BaseMods": [
         "MapSupporterActorScale2"
       ],
       "Descriptions": [
-        "Players have {%} reduced Character Size"
+        "Players have % reduced Character Size"
       ],
       "Type": "unique_map"
     },
-    "Players have {%} reduced effect of Non-Curse Auras from Skills": {
+    "Players have % reduced effect of Non-Curse Auras from Skills": {
       "BaseMods": [
         "MapPlayersReducedAuraEffect2MapWorlds",
         "MapPlayersReducedAuraEffect3MapWorldsMaven",
@@ -1628,11 +1628,11 @@
         "MapUberWeakPlayersReducedAuraEffect"
       ],
       "Descriptions": [
-        "Players have {%} reduced effect of Non-Curse Auras from Skills"
+        "Players have % reduced effect of Non-Curse Auras from Skills"
       ],
       "Type": "unique_map"
     },
-    "Players have {%} less Accuracy Rating": {
+    "Players have % less Accuracy Rating": {
       "BaseMods": [
         "MapPlayersAccuracyRating2MapWorlds",
         "MapPlayersAccuracyRating3MapWorlds",
@@ -1641,10 +1641,10 @@
         "MapUberWeakPlayersAccuracyRating"
       ],
       "Descriptions": [
-        "Players have {%} less Accuracy Rating"
+        "Players have % less Accuracy Rating"
       ]
     },
-    "Players have {%} less Area of Effect": {
+    "Players have % less Area of Effect": {
       "BaseMods": [
         "MapPlayersLessAoERadius2MapWorlds",
         "MapPlayersLessAoERadius3MapWorlds",
@@ -1653,10 +1653,10 @@
         "MapUberWeakPlayersLessAoERadius"
       ],
       "Descriptions": [
-        "Players have {%} less Area of Effect"
+        "Players have % less Area of Effect"
       ]
     },
-    "Players have {%} less Cooldown Recovery Rate": {
+    "Players have % less Cooldown Recovery Rate": {
       "BaseMods": [
         "MapPlayersLessCooldownRecovery2MapWorlds",
         "MapPlayersLessCooldownRecovery3MapWorlds",
@@ -1665,10 +1665,10 @@
         "MapUberWeakPlayersLessCooldownRecovery"
       ],
       "Descriptions": [
-        "Players have {%} less Cooldown Recovery Rate"
+        "Players have % less Cooldown Recovery Rate"
       ]
     },
-    "Players have {%} less Recovery Rate of Life and Energy Shield": {
+    "Players have % less Recovery Rate of Life and Energy Shield": {
       "BaseMods": [
         "MapPlayerReducedRegen1MapWorlds",
         "MapPlayerReducedRegen2MapWorlds_",
@@ -1677,23 +1677,23 @@
         "MapUberWeakPlayerReducedRegen"
       ],
       "Descriptions": [
-        "Players have {%} less Recovery Rate of Life and Energy Shield"
+        "Players have % less Recovery Rate of Life and Energy Shield"
       ]
     },
-    "Players have {%} less effect of Flasks applied to them": {
+    "Players have % less effect of Flasks applied to them": {
       "BaseMods": [
         "MapUberModLessFlaskEffect"
       ],
       "Descriptions": [
-        "Players have {%} less effect of Flasks applied to them"
+        "Players have % less effect of Flasks applied to them"
       ]
     },
-    "Players have -{%} to all maximum Resistances": {
+    "Players have -% to all maximum Resistances": {
       "BaseMods": [
         "MapUberModMinusMax"
       ],
       "Descriptions": [
-        "Players have -{%} to all maximum Resistances"
+        "Players have -% to all maximum Resistances"
       ]
     },
     "Players have Shroud Walker": {
@@ -1705,38 +1705,38 @@
       ],
       "Type": "unique_map"
     },
-    "Players have {%} chance to be targeted by a Meteor when they use a Flask": {
+    "Players have % chance to be targeted by a Meteor when they use a Flask": {
       "BaseMods": [
         "MapUberModFlaskMeteor"
       ],
       "Descriptions": [
-        "Players have {%} chance to be targeted by a Meteor when they use a Flask"
+        "Players have % chance to be targeted by a Meteor when they use a Flask"
       ]
     },
-    "Players have {%} chance to gain Rare Monster Modifiers for {#} seconds on Kill": {
+    "Players have % chance to gain Rare Monster Modifiers for # seconds on Kill": {
       "BaseMods": [
         "MapSupporterRareMonsterModOnKill"
       ],
       "Descriptions": [
-        "Players have {%} chance to gain Rare Monster Modifiers for {#} seconds on Kill"
+        "Players have % chance to gain Rare Monster Modifiers for # seconds on Kill"
       ],
       "Type": "unique_map"
     },
-    "Players have {%} increased Character Size": {
+    "Players have % increased Character Size": {
       "BaseMods": [
         "MapSupporterActorScale1"
       ],
       "Descriptions": [
-        "Players have {%} increased Character Size"
+        "Players have % increased Character Size"
       ],
       "Type": "unique_map"
     },
-    "Players have {%} increased Cost of Skills for each Skill they've used Recently": {
+    "Players have % increased Cost of Skills for each Skill they've used Recently": {
       "BaseMods": [
         "MapSupporterSkillCosts"
       ],
       "Descriptions": [
-        "Players have {%} increased Cost of Skills for each Skill they've used Recently"
+        "Players have % increased Cost of Skills for each Skill they've used Recently"
       ],
       "Type": "unique_map"
     },
@@ -1749,21 +1749,21 @@
       ],
       "Type": "unique_map"
     },
-    "Players in Area are {%} Delirious": {
+    "Players in Area are % Delirious": {
       "BaseMods": [
         "MapSupporterMaxAffliction"
       ],
       "Descriptions": [
-        "Players in Area are {%} Delirious"
+        "Players in Area are % Delirious"
       ],
       "Type": "unique_map"
     },
-    "Players reflect {%} of Melee Physical Damage taken": {
+    "Players reflect % of Melee Physical Damage taken": {
       "BaseMods": [
         "MapSupporterPlayerThorns"
       ],
       "Descriptions": [
-        "Players reflect {%} of Melee Physical Damage taken"
+        "Players reflect % of Melee Physical Damage taken"
       ],
       "Type": "unique_map"
     },
@@ -1776,13 +1776,13 @@
       ],
       "Type": "unique_map"
     },
-    "Players' Minions deal {%} less Damage per Item Equipped by their Master": {
+    "Players' Minions deal % less Damage per Item Equipped by their Master": {
       "BaseMods": [
         "MapSupporterDamagePerSlot"
       ],
       "Descriptions": [
-        "Players deal {%} less Damage per Equipped Item",
-        "Players' Minions deal {%} less Damage per Item Equipped by their Master"
+        "Players deal % less Damage per Equipped Item",
+        "Players' Minions deal % less Damage per Item Equipped by their Master"
       ],
       "Type": "unique_map"
     },
@@ -1791,7 +1791,7 @@
         "MapSupporterMovement"
       ],
       "Descriptions": [
-        "Players have {%} reduced Movement Speed",
+        "Players have % reduced Movement Speed",
         "Players' Travel Skills are Disabled"
       ],
       "Type": "unique_map"
@@ -1822,7 +1822,7 @@
       ],
       "Type": "unique_map"
     },
-    "Rare Monsters each have {#} additional Modifier": {
+    "Rare Monsters each have # additional Modifier": {
       "BaseMods": [
         "MapSupporterAdditionalRareMonsterMods1",
         "MapSupporterAdditionalRareMonsterMods2",
@@ -1830,8 +1830,8 @@
         "MapUberModRareMonsters"
       ],
       "Descriptions": [
-        "Rare Monsters each have {#} additional Modifier",
-        "{%}-{%} increased number of Rare Monsters"
+        "Rare Monsters each have # additional Modifier",
+        "%-% increased number of Rare Monsters"
       ],
       "Type": "unique_map"
     },
@@ -1844,31 +1844,31 @@
       ],
       "Type": "unique_map"
     },
-    "Rare Monsters have {%} chance to have a Volatile Core": {
+    "Rare Monsters have % chance to have a Volatile Core": {
       "BaseMods": [
         "MapUberModVolatiles"
       ],
       "Descriptions": [
-        "Rare Monsters have {%} chance to have a Volatile Core"
+        "Rare Monsters have % chance to have a Volatile Core"
       ]
     },
-    "Rare Monsters have {%} chance to spawn a Duplicate of Map Boss on Death": {
+    "Rare Monsters have % chance to spawn a Duplicate of Map Boss on Death": {
       "BaseMods": [
         "MapSupporterRareMonsterSpawnBoss"
       ],
       "Descriptions": [
-        "Rare Monsters have {%} chance to spawn a Duplicate of Map Boss on Death"
+        "Rare Monsters have % chance to spawn a Duplicate of Map Boss on Death"
       ],
       "Type": "unique_map"
     },
-    "Rare and Unique Monsters in Area are Possessed by up to {#} Tormented Spirit and if Possessed their Minions are Touched": {
+    "Rare and Unique Monsters in Area are Possessed by up to # Tormented Spirit and if Possessed their Minions are Touched": {
       "BaseMods": [
         "MapSupporterPossessed1",
         "MapSupporterPossessed2",
         "MapSupporterPossessed3"
       ],
       "Descriptions": [
-        "Rare and Unique Monsters in Area are Possessed by up to {#} Tormented Spirit and if Possessed their Minions are Touched"
+        "Rare and Unique Monsters in Area are Possessed by up to # Tormented Spirit and if Possessed their Minions are Touched"
       ],
       "Type": "unique_map"
     },
@@ -1928,17 +1928,17 @@
       ],
       "Type": "unique_map"
     },
-    "Tormented Spirits can Possess Players for {#} seconds\nTormented Spirits cannot Possess Monsters": {
+    "Tormented Spirits can Possess Players for # seconds\nTormented Spirits cannot Possess Monsters": {
       "BaseMods": [
         "MapSupporterTorment"
       ],
       "Descriptions": [
-        "Area is haunted by {#}-{#} additional Tormented Spirit",
-        "Tormented Spirits can Possess Players for {#} seconds\nTormented Spirits cannot Possess Monsters"
+        "Area is haunted by #-# additional Tormented Spirit",
+        "Tormented Spirits can Possess Players for # seconds\nTormented Spirits cannot Possess Monsters"
       ],
       "Type": "unique_map"
     },
-    "Unique Boss deals {%} increased Damage": {
+    "Unique Boss deals % increased Damage": {
       "BaseMods": [
         "MapDangerousBoss1MapWorlds",
         "MapDangerousBoss2MapWorlds",
@@ -1947,11 +1947,11 @@
         "MapUberWeakDangerousBoss"
       ],
       "Descriptions": [
-        "Unique Boss deals {%} increased Damage",
-        "Unique Boss has {%} increased Attack and Cast Speed"
+        "Unique Boss deals % increased Damage",
+        "Unique Boss has % increased Attack and Cast Speed"
       ]
     },
-    "Unique Boss has {%} increased Life": {
+    "Unique Boss has % increased Life": {
       "BaseMods": [
         "MapMassiveBoss1MapWorlds",
         "MapMassiveBoss2MapWorlds",
@@ -1960,8 +1960,8 @@
         "MapUberWeakMassiveBoss"
       ],
       "Descriptions": [
-        "Unique Boss has {%} increased Area of Effect",
-        "Unique Boss has {%} increased Life"
+        "Unique Boss has % increased Area of Effect",
+        "Unique Boss has % increased Life"
       ]
     },
     "Unique Bosses are Possessed": {
@@ -2014,50 +2014,50 @@
       ],
       "Type": "unique_map"
     },
-    "When Hit, Players gain a random Movement Speed\nmodifier from {%} less to {%} more, until Hit again": {
+    "When Hit, Players gain a random Movement Speed\nmodifier from % less to % more, until Hit again": {
       "BaseMods": [
         "MapSupporterVariableMovement"
       ],
       "Descriptions": [
-        "When Hit, Players gain a random Movement Speed\nmodifier from {%} less to {%} more, until Hit again"
+        "When Hit, Players gain a random Movement Speed\nmodifier from % less to % more, until Hit again"
       ],
       "Type": "unique_map"
     },
-    "{%} chance for Rare Monsters to Fracture on death": {
+    "% chance for Rare Monsters to Fracture on death": {
       "BaseMods": [
         "MapUberModRareFracture"
       ],
       "Descriptions": [
-        "{%} chance for Rare Monsters to Fracture on death"
+        "% chance for Rare Monsters to Fracture on death"
       ]
     },
-    "{%}-{%} increased Explicit Modifier magnitudes": {
+    "%-% increased Explicit Modifier magnitudes": {
       "BaseMods": [
         "MapCorruptionModEffect"
       ],
       "Descriptions": [
-        "{%}-{%} increased Explicit Modifier magnitudes"
+        "%-% increased Explicit Modifier magnitudes"
       ]
     },
-    "{%}-{%} increased Magic Monsters": {
+    "%-% increased Magic Monsters": {
       "BaseMods": [
         "MapBloodlinesModOnMagicsMapWorlds"
       ],
       "Descriptions": [
-        "{%}-{%} increased Magic Monsters"
+        "%-% increased Magic Monsters"
       ]
     },
-    "{%}-{%} increased Monster Cast Speed": {
+    "%-% increased Monster Cast Speed": {
       "BaseMods": [
         "MapUberModTurbo"
       ],
       "Descriptions": [
-        "{%}-{%} increased Monster Attack Speed",
-        "{%}-{%} increased Monster Cast Speed",
-        "{%}-{%} increased Monster Movement Speed"
+        "%-% increased Monster Attack Speed",
+        "%-% increased Monster Cast Speed",
+        "%-% increased Monster Movement Speed"
       ]
     },
-    "{%}-{%} increased Monster Damage": {
+    "%-% increased Monster Damage": {
       "BaseMods": [
         "MapMonsterDamage2MapWorlds",
         "MapMonsterDamage3MapWorlds",
@@ -2067,10 +2067,10 @@
         "MapUberWeakMonsterDamage"
       ],
       "Descriptions": [
-        "{%}-{%} increased Monster Damage"
+        "%-% increased Monster Damage"
       ]
     },
-    "{%}-{%} increased Monster Movement Speed": {
+    "%-% increased Monster Movement Speed": {
       "BaseMods": [
         "MapMonsterFast2MapWorlds",
         "MapMonsterFast3MapWorlds",
@@ -2078,28 +2078,28 @@
         "MapMonsterFastMapWorlds",
       ],
       "Descriptions": [
-        "{%}-{%} increased Monster Attack Speed",
-        "{%}-{%} increased Monster Cast Speed",
-        "{%}-{%} increased Monster Movement Speed"
+        "%-% increased Monster Attack Speed",
+        "%-% increased Monster Cast Speed",
+        "%-% increased Monster Movement Speed"
       ]
     },
-    "{%}-{%} increased number of Rare Monsters": {
+    "%-% increased number of Rare Monsters": {
       "BaseMods": [
         "MapNemesisModOnRaresMapWorlds"
       ],
       "Descriptions": [
-        "{%}-{%} increased number of Rare Monsters"
+        "%-% increased number of Rare Monsters"
       ]
     },
-    "{%}-{%} increased quantity of Petals found on Monsters in Area": {
+    "%-% increased quantity of Petals found on Monsters in Area": {
       "BaseMods": [
         "MemoryAltarMapMonsterRosePetalQuantity"
       ],
       "Descriptions": [
-        "{%}-{%} increased quantity of Petals found on Monsters in Area"
+        "%-% increased quantity of Petals found on Monsters in Area"
       ]
     },
-    "{%}-{%} more Monster Life": {
+    "%-% more Monster Life": {
       "BaseMods": [
         "MapMonsterLife2MapWorlds",
         "MapMonsterLife3MapWorlds",
@@ -2109,16 +2109,16 @@
         "MapUberWeakMonsterLife"
       ],
       "Descriptions": [
-        "{%}-{%} more Monster Life"
+        "%-% more Monster Life"
       ]
     },
-    "{%}-{%} to Monster Critical Strike Multiplier": {
+    "%-% to Monster Critical Strike Multiplier": {
       "BaseMods": [
         "MapUberModCrit"
       ],
       "Descriptions": [
-        "Monsters have {%}-{%} increased Critical Strike Chance",
-        "{%}-{%} to Monster Critical Strike Multiplier"
+        "Monsters have %-% increased Critical Strike Chance",
+        "%-% to Monster Critical Strike Multiplier"
       ]
     }
   }
