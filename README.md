@@ -1,5 +1,6 @@
-# MapNotify 3.28
-Notifications for Map modifiers, Heist requirements, and Atlas completion.
+# MapNotify-3.28
+
+MapNotify-3.28 is a plugin for Exile API designed to highlight map modifiers and provide detailed information overlays for maps, invitations, contracts, and logbooks.
 
 ![hippo](https://i.imgur.com/6X2qUWh.gif)
 
@@ -17,43 +18,50 @@ Notifications for Map modifiers, Heist requirements, and Atlas completion.
 
 ![Image](https://i.imgur.com/q4mYaWD.png)
 
-![Image](https://i.imgur.com/XNtwxUc.png)
+![Image](https://i.imgur.com/jGrlgZ3.png)
 
-![Image](https://i.imgur.com/lu73OA9.png)
+![Image](https://i.imgur.com/QGH69ym.png)
 
-# Includes
-### 1. Enhanced Map Tooltips
-When hovering over a map, contract, or blueprint, an overlay displays:
-*   **Map Tier & Name**: Colored by rarity (Normal, Magic, Rare).
-*   **IIQ, IIR & Pack Size**: Compact display of Item Quantity, Rarity, and Pack Size with customizable thresholds.
-*   **Mod Count**: Displays the number of mods.
-*   **Specialized Quality**: Detects and displays specific chisel types (Quantity, Rarity, Pack Size, Scarab, Currency, etc.).
-*   **Originator/Nightmare Stats**: Shows bonus percentages (More Maps, Scarabs, or Currency).
+## Features
 
-### 2. Mod Alerts (Good vs. Bad)
-The plugin parses item modifiers against your custom configuration files (`GoodMods.txt` and `BadMods.txt`):
-*   **Bad Mods**: Highlights maps that contain dangerous modifiers (e.g., Reflect, No Regen, Temporal Chains).
-*   **Good Mods**: Highlights maps that contain desirable modifiers (e.g., Beyond, Twinned).
-*   **Bricked Mods**: Allows specific mods to be marked as "Bricked" to mark maps that you cannot run, adds a border to maps.
+### Mod Highlighting
+*   **Good/Bad Mod Filtering:** Highlights maps based on user-defined "Good" and "Bad" modifier lists.
+*   **Bricked Maps:** Identifies "bricking" modifiers with specific border highlights.
+*   **Mod Preview Window:** Capture modifiers from hovered items using a hotkey to categorize them, set colors, or mark them as bricking.
+*   **Mod Browser:** A built-in database to search and add modifiers manually (Generic, Uber, Expedition, and Valdo mods).
 
-### 3. Visual Inventory & Stash Highlights
-Instantly see which maps are worth running or avoiding via colored borders and highlights:
-*   Works across **Player Inventory**, **Standard/Premium Stashes**, **Map Stash Tabs** and **Heist Locker** (Contracts & Blueprints supported).
-*   Works in **Offline Shops** and specialized windows like **Tujen's Haggle** or **Trade Windows** (both sides).
-*   Highlights use customizable colors and thickness settings.
+### Tooltip Overlays
+*   **Stat Breakdown:** Displays Item Quantity (IIQ), Item Rarity (IIR), and Pack Size (PS).
+*   **Prefix/Suffix Breakdown:** Shows the contribution of prefixes and suffixes to map stats.
+*   **Heist Info:** Displays Area Level and required Job levels for Contracts and Blueprints.
+*   **Logbook Info:** Displays Faction information and implicit modifiers.
+*   **Originator/Nightmare Stats:** Displays bonus stats for specialized map types.
 
-### 4. Atlas Highlighter
-Visual indicators directly on the Atlas for:
-*   **Incomplete Maps**: Highlights maps you haven't completed.
-*   **Bonus Objectives**: Highlights maps missing bonus completion.
-*   **Maven Witness**: Highlights maps currently witnessed by the Maven.
-*   *Radius and colors are fully adjustable in settings.*
+### Atlas Highlighting
+*   **Completion Tracking:** Highlights nodes on the Atlas that are not completed.
+*   **Bonus Objectives:** Highlights maps with missing bonus objectives.
+*   **Maven Witness:** Highlights maps currently witnessed by the Maven.
 
-### 5. Interactive Mod Preview & Configuration
-Manage your mod lists without leaving the game:
-*   **Capture Hotkey**: Hover over any map and press your hotkey (default: customizable with Ctrl/Shift/Alt) to open the **Map Mod Preview** window.
-*   **On-the-fly Editing**: View mods or raw names, set custom display names, pick colors, and toggle "Bricked" status.
-*   **Active Mods List**: View and quickly delete currently configured mods directly from the GUI.
+### Supported UI Elements
+*   Inventory and Stash (including Map Stash).
+*   Heist and Expedition Lockers.
+*   Trade and Purchase/Shop windows.
+*   Maven Invitations.
+
+## Usage
+
+1.  **Hotkey:** Use the configured hotkey (Default: F1 or as set in Core Settings) while hovering over a map to open the **Map Mod Preview** window.
+2.  **Configuration:**
+    *   **Active Mods:** View and delete currently tracked modifiers.
+    *   **Captured Mods:** Categorize mods from the last hovered item.
+    *   **Profiles:** Create and switch between different mod filter profiles.
+3.  **Atlas:** Type `a|e` in the Atlas search box to force the client to load node data for highlighters to function correctly.
+
+## Configuration Files
+
+The plugin stores settings and mod lists in:
+*   `config/MapNotify-3.28/Profiles/[ProfileName]/GoodMods.txt`
+*   `config/MapNotify-3.28/Profiles/[ProfileName]/BadMods.txt`
 
 # Credits
 *   **Original Plugin**: Lachrymatory https://github.com/Sirais/MapNotify
