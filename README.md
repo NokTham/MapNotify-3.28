@@ -6,7 +6,7 @@ MapNotify-3.28 is a plugin for Exile API designed to highlight map modifiers and
 
 ![hippo](https://i.imgur.com/FDQVQBm.gif)
 
-![Image](https://i.imgur.com/jrhYncI.png)
+![Image](https://i.imgur.com/ch17XYQ.png)
 
 ![Image](https://i.imgur.com/TGwiiOs.png)
 
