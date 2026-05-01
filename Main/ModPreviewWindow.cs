@@ -195,10 +195,13 @@ namespace MapNotify_3_28
             bool inGood = GoodModsDictionary?.Any(x => BaseModExtractor.AreEquivalent(mod.RawName, x.Key)) ?? false;
             bool inBad = BadModsDictionary?.Any(x => BaseModExtractor.AreEquivalent(mod.RawName, x.Key)) ?? false;
             if (inGood && inBad) ImGui.TextColored(new nuVector4(1f, 1f, 0f, 1f), "[!] CONFLICT: Present in both Good and Bad lists.");
-            
+
             HelpMarker($"{mod.RawName}");
             ImGui.SameLine();
+            ImGui.PushStyleColor(ImGuiCol.Text, mod.Color);
             ImGui.TextWrapped(EscapeImGui(string.IsNullOrEmpty(mod.Description) ? mod.RawName : mod.Description).Replace("\\n", "\n"));
+            ImGui.PopStyleColor();
+
 
             var displayName = mod.DisplayName;
             if (ImGui.InputText("##displayname", ref displayName, 100))
@@ -279,9 +282,15 @@ namespace MapNotify_3_28
             bool anyBricking = modEntry.BaseMods.Any(bm => ((GoodModsDictionary?.TryGetValue(bm, out var goodMod) ?? false) && goodMod.Bricking) ||
                                                            ((BadModsDictionary?.TryGetValue(bm, out var badMod) ?? false) && badMod.Bricking));
 
-            nuVector4 displayColor = new nuVector4(1, 1, 1, 1); // Default white
-            if (anyGood && !anyBad) displayColor = new nuVector4(0.4f, 1f, 0.4f, 1f); // Green for good
-            if (anyBad && !anyGood) displayColor = new nuVector4(1f, 0.4f, 0.4f, 1f); // Red for bad
+            // Get the color from the first matched mod in the group, or fall back to defaults
+            var matchResult = modEntry.BaseMods.Select(bm => MatchMod(bm)).FirstOrDefault(m => m.match != null);
+            nuVector4 displayColor = matchResult.match?.Color ?? new nuVector4(1, 1, 1, 1);
+
+            if (matchResult.match == null)
+            {
+                if (anyGood && !anyBad) displayColor = new nuVector4(0.4f, 1f, 0.4f, 1f); // Default Green
+                else if (anyBad && !anyGood) displayColor = new nuVector4(1f, 0.4f, 0.4f, 1f); // Default Red
+            }
             if (anyGood && anyBad) ImGui.TextColored(new nuVector4(1f, 1f, 0f, 1f), "[!] CONFLICT: Present in both Good and Bad lists."); // Yellow for conflict
 
             HelpMarker($"{string.Join(", ", modEntry.BaseMods)}");
@@ -364,10 +373,14 @@ namespace MapNotify_3_28
             {
                 foreach (var bm in modEntry.BaseMods)
                 {
-                var tempMod = new CapturedMod
-                {
-                    RawName = bm, DisplayName = currentEditName, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = displayColor, IsBricking = anyBricking
-                };
+                    var tempMod = new CapturedMod
+                    {
+                        RawName = bm,
+                        DisplayName = currentEditName,
+                        Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey,
+                        Color = displayColor,
+                        IsBricking = anyBricking
+                    };
                     UpdateColorForCategory(tempMod, false);
                     SaveModToConfig(tempMod, "BadMods.txt", bm);
                 }
