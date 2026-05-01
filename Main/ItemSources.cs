@@ -32,10 +32,14 @@ namespace MapNotify_3_28
         private List<NormalInventoryItem> GetItemsFromCollection(IEnumerable<NormalInventoryItem> items)
         {
             if (items == null) return new List<NormalInventoryItem>();
-            return items.Where(it => it?.Item != null && ItemIsMap(it.Item))
-                        .GroupBy(it => it.Item.Address)
-                        .Select(g => g.First())
-                        .ToList();
+            var result = new List<NormalInventoryItem>();
+            var seen = new HashSet<long>();
+            foreach (var it in items)
+            {
+                if (it?.Item != null && ItemIsMap(it.Item) && seen.Add(it.Item.Address))
+                    result.Add(it);
+            }
+            return result;
         }
 
         private List<NormalInventoryItem> GetInventoryItems()
@@ -276,16 +280,16 @@ namespace MapNotify_3_28
             var tradeWindow = ui.TradeWindow;
             if (window == null && tradeWindow.IsVisible) window = tradeWindow;
             if (window == null) return new List<NormalInventoryItem>();
-
-            var result = new List<NormalInventoryItem>();
+            
             if (window is TradeWindow trade)
             {
-                result.AddRange(GetItemsFromCollection(trade.YourOffer));
+                var result = GetItemsFromCollection(trade.YourOffer);
                 result.AddRange(GetItemsFromCollection(trade.OtherOffer));
+                return result;
             }
             else
             {
-                var seenAddresses = new HashSet<long>();
+                var result = new List<NormalInventoryItem>();
                 try
                 {
                     var children = window.Children;
@@ -295,13 +299,13 @@ namespace MapNotify_3_28
                     if (currentTabContainer != null)
                     {
                         foreach (var tab in currentTabContainer.Children)
-                            if (tab.IsVisible && tab.ChildCount > 0)
-                                FindMapsInElementRecursive(tab.GetChildAtIndex(0), result, seenAddresses, 0);
+                            if (tab.IsVisible && tab.ChildCount > 0) 
+                                FindMapsInElement(tab.GetChildAtIndex(0), result);
                     }
                 }
                 catch { }
+                return result;
             }
-            return result;
         }
     }
 }

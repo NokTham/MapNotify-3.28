@@ -135,14 +135,15 @@ namespace MapNotify_3_28
 
         private Dictionary<string, StyledText> SafeLoadDictionary(string path)
         {
-            var dict = new Dictionary<string, StyledText>();
+            var dict = new Dictionary<string, StyledText>(StringComparer.OrdinalIgnoreCase);
             foreach (var line in GenDictionary(path))
             {
                 var bricking = false;
                 if (line.Length > 3)
                     bool.TryParse(line[3] ?? null, out bricking);
 
-                dict[line[0]] = new StyledText { Text = line[1], Color = SharpToNu(HexToSDXVector4(line[2])), Bricking = bricking };
+                var baseKey = BaseModExtractor.GetBaseMod(line[0]);
+                dict[baseKey] = new StyledText { Text = line[1], Color = SharpToNu(HexToSDXVector4(line[2])), Bricking = bricking };
             }
             return dict;
         }
