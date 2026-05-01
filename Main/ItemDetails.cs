@@ -161,7 +161,7 @@ namespace MapNotify_3_28
                     {
                         if (mod == null) continue;
                         var modText = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
-                        var cleanText = !string.IsNullOrEmpty(modText) ? TooltipTagsRegex.Replace(modText, "") : string.Empty;
+                        var cleanText = modText ?? string.Empty;
                         if (string.IsNullOrEmpty(cleanText)) continue;
 
                         var (match, _) = MatchMod(mod.RawName);
@@ -191,32 +191,20 @@ namespace MapNotify_3_28
             {
                 if (string.IsNullOrEmpty(rawName)) return;
 
-                var goodMatch = GoodModsDictionary?.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key)).Value;
-                var badMatch = BadModsDictionary?.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key)).Value;
-
-                if (goodMatch != null && badMatch != null)
+                // Using the helper method to avoid redundant dictionary iterations
+                var (matchedKey, match, isGood) = MatchModWithKey(rawName);
+                
+                if (match != null && isGood)
                 {
-                    var conflict = new StyledText
-                    {
-                        Text = $"[!] DUPLICATE: {goodMatch.Text} / {badMatch.Text}",
-                        EscapedText = EscapeImGui($"[!] DUPLICATE: {goodMatch.Text} / {badMatch.Text}"),
-                        Color = new nuVector4(1f, 1f, 0f, 1f), // Yellow warning color
-                        Bricking = goodMatch.Bricking || badMatch.Bricking
-                    };
-                    ConflictingMods.Add(conflict);
-                    if (conflict.Bricking) Bricked = true;
+                    if (string.IsNullOrEmpty(match.EscapedText)) match.EscapedText = EscapeImGui(match.Text);
+                    if (match.Bricking) Bricked = true;
+                    ActiveGoodMods.Add(match);
                 }
-                else if (goodMatch != null)
+                else if (match != null && !isGood)
                 {
-                    if (string.IsNullOrEmpty(goodMatch.EscapedText)) goodMatch.EscapedText = EscapeImGui(goodMatch.Text);
-                    if (goodMatch.Bricking) Bricked = true;
-                    ActiveGoodMods.Add(goodMatch);
-                }
-                else if (badMatch != null)
-                {
-                    if (string.IsNullOrEmpty(badMatch.EscapedText)) badMatch.EscapedText = EscapeImGui(badMatch.Text);
-                    if (badMatch.Bricking) Bricked = true;
-                    ActiveBadMods.Add(badMatch);
+                    if (string.IsNullOrEmpty(match.EscapedText)) match.EscapedText = EscapeImGui(match.Text);
+                    if (match.Bricking) Bricked = true;
+                    ActiveBadMods.Add(match);
                 }
             }
 
@@ -253,21 +241,24 @@ namespace MapNotify_3_28
                 if (showQuant) tLine.Add(new StyledText { Text = $"{Quantity}% IIQ", Color = qCol, EscapedText = $"{Quantity}%% IIQ" });
                 if (showPack) tLine.Add(new StyledText { Text = $"{PackSize}% PS", Color = pCol, EscapedText = $"{PackSize}%% PS" });
                 if (showRarity) tLine.Add(new StyledText { Text = $"{Rarity}% IIR", Color = rCol, EscapedText = $"{Rarity}%% IIR" });
-                lines.Add(tLine);
+                if (tLine.Count > 1) lines.Add(tLine);
 
-                // P: % IIQ % PS % IIR
-                var pLine = new List<StyledText> { new StyledText { Text = "P: ", Color = white, EscapedText = "P: " } };
-                if (showQuant) pLine.Add(new StyledText { Text = $"{PrefixStats.Quantity}% IIQ", Color = PrefixStats.Quantity > SuffixStats.Quantity ? green : white, EscapedText = $"{PrefixStats.Quantity}%% IIQ" });
-                if (showPack) pLine.Add(new StyledText { Text = $"{PrefixStats.PackSize}% PS", Color = PrefixStats.PackSize > SuffixStats.PackSize ? green : white, EscapedText = $"{PrefixStats.PackSize}%% PS" });
-                if (showRarity) pLine.Add(new StyledText { Text = $"{PrefixStats.Rarity}% IIR", Color = PrefixStats.Rarity > SuffixStats.Rarity ? green : white, EscapedText = $"{PrefixStats.Rarity}%% IIR" });
-                lines.Add(pLine);
+                if (pluginSettings.ShowPrefixSuffixStats.Value)
+                {
+                    // P: % IIQ % PS % IIR
+                    var pLine = new List<StyledText> { new StyledText { Text = "P: ", Color = white, EscapedText = "P: " } };
+                    if (showQuant) pLine.Add(new StyledText { Text = $"{PrefixStats.Quantity}% IIQ", Color = PrefixStats.Quantity > SuffixStats.Quantity ? green : white, EscapedText = $"{PrefixStats.Quantity}%% IIQ" });
+                    if (showPack) pLine.Add(new StyledText { Text = $"{PrefixStats.PackSize}% PS", Color = PrefixStats.PackSize > SuffixStats.PackSize ? green : white, EscapedText = $"{PrefixStats.PackSize}%% PS" });
+                    if (showRarity) pLine.Add(new StyledText { Text = $"{PrefixStats.Rarity}% IIR", Color = PrefixStats.Rarity > SuffixStats.Rarity ? green : white, EscapedText = $"{PrefixStats.Rarity}%% IIR" });
+                    if (pLine.Count > 1) lines.Add(pLine);
 
-                // S: % IIQ % PS % IIR
-                var sLine = new List<StyledText> { new StyledText { Text = "S: ", Color = white, EscapedText = "S: " } };
-                if (showQuant) sLine.Add(new StyledText { Text = $"{SuffixStats.Quantity}% IIQ", Color = SuffixStats.Quantity > PrefixStats.Quantity ? green : white, EscapedText = $"{SuffixStats.Quantity}%% IIQ" });
-                if (showPack) sLine.Add(new StyledText { Text = $"{SuffixStats.PackSize}% PS", Color = SuffixStats.PackSize > PrefixStats.PackSize ? green : white, EscapedText = $"{SuffixStats.PackSize}%% PS" });
-                if (showRarity) sLine.Add(new StyledText { Text = $"{SuffixStats.Rarity}% IIR", Color = SuffixStats.Rarity > PrefixStats.Rarity ? green : white, EscapedText = $"{SuffixStats.Rarity}%% IIR" });
-                lines.Add(sLine);
+                    // S: % IIQ % PS % IIR
+                    var sLine = new List<StyledText> { new StyledText { Text = "S: ", Color = white, EscapedText = "S: " } };
+                    if (showQuant) sLine.Add(new StyledText { Text = $"{SuffixStats.Quantity}% IIQ", Color = SuffixStats.Quantity > PrefixStats.Quantity ? green : white, EscapedText = $"{SuffixStats.Quantity}%% IIQ" });
+                    if (showPack) sLine.Add(new StyledText { Text = $"{SuffixStats.PackSize}% PS", Color = SuffixStats.PackSize > PrefixStats.PackSize ? green : white, EscapedText = $"{SuffixStats.PackSize}%% PS" });
+                    if (showRarity) sLine.Add(new StyledText { Text = $"{SuffixStats.Rarity}% IIR", Color = SuffixStats.Rarity > PrefixStats.Rarity ? green : white, EscapedText = $"{SuffixStats.Rarity}%% IIR" });
+                    if (sLine.Count > 1) lines.Add(sLine);
+                }
 
                 return lines;
             }
@@ -392,34 +383,34 @@ namespace MapNotify_3_28
                 ref int scarabs, ref int currency, ref int maps)
             {
                 if (string.IsNullOrEmpty(key)) return;
-                string lowerKey = key.ToLower();
-
-                if (lowerKey.Contains("quantity"))
+                
+                // Using StringComparison.OrdinalIgnoreCase avoids allocating a new string with .ToLower()
+                if (key.Contains("quantity", StringComparison.OrdinalIgnoreCase))
                 {
                     quantity += val;
                     if (isPrefix) PrefixStats.Quantity += val; else if (isSuffix) SuffixStats.Quantity += val;
                 }
-                else if (lowerKey.Contains("rarity"))
+                else if (key.Contains("rarity", StringComparison.OrdinalIgnoreCase))
                 {
                     rarity += val;
                     if (isPrefix) PrefixStats.Rarity += val; else if (isSuffix) SuffixStats.Rarity += val;
                 }
-                else if (lowerKey.Contains("pack_size"))
+                else if (key.Contains("pack_size", StringComparison.OrdinalIgnoreCase))
                 {
                     packSize += val;
                     if (isPrefix) PrefixStats.PackSize += val; else if (isSuffix) SuffixStats.PackSize += val;
                 }
-                else if (lowerKey.Contains("scarab_drop_chance"))
+                else if (key.Contains("scarab_drop_chance", StringComparison.OrdinalIgnoreCase))
                 {
                     scarabs += val; IsOriginatorMap = true;
                     if (isPrefix) PrefixStats.MoreScarabs += val; else if (isSuffix) SuffixStats.MoreScarabs += val;
                 }
-                else if (lowerKey.Contains("currency_drop_chance"))
+                else if (key.Contains("currency_drop_chance", StringComparison.OrdinalIgnoreCase))
                 {
                     currency += val; IsOriginatorMap = true;
                     if (isPrefix) PrefixStats.MoreCurrency += val; else if (isSuffix) SuffixStats.MoreCurrency += val;
                 }
-                else if (lowerKey.Contains("map_item_drop_chance"))
+                else if (key.Contains("map_item_drop_chance", StringComparison.OrdinalIgnoreCase))
                 {
                     maps += val; IsOriginatorMap = true;
                     if (isPrefix) PrefixStats.MoreMaps += val; else if (isSuffix) SuffixStats.MoreMaps += val;

@@ -393,11 +393,9 @@ namespace MapNotify_3_28
             {
                 foreach (var bm in modEntry.BaseMods)
                 {
-                    DeleteModFromConfig(bm);
+                    DeleteModFromConfig(bm, false);
                 }
                 _browserDisplayNameEdits.Remove(modEntry.GroupKey); // Clear edit after action
-                GoodModsDictionary = LoadConfigGoodMod(); // Reload dictionaries to reflect changes
-                BadModsDictionary = LoadConfigBadMod();
             }
             ImGui.SameLine();
             var isBricking = anyBricking; // Use the aggregated bricking status
@@ -485,7 +483,7 @@ namespace MapNotify_3_28
         /// Removes a mod from both Good and Bad config files.
         /// Suggestion: Consolidate IO operations to reduce disk hits when managing multiple mods.
         /// </summary>
-        private void DeleteModFromConfig(string rawName)
+        private void DeleteModFromConfig(string rawName, bool logError = true)
         {
             string[] files = { "GoodMods.txt", "BadMods.txt" };
             bool deleted = false;
@@ -499,7 +497,7 @@ namespace MapNotify_3_28
                 }
             }
             if (deleted) { GoodModsDictionary = LoadConfigGoodMod(); BadModsDictionary = LoadConfigBadMod(); }
-            else LogError($"Could not find {rawName} in GoodMods.txt or BadMods.txt", 5);
+            else if (logError) LogError($"Could not find {rawName} in GoodMods.txt or BadMods.txt", 5);
         }
     }
 }

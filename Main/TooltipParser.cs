@@ -125,10 +125,10 @@ namespace MapNotify_3_28
             void FindRequirementsRecursive(Element element, int depth = 0)
             {
                 if (element == null || depth > 20) return;
-                var text = element.Text;
+                var text = element.TextNoTags ?? element.Text;
                 if (!string.IsNullOrEmpty(text) && text.Contains("Requires "))
                 {
-                    var cleanText = TooltipTagsRegex.Replace(text, "").Replace("{", "").Replace("}", "");
+                    var cleanText = text.Replace("{", "").Replace("}", "").Trim();
                     int reqIndex = cleanText.IndexOf("Requires ");
                     int openParen = cleanText.IndexOf('(', reqIndex);
                     int closeParen = cleanText.IndexOf(')', openParen);

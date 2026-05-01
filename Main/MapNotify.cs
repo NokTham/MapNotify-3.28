@@ -27,8 +27,6 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     public class ModEntry { public string GroupKey { get; set; } public List<string> Descriptions { get; set; } public List<string> BaseMods { get; set; } public string Type { get; set; } }
     public class ModData { public string BaseMod { get; set; } public string Description { get; set; } }
 
-    private static readonly Regex TooltipTagsRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
-
     public static class UIIndices
     {
         public const int MapDeviceRoot = 67;
@@ -438,7 +436,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
 
             if (!string.IsNullOrEmpty(nameToMatch))
             {
-                var cleanModName = TooltipTagsRegex.Replace(nameToMatch, "").Replace("{", "").Replace("}", "").Replace("%%", "%").Replace("..", ".").Trim();
+                var cleanModName = nameToMatch.Replace("{", "").Replace("}", "").Replace("%%", "%").Replace("..", ".").Trim();
                 for (int k = 0; k < availableDescriptions.Count; k++)
                 {
                     var fragments = cleanModName.Split('#', StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).Where(f => f.Length > 1).ToList();
@@ -506,7 +504,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                     var (existingEntry, _) = MatchMod(mod.RawName);
 
                     var modText = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
-                    var cleanDesc = TooltipTagsRegex.Replace(modText, "").Replace("{", "").Replace("}", "").Trim();
+                    var cleanDesc = modText.Replace("{", "").Replace("}", "").Trim();
 
                     _capturedMods.Add(new CapturedMod
                     {
