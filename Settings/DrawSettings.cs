@@ -113,7 +113,7 @@ namespace MapNotify_3_28
                 );
                 ImGui.SameLine();
                 HelpMarker(
-                    "This setting is only applied once upon Initialization\nReload the plugin to use the updated setting"
+                    "Affects Inventory, Maven Inv and Shops.\nReload the plugin to use the updated setting."
                 );
                 Settings.StashCacheInterval.Value = IntSlider(
                     "Stash Item Caching Interval in ms",
@@ -122,7 +122,7 @@ namespace MapNotify_3_28
                 );
                 ImGui.SameLine();
                 HelpMarker(
-                    "This setting is only applied once upon Initialization\nReload the plugin to use the updated setting"
+                    "Affects Regular/Premium Stahes, Heist and Expedition Lockers.\nReload the plugin to use the updated setting."
                 );
                 Settings.MapStashCacheInterval.Value = IntSlider(
                     "Map Stash Caching Interval in ms",
@@ -131,7 +131,7 @@ namespace MapNotify_3_28
                 );
                 ImGui.SameLine();
                 HelpMarker(
-                    "Specific interval for Map Stash tabs due to high performance cost.\nThis setting is only applied once upon Initialization\nReload the plugin to use the updated setting"
+                    "Specific interval for Map Stash tabs due to high performance cost.\nReload the plugin to use the updated setting"
                 );
 
                 ImGui.Dummy(new nuVector2(0, 5));
