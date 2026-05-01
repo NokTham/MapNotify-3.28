@@ -339,6 +339,7 @@ namespace MapNotify_3_28
                     BadModsDictionary = LoadConfigBadMod();
                     ExpectedNodes = LoadExpectedNodes();
                     ExpectedBonusNodes = LoadExpectedBonusNodes();
+                    LoadModsDatabase();
                 }
                 if (ImGui.Button("Recreate Default Warnings Text Files"))
                     ResetConfigs();

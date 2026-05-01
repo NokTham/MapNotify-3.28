@@ -62,76 +62,33 @@ namespace MapNotify_3_28
 
         private HashSet<string> LoadExpectedNodes()
         {
-            var path = Path.Combine(ConfigDirectory, "ExpectedNodes.txt");
-            var templatePath = Path.Combine(DirectoryFullName, "data", "ExpectedNodes.txt");
-
-            if (!File.Exists(path))
-            {
-                // Fallback: If running from Temp (Source-compilation), look in the Source folder for templates.
-                if (!File.Exists(templatePath) && DirectoryFullName.Contains(@"\Plugins\Temp\"))
-                {
-                    var sourceTemplatePath = templatePath.Replace(@"\Plugins\Temp\", @"\Plugins\Source\");
-                    if (File.Exists(sourceTemplatePath)) templatePath = sourceTemplatePath;
-                }
-
-                if (File.Exists(templatePath))
-                {
-                    LogMessage($"Copying ExpectedNodes template from {templatePath}", 5);
-                    File.Copy(templatePath, path);
-                }
-                else
-                {
-                    LogError($"Template not found at {templatePath}. Using fallback defaults.", 10);
-                }
-            }
-
-            if (!File.Exists(path))
-            {
-                // Fallback: If template is missing, pre-fill with SpecialNodeMapping names
-                var defaults = SpecialNodeMapping.Keys.Concat(SpecialNodeMapping.Values).Distinct();
-                var content = "# Whitelist for all Atlas nodes (Names or IDs)\r\n" + string.Join("\r\n", defaults);
-                File.WriteAllText(path, content);
-            }
-
-            return File.ReadAllLines(path)
-                .Select(line => line.Trim())
-                .Where(line => !string.IsNullOrWhiteSpace(line) && !line.StartsWith("#"))
-                .ToHashSet(System.StringComparer.OrdinalIgnoreCase);
+            return LoadInternalList("ExpectedNodes.txt");
         }
 
         private HashSet<string> LoadExpectedBonusNodes()
         {
-            var path = Path.Combine(ConfigDirectory, "ExpectedBonusNodes.txt");
-            var templatePath = Path.Combine(DirectoryFullName, "data", "ExpectedBonusNodes.txt");
+            return LoadInternalList("ExpectedBonusNodes.txt");
+        }
 
-            if (!File.Exists(path))
-            {
-                // Fallback: If running from Temp (Source-compilation), look in the Source folder for templates.
-                if (!File.Exists(templatePath) && DirectoryFullName.Contains(@"\Plugins\Temp\"))
-                {
-                    var sourceTemplatePath = templatePath.Replace(@"\Plugins\Temp\", @"\Plugins\Source\");
-                    if (File.Exists(sourceTemplatePath)) templatePath = sourceTemplatePath;
-                }
+        private HashSet<string> LoadInternalList(string fileName)
+        {
+            var configPath = Path.Combine(ConfigDirectory, fileName);
+            if (File.Exists(configPath)) return ParseFileToSet(configPath);
 
-                if (File.Exists(templatePath))
-                {
-                    LogMessage($"Copying ExpectedBonusNodes template from {templatePath}", 5);
-                    File.Copy(templatePath, path);
-                }
-                else
-                {
-                    LogError($"Template not found at {templatePath}. Using fallback defaults.", 10);
-                }
-            }
+            // Fallback 1: Standard data folder
+            var dataPath = Path.Combine(DirectoryFullName, "data", fileName);
+            if (File.Exists(dataPath)) return ParseFileToSet(dataPath);
 
-            if (!File.Exists(path))
-            {
-                // Fallback: Pre-fill with a few known standards if template is missing
-                var defaults = new[] { "Mesa", "City Square", "Atoll", "Shore", "Promenade" };
-                var content = "# Maps that possess a Bonus Objective (Exclude Unique Maps)\r\n" + string.Join("\r\n", defaults);
-                File.WriteAllText(path, content);
-            }
+            // Fallback 2: Source directory (needed for many ExileCore setups)
+            var sourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins", "Source", "MapNotify-3.28", "data", fileName);
+            if (File.Exists(sourcePath)) return ParseFileToSet(sourcePath);
 
+            LogError($"MapNotify: Could not find {fileName} in config or data folders. Atlas highlighting will not work.", 10);
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        private HashSet<string> ParseFileToSet(string path)
+        {
             return File.ReadAllLines(path)
                 .Select(line => line.Trim())
                 .Where(line => !string.IsNullOrWhiteSpace(line) && !line.StartsWith("#"))
