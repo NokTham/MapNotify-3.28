@@ -49,7 +49,7 @@ namespace MapNotify_3_28
 
         private void FindMapsInElementRecursive(Element element, List<NormalInventoryItem> result, HashSet<long> seenAddresses, int depth)
         {
-            if (element == null || !element.IsVisible || depth > 20) return;
+            if (element == null || !element.IsVisible || depth > 13) return;
             try
             {
                 var item = element.AsObject<NormalInventoryItem>();
