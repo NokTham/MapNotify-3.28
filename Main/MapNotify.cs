@@ -221,9 +221,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     private static (string matchedKey, StyledText match, bool isGood) MatchModWithKey(string rawName)
     {
         if (string.IsNullOrEmpty(rawName)) return (null, null, false);
-        var goodMatch = GoodModsDictionary.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key));
+        var normalizedInput = BaseModExtractor.GetBaseMod(rawName);
+        var goodMatch = GoodModsDictionary.FirstOrDefault(x => string.Equals(normalizedInput, BaseModExtractor.GetBaseMod(x.Key), StringComparison.Ordinal));
         if (goodMatch.Value != null) return (goodMatch.Key, goodMatch.Value, true);
-        var badMatch = BadModsDictionary.FirstOrDefault(x => BaseModExtractor.AreEquivalent(rawName, x.Key));
+        var badMatch = BadModsDictionary.FirstOrDefault(x => string.Equals(normalizedInput, BaseModExtractor.GetBaseMod(x.Key), StringComparison.Ordinal));
         return (badMatch.Key, badMatch.Value, false);
     }
 
