@@ -145,8 +145,9 @@ namespace MapNotify_3_28
                 bool isHovered = ingameState?.UIHover?.Address == Item?.Address;
                 if (isHovered)
                 {
-                    UpdateHeistDetails(heistContract, heistBlueprint, modsComponent);
-                    ProcessQuality(qualityComponent, modsComponent);
+                    var tooltipData = ParseTooltip(Item?.Tooltip);
+                    UpdateHeistDetails(heistContract, heistBlueprint, modsComponent, tooltipData);
+                    ProcessQuality(qualityComponent, modsComponent, tooltipData);
                 }
                 
                 ProcessMods(modsComponent, path, localGood, localBad);
@@ -330,7 +331,7 @@ namespace MapNotify_3_28
                 NeedsPadding = Tier != -1 || IsMavenMap || IsLogbook || IsHeist || ClassID.Contains("MiscMapItem");
             }
 
-            private void ProcessQuality(Quality qualityComponent, Mods modsComponent)
+            private void ProcessQuality(Quality qualityComponent, Mods modsComponent, TooltipData tooltipData)
             {
                 ChiselName = string.Empty; ChiselValue = 0;
                 int quality = qualityComponent?.ItemQuality ?? 0;
@@ -341,13 +342,13 @@ namespace MapNotify_3_28
                 {
                     var qId = modsComponent.AlternateQualityType.Id;
                     if (qId == "MapRarityQuality") { ChiselName = "Rarity Chisel"; ChiselValue = 40; }
-                    else if (qId == "MapQuantityQuality") { ChiselName = "Quantity Chisel"; if (quantity == 0) quantity = ParseElementForQuality(Item?.Tooltip); ChiselValue = quantity; }
+                    else if (qId == "MapQuantityQuality") { ChiselName = "Quantity Chisel"; if (quantity == 0) quantity = tooltipData.Quality; ChiselValue = quantity; }
                     else if (qId == "MapPackSizeQuality") { ChiselName = "Pack Size Chisel"; ChiselValue = 10; }
                     else if (qId == "MapDivinationCardQuality") { ChiselName = "Divination Chisel"; ChiselValue = 50; }
                     else if (qId == "MapScarabQuality") { ChiselName = "Scarab Chisel"; ChiselValue = 50; }
                     else if (qId == "MapCurrencyQuality") { ChiselName = "Currency Chisel"; ChiselValue = 50; }
                 }
-                else if (quantity == 0) quantity = ParseElementForQuality(Item?.Tooltip);
+                else if (quantity == 0) quantity = tooltipData.Quality;
                 Quantity = quantity; Rarity = rarity;
             }
 
@@ -463,7 +464,7 @@ namespace MapNotify_3_28
                 }
             }
 
-            private void UpdateHeistDetails(HeistContract heistContract, HeistBlueprint heistBlueprint, Mods mods)
+            private void UpdateHeistDetails(HeistContract heistContract, HeistBlueprint heistBlueprint, Mods mods, TooltipData tooltipData)
             {
                 HeistJobLines.Clear();
                 if (heistContract != null)
@@ -477,8 +478,8 @@ namespace MapNotify_3_28
                     HeistAreaLevel = heistBlueprint.AreaLevel;
                     if (heistBlueprint.Wings != null)
                     {
-                        var revealedWingsCount = ParseElementForWings(Item?.Tooltip);
-                        var summaryRequirements = ParseElementForRequirements(Item?.Tooltip);
+                        var revealedWingsCount = tooltipData.Wings;
+                        var summaryRequirements = tooltipData.Requirements;
                         int actuallyRevealed = 1;
                         for (int i = 0; i < heistBlueprint.Wings.Count; i++)
                         {
