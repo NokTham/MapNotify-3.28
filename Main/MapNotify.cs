@@ -84,6 +84,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     private string _newProfileName = string.Empty;
     private bool _forceCapturedTab;
     private List<ModEntry> _modEntries = new List<ModEntry>(); // Store grouped mod entries for browser
+    private string _lastCharacterName = string.Empty;
 
     public MapNotify_3_28()
     {
@@ -194,6 +195,32 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     public static string EscapeImGui(string text)
     {
         return text?.Replace("%%", "%").Replace("%", "%%") ?? string.Empty;
+    }
+
+    public override Job Tick()
+    {
+        if (Settings.AutoSwitchProfile.Value)
+        {
+            var playerName = GameController.Player?.GetComponent<Player>()?.PlayerName;
+            if (!string.IsNullOrEmpty(playerName) && playerName != _lastCharacterName)
+            {
+                _lastCharacterName = playerName;
+                
+                // Check if a profile folder exists with exactly the character's name
+                var profilePath = Path.Combine(ConfigDirectory, "Profiles", playerName);
+                var profileToSet = Directory.Exists(profilePath) ? playerName : "Default";
+
+                if (Settings.SelectedProfile.Value != profileToSet)
+                {
+                    Settings.SelectedProfile.Value = profileToSet;
+                    GoodModsDictionary = LoadConfigGoodMod();
+                    BadModsDictionary = LoadConfigBadMod();
+                    LogMessage($"MapNotify: Auto-switched to {(profileToSet == "Default" ? "Default profile" : $"character profile: {playerName}")}", 5);
+                }
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

@@ -49,6 +49,9 @@ namespace MapNotify_3_28
                 if (Settings.SelectedProfile.Value != "Default")
                 {
                     ImGui.SameLine();
+                    if (ImGui.Button("Ren")) ImGui.OpenPopup("RenameProfilePopup");
+
+                    ImGui.SameLine();
                     if (ImGui.Button("Del"))
                     {
                         Directory.Delete(GetProfileDirectory(), true);
@@ -56,7 +59,8 @@ namespace MapNotify_3_28
                         RefreshProfileList();
                         GoodModsDictionary = LoadConfigGoodMod();
                         BadModsDictionary = LoadConfigBadMod();
-                            _browserBrickingEdits.Clear();
+                        _browserDisplayNameEdits.Clear();
+                        _browserBrickingEdits.Clear();
                     }
                 }
 
@@ -73,6 +77,37 @@ namespace MapNotify_3_28
                     }
                     ImGui.EndPopup();
                 }
+
+                if (ImGui.BeginPopup("RenameProfilePopup"))
+                {
+                    ImGui.Text($"Rename profile '{Settings.SelectedProfile.Value}' to:");
+                    ImGui.InputTextWithHint("##renameprofilename", "New Profile Name", ref _newProfileName, 50);
+                    if (ImGui.Button("Apply") && !string.IsNullOrWhiteSpace(_newProfileName))
+                    {
+                        var oldName = Settings.SelectedProfile.Value;
+                        var oldPath = Path.Combine(ConfigDirectory, "Profiles", oldName);
+                        var newPath = Path.Combine(ConfigDirectory, "Profiles", _newProfileName);
+                        
+                        if (Directory.Exists(oldPath) && !Directory.Exists(newPath))
+                        {
+                            try
+                            {
+                                Directory.Move(oldPath, newPath);
+                                Settings.SelectedProfile.Value = _newProfileName;
+                                RefreshProfileList();
+                                LogMessage($"MapNotify: Profile renamed to {_newProfileName}", 5);
+                            }
+                            catch (Exception ex) { LogError($"MapNotify: Rename failed: {ex.Message}", 10); }
+                        }
+                        _newProfileName = string.Empty;
+                        ImGui.CloseCurrentPopup();
+                    }
+                    ImGui.EndPopup();
+                }
+
+                Settings.AutoSwitchProfile.Value = Checkbox("Auto-switch Profile (by Character Name)", Settings.AutoSwitchProfile.Value);
+                ImGui.SameLine();
+                WarningMarker("Automatically switches to a profile matching your character's name. Note: You MUST create a new profile with the exact character name for this to function.");
 
                 ImGui.InputTextWithHint("##modfilter", "Filter Mods...", ref _modFilter, 100);
                 ImGui.Separator();

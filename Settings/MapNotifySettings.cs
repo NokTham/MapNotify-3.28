@@ -10,6 +10,7 @@ namespace MapNotify_3_28
         // Framework and Profile Management
         public ToggleNode Enable { get; set; } = new(true);
         public TextNode SelectedProfile { get; set; } = new TextNode("Default");
+        public ToggleNode AutoSwitchProfile { get; set; } = new(false);
 
         // Core Settings
         public HotkeyNode CaptureHotkey { get; set; } = new(System.Windows.Forms.Keys.F1);

@@ -20,15 +20,16 @@ MapNotify-3.28 is a plugin for Exile API designed to highlight map modifiers and
 
 ![Image](https://i.imgur.com/jGrlgZ3.png)
 
-![Image](https://i.imgur.com/QGH69ym.png)
+![Image](https://i.imgur.com/tIPNqzJ.png)
 
 ## Features
 
 ### Mod Highlighting
 *   **Good/Bad Mod Filtering:** Highlights maps based on user-defined "Good" and "Bad" modifier lists.
 *   **Bricked Maps:** Identifies "bricking" modifiers with specific border highlights.
+*   **Character-Specific Profiles:** Automatically switch mod filters based on your current character's name.
 *   **Mod Preview Window:** Capture modifiers from hovered items using a hotkey to categorize them, set colors, or mark them as bricking.
-*   **Mod Browser:** A built-in database to search and add modifiers manually (Generic, Uber, Expedition, and Valdo mods).
+*   **Mod Browser:** A built-in database to search and add modifiers (Generic, Uber, Expedition, and Valdo mods).
 
 ### Tooltip Overlays
 *   **Stat Breakdown:** Displays Item Quantity (IIQ), Item Rarity (IIR), and Pack Size (PS).
@@ -54,7 +55,7 @@ MapNotify-3.28 is a plugin for Exile API designed to highlight map modifiers and
 2.  **Configuration:**
     *   **Active Mods:** View and delete currently tracked modifiers.
     *   **Captured Mods:** Categorize mods from the last hovered item.
-    *   **Profiles:** Create and switch between different mod filter profiles.
+    *   **Profiles:** Manage character-specific filters. Enable **Auto-switch** to automatically load a profile that matches your Character Name.
 3.  **Atlas:** Type `a|e` in the Atlas search box to force the client to load node data for highlighters to function correctly.
 
 ## Configuration Files
