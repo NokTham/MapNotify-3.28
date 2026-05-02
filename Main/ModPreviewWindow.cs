@@ -44,12 +44,20 @@ namespace MapNotify_3_28
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("New")) ImGui.OpenPopup("CreateProfilePopup");
+                if (ImGui.Button("New"))
+                {
+                    _newProfileName = string.Empty;
+                    ImGui.OpenPopup("CreateProfilePopup");
+                }
 
                 if (Settings.SelectedProfile.Value != "Default")
                 {
                     ImGui.SameLine();
-                    if (ImGui.Button("Ren")) ImGui.OpenPopup("RenameProfilePopup");
+                    if (ImGui.Button("Ren"))
+                    {
+                        _newProfileName = string.Empty;
+                        ImGui.OpenPopup("RenameProfilePopup");
+                    }
 
                     ImGui.SameLine();
                     if (ImGui.Button("Del"))
@@ -66,6 +74,13 @@ namespace MapNotify_3_28
 
                 if (ImGui.BeginPopup("CreateProfilePopup"))
                 {
+                    var currentPlayerName = GameController.Player?.GetComponent<ExileCore.PoEMemory.Components.Player>()?.PlayerName;
+                    if (!string.IsNullOrEmpty(currentPlayerName))
+                    {
+                        if (ImGui.Button($"Use Character Name: {currentPlayerName}")) _newProfileName = currentPlayerName;
+                        ImGui.Separator();
+                    }
+
                     ImGui.InputTextWithHint("##newprofilename", "Profile Name", ref _newProfileName, 50);
                     if (ImGui.Button("Create") && !string.IsNullOrWhiteSpace(_newProfileName))
                     {
