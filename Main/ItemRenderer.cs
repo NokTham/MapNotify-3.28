@@ -142,25 +142,26 @@ namespace MapNotify_3_28
             {
                 var green = new nuVector4(0.4f, 1f, 0.4f, 1f);
                 var red = new nuVector4(1f, 0.4f, 0.4f, 1f);
+                var white = new nuVector4(1f, 1f, 1f, 1f);
 
                 bool drawn = false;
                 if (Settings.ShowQuantityPercent.Value && details.Quantity != 0)
                 {
-                    var col = Settings.ColorQuantityPercent.Value && details.Quantity < Settings.ColorQuantity.Value ? red : green;
+                    var col = Settings.ColorQuantityPercent.Value ? (details.Quantity < Settings.ColorQuantity.Value ? red : green) : white;
                     ImGui.TextColored(col, $"{details.Quantity}%% IIQ");
                     drawn = true;
                 }
                 if (Settings.ShowPackSizePercent.Value && details.PackSize != 0)
                 {
                     if (drawn) ImGui.SameLine();
-                    var col = Settings.ColorPackSizePercent.Value && details.PackSize < Settings.ColorPackSize.Value ? red : green;
+                    var col = Settings.ColorPackSizePercent.Value ? (details.PackSize < Settings.ColorPackSize.Value ? red : green) : white;
                     ImGui.TextColored(col, $"{details.PackSize}%% PS");
                     drawn = true;
                 }
                 if (Settings.ShowRarityPercent.Value && details.Rarity != 0)
                 {
                     if (drawn) ImGui.SameLine();
-                    var col = Settings.ColorRarityPercent.Value && details.Rarity < Settings.ColorRarity.Value ? red : green;
+                    var col = Settings.ColorRarityPercent.Value ? (details.Rarity < Settings.ColorRarity.Value ? red : green) : white;
                     ImGui.TextColored(col, $"{details.Rarity}%% IIR");
                 }
             }
