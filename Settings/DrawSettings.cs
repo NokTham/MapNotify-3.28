@@ -347,6 +347,10 @@ namespace MapNotify_3_28
                 HelpMarker(
                     "This will irreversibly delete all your existing warnings config files!"
                 );
+                Settings.TooltipOffsetX.Value = IntSlider("Tooltip X Offset", Settings.TooltipOffsetX, 400f);
+                Settings.TooltipOffsetY.Value = IntSlider("Tooltip Y Offset", Settings.TooltipOffsetY, 400f);
+                ImGui.SameLine();
+                HelpMarker("Adjust the base position of the tooltip relative to the cursor.");
                 Settings.PadForBigCursor.Value = Checkbox(
                     "Pad for Big Cursor",
                     Settings.PadForBigCursor.Value

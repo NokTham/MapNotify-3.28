@@ -74,6 +74,8 @@ namespace MapNotify_3_28
         public RangeNode<int> BorderThicknessMap { get; set; } = new(2, 1, 6);
 
         // Config Files and Other
+        public RangeNode<int> TooltipOffsetX { get; set; } = new(25, -150, 150);
+        public RangeNode<int> TooltipOffsetY { get; set; } = new(0, -150, 150);
         public ToggleNode PadForBigCursor { get; set; } = new(false);
         public ToggleNode PadForNinjaPricer { get; set; } = new(false);
         public ToggleNode PadForNinjaPricer2 { get; set; } = new(false);

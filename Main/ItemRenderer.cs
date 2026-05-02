@@ -37,16 +37,16 @@ namespace MapNotify_3_28
                 if (alwaysShow || ItemDetails.ActiveGoodMods.Count > 0 || ItemDetails.ActiveBadMods.Count > 0)
                 {
                     var mousePos = MouseLite.GetCursorPositionVector();
-                    var boxOrigin = new nuVector2(mousePos.X + 25, mousePos.Y);
+                    var boxOrigin = new nuVector2(mousePos.X + Settings.TooltipOffsetX.Value, mousePos.Y + Settings.TooltipOffsetY.Value);
 
                     if (Settings.PadForBigCursor.Value && ItemDetails.NeedsPadding)
-                        boxOrigin = new nuVector2(mousePos.X + 45, mousePos.Y + 35);
+                        boxOrigin += new nuVector2(20, 35);
                     if (Settings.PadForNinjaPricer.Value && ItemDetails.NeedsPadding)
-                        boxOrigin = new nuVector2(mousePos.X + 25, mousePos.Y + 56);
+                        boxOrigin += new nuVector2(0, 56);
                     if (Settings.PadForNinjaPricer2.Value && ItemDetails.NeedsPadding)
-                        boxOrigin = new nuVector2(mousePos.X + 25, mousePos.Y + 114);
+                        boxOrigin += new nuVector2(0, 114);
                     if (Settings.PadForAltPricer.Value && ItemDetails.NeedsPadding)
-                        boxOrigin = new nuVector2(mousePos.X + 25, mousePos.Y + 30);
+                        boxOrigin += new nuVector2(0, 30);
 
                     var windowId = ItemDetails.WindowID;
                     if (isInventory)
