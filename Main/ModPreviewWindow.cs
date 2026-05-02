@@ -138,7 +138,7 @@ namespace MapNotify_3_28
                     .Where(m => string.IsNullOrEmpty(_modFilter) ||
                                 m.Key.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) ||
                                 m.Value.Text.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase))
-                    .GroupBy(m => m.Value.Text)
+                    .GroupBy(m => string.IsNullOrWhiteSpace(m.Value.Text) ? m.Key : m.Value.Text)
                     .ToList();
 
                 if (groups.Count == 0) return;
