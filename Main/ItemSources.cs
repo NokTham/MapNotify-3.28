@@ -44,7 +44,7 @@ namespace MapNotify_3_28
 
         private List<NormalInventoryItem> GetInventoryItems()
         {
-            if (ingameState?.IngameUi?.InventoryPanel?.IsVisible == true)
+            if (Settings.FilterInventory.Value && ingameState?.IngameUi?.InventoryPanel?.IsVisible == true)
             {
                 return GetItemsFromCollection(ingameState.IngameUi.InventoryPanel[InventoryIndex.PlayerInventory]?.VisibleInventoryItems);
             }
@@ -123,6 +123,7 @@ namespace MapNotify_3_28
         private List<NormalInventoryItem> GetMapDeviceItems()
         {
             var result = new List<NormalInventoryItem>();
+            if (!Settings.ShowForInvitations.Value && !Settings.FilterTrade.Value) return result;
             var ui = ingameState?.IngameUi;
             if (ui == null) return result;
 
@@ -165,6 +166,8 @@ namespace MapNotify_3_28
 
         private List<NormalInventoryItem> GetMerchantItems()
         {
+            if (!Settings.FilterShops.Value) return new List<NormalInventoryItem>();
+
             var merchantPanel = ingameState?.IngameUi?.OfflineMerchantPanel;
             return (merchantPanel != null && merchantPanel.IsVisible) 
                 ? GetItemsFromCollection(merchantPanel.VisibleStash?.VisibleInventoryItems) 
@@ -273,6 +276,8 @@ namespace MapNotify_3_28
         {
             var ui = ingameState?.IngameUi;
             if (ui == null) return new List<NormalInventoryItem>();
+            if (!Settings.FilterTrade.Value) return new List<NormalInventoryItem>();
+
             Element window = ui.PurchaseWindow?.IsVisible == true ? ui.PurchaseWindow :
                              ui.PurchaseWindowHideout?.IsVisible == true ? ui.PurchaseWindowHideout :
                              ui.HaggleWindow?.IsVisible == true ? ui.HaggleWindow : null;
