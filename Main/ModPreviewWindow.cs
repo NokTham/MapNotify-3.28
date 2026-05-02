@@ -11,6 +11,7 @@ namespace MapNotify_3_28
     partial class MapNotify_3_28
     {
         private Dictionary<string, string> _browserDisplayNameEdits = new Dictionary<string, string>();
+        private Dictionary<string, bool> _browserBrickingEdits = new Dictionary<string, bool>();
 
         /// <summary>
         /// Renders the ImGui interface for the Map Mod Preview window.
@@ -36,6 +37,7 @@ namespace MapNotify_3_28
                             GoodModsDictionary = LoadConfigGoodMod();
                             BadModsDictionary = LoadConfigBadMod();
                             _browserDisplayNameEdits.Clear();
+                            _browserBrickingEdits.Clear();
                         }
                     }
                     ImGui.EndCombo();
@@ -54,6 +56,7 @@ namespace MapNotify_3_28
                         RefreshProfileList();
                         GoodModsDictionary = LoadConfigGoodMod();
                         BadModsDictionary = LoadConfigBadMod();
+                            _browserBrickingEdits.Clear();
                     }
                 }
 
@@ -277,13 +280,19 @@ namespace MapNotify_3_28
             ImGui.PushID(modEntry.GroupKey);
 
             // Determine overall status for the ModEntry
-            bool anyGood = modEntry.BaseMods.Any(bm => GoodModsDictionary?.Any(x => BaseModExtractor.AreEquivalent(bm, x.Key)) ?? false);
-            bool anyBad = modEntry.BaseMods.Any(bm => BadModsDictionary?.Any(x => BaseModExtractor.AreEquivalent(bm, x.Key)) ?? false);
-            bool anyBricking = modEntry.BaseMods.Any(bm => ((GoodModsDictionary?.TryGetValue(bm, out var goodMod) ?? false) && goodMod.Bricking) ||
-                                                           ((BadModsDictionary?.TryGetValue(bm, out var badMod) ?? false) && badMod.Bricking));
+            var browserMatches = modEntry.BaseMods.Select(MatchMod).ToList();
+            bool anyGood = browserMatches.Any(m => m.match != null && m.isGood);
+            bool anyBad = browserMatches.Any(m => m.match != null && !m.isGood);
+            bool anyBricking = browserMatches.Any(m => m.match?.Bricking ?? false);
+
+            if (!_browserBrickingEdits.TryGetValue(modEntry.GroupKey, out var currentBricking))
+            {
+                currentBricking = anyBricking;
+                _browserBrickingEdits[modEntry.GroupKey] = currentBricking;
+            }
 
             // Get the color from the first matched mod in the group, or fall back to defaults
-            var matchResult = modEntry.BaseMods.Select(bm => MatchMod(bm)).FirstOrDefault(m => m.match != null);
+            var matchResult = browserMatches.FirstOrDefault(m => m.match != null);
             nuVector4 displayColor = matchResult.match?.Color ?? new nuVector4(1, 1, 1, 1);
 
             if (matchResult.match == null)
@@ -360,11 +369,12 @@ namespace MapNotify_3_28
             {
                 foreach (var bm in modEntry.BaseMods)
                 {
-                    var tempMod = new CapturedMod { RawName = bm, DisplayName = currentEditName, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = displayColor, IsBricking = anyBricking };
+                    var tempMod = new CapturedMod { RawName = bm, DisplayName = currentEditName, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = displayColor, IsBricking = currentBricking };
                     UpdateColorForCategory(tempMod, true);
                     SaveModToConfig(tempMod, "GoodMods.txt", bm);
                 }
                 _browserDisplayNameEdits.Remove(modEntry.GroupKey); // Clear edit after action
+                _browserBrickingEdits.Remove(modEntry.GroupKey);
                 GoodModsDictionary = LoadConfigGoodMod(); // Reload dictionaries to reflect changes
                 BadModsDictionary = LoadConfigBadMod();
             }
@@ -379,12 +389,13 @@ namespace MapNotify_3_28
                         DisplayName = currentEditName,
                         Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey,
                         Color = displayColor,
-                        IsBricking = anyBricking
+                        IsBricking = currentBricking
                     };
                     UpdateColorForCategory(tempMod, false);
                     SaveModToConfig(tempMod, "BadMods.txt", bm);
                 }
                 _browserDisplayNameEdits.Remove(modEntry.GroupKey); // Clear edit after action
+                _browserBrickingEdits.Remove(modEntry.GroupKey);
                 GoodModsDictionary = LoadConfigGoodMod(); // Reload dictionaries to reflect changes
                 BadModsDictionary = LoadConfigBadMod();
             }
@@ -396,15 +407,16 @@ namespace MapNotify_3_28
                     DeleteModFromConfig(bm, false);
                 }
                 _browserDisplayNameEdits.Remove(modEntry.GroupKey); // Clear edit after action
+                _browserBrickingEdits.Remove(modEntry.GroupKey);
             }
             ImGui.SameLine();
-            var isBricking = anyBricking; // Use the aggregated bricking status
-            if (ImGui.Checkbox("Brick", ref isBricking))
+            if (ImGui.Checkbox("Brick", ref currentBricking))
             {
+                _browserBrickingEdits[modEntry.GroupKey] = currentBricking;
                 foreach (var bm in modEntry.BaseMods)
                 {
                     // Need to create a CapturedMod to pass to AutoSaveIfExisting
-                    var tempMod = new CapturedMod { RawName = bm, DisplayName = currentEditName, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = displayColor, IsBricking = isBricking };
+                    var tempMod = new CapturedMod { RawName = bm, DisplayName = currentEditName, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = displayColor, IsBricking = currentBricking };
                     // AutoSaveIfExisting will handle finding if it's good/bad and saving
                     AutoSaveIfExisting(tempMod);
                 }
@@ -447,8 +459,7 @@ namespace MapNotify_3_28
         /// </summary>
         private void SaveModToConfig(CapturedMod mod, string fileName, string baseMod = null)
         {
-            if (baseMod == null)
-                baseMod = BaseModExtractor.GetBaseMod(mod.RawName);
+            baseMod = BaseModExtractor.GetBaseMod(baseMod ?? mod.RawName);
 
             string pureFileName = Path.GetFileName(fileName);
             string otherFile = pureFileName == "GoodMods.txt" ? "BadMods.txt" : "GoodMods.txt";
