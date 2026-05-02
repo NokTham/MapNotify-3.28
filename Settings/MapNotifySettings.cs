@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ExileCore.Shared.Interfaces;
 using ExileCore.Shared.Nodes;
 using SharpDX;
@@ -68,6 +69,10 @@ namespace MapNotify_3_28
         // Borders and Highlight Colours
         public RangeNode<int> BorderDeflation { get; set; } = new(4, 0, 50);
         public RangeNode<int> BorderThickness { get; set; } = new(1, 1, 6);
+        public RangeNode<int> SimpleOutlinesThickness { get; set; } = new(2, 1, 6);
+        public ToggleNode UseAdvancedOutlines { get; set; } = new(false);
+        public ListNode AdvancedOutlineOrientation { get; set; } = new ListNode { Value = "Horizontal", Values = new List<string> { "Horizontal", "Vertical" } };
+        public ListNode AdvancedOutlineGoodPosition { get; set; } = new ListNode { Value = "Top/Left", Values = new List<string> { "Top/Left", "Bottom/Right" } };
         public ColorNode MapBorderGood { get; set; } = new ColorNode(new Color(0f, 1f, 0f, 0.35f));
         public ColorNode MapBorderBad { get; set; } = new ColorNode(new Color(1f, 0f, 0f, 0.35f));
         public ColorNode Bricked { get; set; } = new ColorNode(new Color(1f, 0f, 0f, 1f));

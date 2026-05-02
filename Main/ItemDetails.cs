@@ -31,6 +31,7 @@ namespace MapNotify_3_28
             public List<StyledText> ConflictingMods { get; set; } = new List<StyledText>();
             public bool Bricked { get; set; }
             public bool Corrupted { get; set; }
+            public bool Identified { get; set; }
 
             // Base Stats
             public int Tier { get; set; }
@@ -71,7 +72,7 @@ namespace MapNotify_3_28
             public bool IsHeist { get; set; }
             public bool IsValdoMap { get; set; }
 
-            private DateTime _lastUpdate = DateTime.MinValue;
+            private long _lastUpdate;
 
             public class MapModStats
             {
@@ -102,10 +103,11 @@ namespace MapNotify_3_28
             /// </summary>
             public void Update()
             {
-                if (DateTime.Now - _lastUpdate < TimeSpan.FromMilliseconds(pluginSettings.InventoryCacheInterval.Value))
+                var now = Environment.TickCount64;
+                if (now - _lastUpdate < pluginSettings.InventoryCacheInterval.Value)
                     return;
 
-                _lastUpdate = DateTime.Now;
+                _lastUpdate = now;
                 WindowID = $"##{Entity.Address}";
                 
                 var localGood = new List<StyledText>();
@@ -134,7 +136,7 @@ namespace MapNotify_3_28
                 IsValdoMap = path.Contains("Valdo", StringComparison.OrdinalIgnoreCase) || 
                              itemName.Contains("Valdo", StringComparison.OrdinalIgnoreCase);
 
-                ProcessFlags(baseComponent);
+                ProcessFlags(baseComponent, modsComponent);
 
                 LogbookAreaLevel = IsLogbook ? (expeditionSaga?.AreaLevel ?? (Tier > 0 ? Tier : 0)) : 0;
                 
@@ -322,11 +324,12 @@ namespace MapNotify_3_28
                 return lines;
             }
 
-            private void ProcessFlags(Base baseComponent)
+            private void ProcessFlags(Base baseComponent, Mods modsComponent)
             {
                 IsOriginatorMap = false;
                 Bricked = false;
                 Corrupted = baseComponent?.isCorrupted ?? false;
+                Identified = modsComponent?.Identified ?? true;
                 IsHeist = Entity.HasComponent<HeistContract>() || Entity.HasComponent<HeistBlueprint>();
                 NeedsPadding = Tier != -1 || IsMavenMap || IsLogbook || IsHeist || ClassID.Contains("MiscMapItem");
             }
@@ -367,6 +370,10 @@ namespace MapNotify_3_28
                         foreach (var mod in itemMods)
                         {
                             if (string.IsNullOrEmpty(mod.RawName)) continue;
+
+                            // Check for Originator/Nightmare flags before hitting the blacklist
+                            if (!IsOriginatorMap && (mod.RawName == "IsUberMap" || mod.RawName.Contains("MapZanaInfluence"))) IsOriginatorMap = true;
+
                             if (ModNameBlacklist.Any(black => mod.RawName.Contains(black))) { ModCount--; continue; }
 
                             var type = mod.ModRecord?.AffixType.ToString() ?? "";

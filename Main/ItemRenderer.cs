@@ -16,7 +16,7 @@ namespace MapNotify_3_28
         /// Renders the custom ImGui tooltip overlay for a specific item.
         /// Handles positioning logic, including offsets for other popular plugins (NinjaPricer, etc.).
         /// </summary>
-        public void RenderItem(NormalInventoryItem Item, Entity Entity, bool isInventory = false, int mapNum = 0)
+        public void RenderItem(NormalInventoryItem Item, Entity Entity)
         {
             var pushedColors = 0;
             var entity = Entity;
@@ -49,14 +49,6 @@ namespace MapNotify_3_28
                         boxOrigin += new nuVector2(0, 30);
 
                     var windowId = ItemDetails.WindowID;
-                    if (isInventory)
-                    {
-                        if (mapNum < lastCol) { boxSize = new nuVector2(0, 0); rowSize += maxSize + 2; maxSize = 0; }
-                        var framePos = ingameState.UIHover.Parent.GetClientRect().TopRight;
-                        framePos.X += 10 + boxSize.X;
-                        framePos.Y -= 200;
-                        boxOrigin = new nuVector2(framePos.X, framePos.Y + rowSize);
-                    }
 
                     var _opened = true;
                     pushedColors += 1;
@@ -64,21 +56,17 @@ namespace MapNotify_3_28
                     if (ImGui.Begin(windowId, ref _opened, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoNavInputs))
                     {
                         ImGui.BeginGroup();
-                        DrawTooltipContent(ItemDetails, isInventory, entity);
+                        DrawTooltipContent(ItemDetails, entity);
                         ImGui.EndGroup();
 
                         // Border Logic
-                        if (ItemDetails.Bricked || (ItemIsMap(entity) && isInventory))
+                        if (ItemDetails.Bricked)
                         {
                             var min = ImGui.GetItemRectMin(); min.X -= 8; min.Y -= 8;
                             var max = ImGui.GetItemRectMax(); max.X += 8; max.Y += 8;
-                            if (ItemDetails.Bricked)
-                            {
-                                var brickColor = ColorToUint(SharpToNu(Settings.Bricked.Value.ToVector4()));
-                                var drawList = ImGui.GetForegroundDrawList();
-                                for (int i = 0; i < Settings.BorderThickness.Value; i++) drawList.AddRect(new nuVector2(min.X - i, min.Y - i), new nuVector2(max.X + i, max.Y + i), brickColor, 0f, 0, 1.0f);
-                            }
-                            else if (isInventory) ImGui.GetForegroundDrawList().AddRect(min, max, 0xFF4A4A4A);
+                            var brickColor = ColorToUint(SharpToNu(Settings.Bricked.Value.ToVector4()));
+                            var drawList = ImGui.GetForegroundDrawList();
+                            for (int i = 0; i < Settings.BorderThickness.Value; i++) drawList.AddRect(new nuVector2(min.X - i, min.Y - i), new nuVector2(max.X + i, max.Y + i), brickColor, 0f, 0, 1.0f);
                         }
 
                         var size = ImGui.GetWindowSize();
@@ -86,8 +74,6 @@ namespace MapNotify_3_28
                         if (finalPos.X + size.X > windowArea.Width) finalPos.X = windowArea.Width - size.X - 10;
                         if (finalPos.Y + size.Y > windowArea.Height) finalPos.Y = windowArea.Height - size.Y - 10;
                         ImGui.SetWindowPos(finalPos, ImGuiCond.Always);
-
-                        if (isInventory) { boxSize.X += (int)size.X + 2; if (maxSize < size.Y) maxSize = size.Y; lastCol = mapNum; }
                     }
                     ImGui.End();
                     ImGui.PopStyleColor(pushedColors);
@@ -95,9 +81,9 @@ namespace MapNotify_3_28
             }
         }
 
-        private void DrawTooltipContent(ItemDetails details, bool isInventory, Entity entity)
+        private void DrawTooltipContent(ItemDetails details, Entity entity)
         {
-            if (isInventory || Settings.ShowMapName.Value) 
+            if (Settings.ShowMapName.Value)
                 ImGui.TextColored(details.ItemColor, details.EscapedMapName);
 
             DrawStatsBlock(details);
@@ -109,9 +95,9 @@ namespace MapNotify_3_28
 
             if (Settings.ShowModCount.Value && details.ModCount != 0)
             {
-                var modCountStr = $"{(isInventory ? details.ModCount - 1 : details.ModCount)} Mods";
-                var color = entity.GetComponent<Base>().isCorrupted ? new nuVector4(1f, 0f, 0f, 1f) : new nuVector4(1f, 1f, 1f, 1f);
-                ImGui.TextColored(color, entity.GetComponent<Base>().isCorrupted ? $"{modCountStr}, Corrupted" : modCountStr);
+                var modCountStr = $"{details.ModCount} Mods";
+                var color = details.Corrupted ? new nuVector4(1f, 0f, 0f, 1f) : new nuVector4(1f, 1f, 1f, 1f);
+                ImGui.TextColored(color, details.Corrupted ? $"{modCountStr}, Corrupted" : modCountStr);
             }
 
             if (Settings.ShowModWarnings.Value) DrawWarningsBlock(details);
@@ -165,7 +151,7 @@ namespace MapNotify_3_28
                     ImGui.TextColored(col, $"{details.Rarity}%% IIR");
                 }
             }
-            if (Settings.ShowChisel.Value && !string.IsNullOrEmpty(details.ChiselName)) 
+            if (Settings.ShowChisel.Value && !string.IsNullOrEmpty(details.ChiselName))
                 ImGui.TextColored(SharpToNu(Settings.ChiselColor.Value.ToVector4()), $"+{details.ChiselValue}%% {details.ChiselName}");
         }
 
@@ -175,7 +161,7 @@ namespace MapNotify_3_28
             if (Settings.HorizontalLines.Value) ImGui.Separator();
             var heistColor = new nuVector4(0.5f, 0.8f, 1f, 1f);
             if (details.HeistAreaLevel > 0) ImGui.TextColored(heistColor, $"Area Level: {details.HeistAreaLevel}");
-            foreach (var line in details.HeistJobLines) 
+            foreach (var line in details.HeistJobLines)
                 ImGui.TextColored(line.IsRevealed ? heistColor : new nuVector4(0.5f, 0.8f, 1f, 0.5f), line.Text);
         }
 
@@ -190,16 +176,16 @@ namespace MapNotify_3_28
                 if (Settings.HorizontalLines.Value) ImGui.Separator();
                 ImGui.TextColored(logbookColor, area.Name); ImGui.SameLine();
                 ImGui.TextColored(new nuVector4(0.7f, 0.7f, 0.7f, 1f), $"({area.Faction})");
-                foreach (var imp in area.Implicits) 
+                foreach (var imp in area.Implicits)
                     ImGui.TextColored(imp.Color, $"{(imp.Bricking ? "[B] " : "- ")}{imp.EscapedText}");
             }
         }
 
         private void DrawOriginatorBlock(ItemDetails details)
         {
-            if (!details.IsOriginatorMap) return;
+            if (!details.IsOriginatorMap || !details.Identified) return;
             var lines = Settings.ShowPrefixSuffixStats.Value ? details.GetOriginatorBreakdownLines() : null;
-            
+
             if (Settings.ShowPrefixSuffixStats.Value && lines?.Count > 0)
             {
                 if (Settings.HorizontalLines.Value) ImGui.Separator();
@@ -241,7 +227,7 @@ namespace MapNotify_3_28
             {
                 ImGui.TextColored(styled.Color, styled.EscapedText);
             }
-            if (details.ConflictingMods.Count > 0 && (details.ActiveGoodMods.Count > 0 || details.ActiveBadMods.Count > 0)) 
+            if (details.ConflictingMods.Count > 0 && (details.ActiveGoodMods.Count > 0 || details.ActiveBadMods.Count > 0))
                 ImGui.Dummy(new nuVector2(0, 5));
 
             foreach (var styled in details.ActiveGoodMods)
@@ -249,9 +235,9 @@ namespace MapNotify_3_28
                 if (details.IsLogbook && Settings.ShowLogbookInfo.Value && details.LogbookAreas.Any(a => a.Implicits.Contains(styled))) continue;
                 ImGui.TextColored(styled.Color, styled.EscapedText);
             }
-            
+
             if ((details.ActiveGoodMods.Count > 0 || details.ConflictingMods.Count > 0) && details.ActiveBadMods.Count > 0) ImGui.Dummy(new nuVector2(0, 5));
-            
+
             foreach (var styled in details.ActiveBadMods)
             {
                 if (details.IsLogbook && Settings.ShowLogbookInfo.Value && details.LogbookAreas.Any(a => a.Implicits.Contains(styled))) continue;
@@ -279,13 +265,30 @@ namespace MapNotify_3_28
             // Bricked highlight (High priority frame)
             if (Settings.BoxForBricked && itemDetails.Bricked)
             {
-                Graphics.DrawFrame(rect, Settings.Bricked.Value, Settings.BorderThicknessMap);
+                if (Settings.UseAdvancedOutlines)
+                {
+                    // Draw an 'X' for bricked maps
+                    Graphics.DrawLine(rect.TopLeft.ToVector2Num(), rect.BottomRight.ToVector2Num(), Settings.BorderThicknessMap.Value, Settings.Bricked.Value);
+                    Graphics.DrawLine(rect.TopRight.ToVector2Num(), rect.BottomLeft.ToVector2Num(), Settings.BorderThicknessMap.Value, Settings.Bricked.Value);
+                }
+                else
+                {
+                    Graphics.DrawFrame(rect, Settings.Bricked.Value, Settings.BorderThicknessMap);
+                }
             }
 
             // Mapping logic to match UI labels:
             var hasBadMod = Settings.BoxForMapWarnings && (itemDetails.ActiveBadMods.Count > 0 || itemDetails.ConflictingMods.Count > 0);
             var hasGoodMod = Settings.BoxForMapBadWarnings && (itemDetails.ActiveGoodMods.Count > 0 || itemDetails.ConflictingMods.Count > 0);
 
+
+            if (Settings.UseAdvancedOutlines)
+            {
+                DrawAdvancedOutlines(rect, hasGoodMod, hasBadMod);
+                return; // Exit after drawing advanced outlines
+            }
+
+            // Default to filled boxes if neither simple nor advanced outlines are enabled
             if (hasGoodMod && hasBadMod)
             {
                 // Both good and bad mods: multi-color filled rectangle for a diagonal gradient effect
@@ -300,6 +303,68 @@ namespace MapNotify_3_28
             }
             else if (hasBadMod) Graphics.DrawBox(rect, Settings.MapBorderBad.Value);
             else if (hasGoodMod) Graphics.DrawBox(rect, Settings.MapBorderGood.Value);
+        }
+
+        private void DrawAdvancedOutlines(RectangleF rect, bool hasGoodMod, bool hasBadMod)
+        {
+            var thickness = Settings.SimpleOutlinesThickness.Value;
+            var goodColor = Settings.MapBorderGood.Value;
+            var badColor = Settings.MapBorderBad.Value;
+
+            bool isHorizontal = Settings.AdvancedOutlineOrientation.Value == "Horizontal";
+            bool goodIsTopOrLeft = Settings.AdvancedOutlineGoodPosition.Value == "Top/Left";
+
+            // Use 25% of the side length for the bracket "wings"
+            float wingWidth = rect.Width * 0.25f;
+            float wingHeight = rect.Height * 0.25f;
+
+            void DrawBracket(bool topOrLeft, Color color)
+            {
+                if (isHorizontal)
+                {
+                    if (topOrLeft) // Top bracket ⊓
+                    {
+                        Graphics.DrawLine(rect.TopLeft.ToVector2Num(), rect.TopRight.ToVector2Num(), thickness, color);
+                        Graphics.DrawLine(rect.TopLeft.ToVector2Num(), rect.TopLeft.ToVector2Num() + new nuVector2(0, wingHeight), thickness, color);
+                        Graphics.DrawLine(rect.TopRight.ToVector2Num(), rect.TopRight.ToVector2Num() + new nuVector2(0, wingHeight), thickness, color);
+                    }
+                    else // Bottom bracket ⊔
+                    {
+                        Graphics.DrawLine(rect.BottomLeft.ToVector2Num(), rect.BottomRight.ToVector2Num(), thickness, color);
+                        Graphics.DrawLine(rect.BottomLeft.ToVector2Num(), rect.BottomLeft.ToVector2Num() - new nuVector2(0, wingHeight), thickness, color);
+                        Graphics.DrawLine(rect.BottomRight.ToVector2Num(), rect.BottomRight.ToVector2Num() - new nuVector2(0, wingHeight), thickness, color);
+                    }
+                }
+                else
+                {
+                    if (topOrLeft) // Left bracket [
+                    {
+                        Graphics.DrawLine(rect.TopLeft.ToVector2Num(), rect.BottomLeft.ToVector2Num(), thickness, color);
+                        Graphics.DrawLine(rect.TopLeft.ToVector2Num(), rect.TopLeft.ToVector2Num() + new nuVector2(wingWidth, 0), thickness, color);
+                        Graphics.DrawLine(rect.BottomLeft.ToVector2Num(), rect.BottomLeft.ToVector2Num() + new nuVector2(wingWidth, 0), thickness, color);
+                    }
+                    else // Right bracket ]
+                    {
+                        Graphics.DrawLine(rect.TopRight.ToVector2Num(), rect.BottomRight.ToVector2Num(), thickness, color);
+                        Graphics.DrawLine(rect.TopRight.ToVector2Num(), rect.TopRight.ToVector2Num() - new nuVector2(wingWidth, 0), thickness, color);
+                        Graphics.DrawLine(rect.BottomRight.ToVector2Num(), rect.BottomRight.ToVector2Num() - new nuVector2(wingWidth, 0), thickness, color);
+                    }
+                }
+            }
+
+            if (hasGoodMod && hasBadMod)
+            {
+                DrawBracket(goodIsTopOrLeft, goodColor);
+                DrawBracket(!goodIsTopOrLeft, badColor);
+            }
+            else if (hasGoodMod)
+            {
+                DrawBracket(goodIsTopOrLeft, goodColor);
+            }
+            else if (hasBadMod)
+            {
+                DrawBracket(!goodIsTopOrLeft, badColor);
+            }
         }
     }
 }

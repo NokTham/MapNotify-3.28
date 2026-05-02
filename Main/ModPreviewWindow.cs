@@ -215,7 +215,7 @@ namespace MapNotify_3_28
 
             ImGui.SameLine();
             var color = mod.Color;
-            if (ImGui.ColorEdit4("", ref color, ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.NoInputs))
+            if (ImGui.ColorEdit4("", ref color, ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaBar))
             {
                 mod.Color = color;
                 AutoSaveIfExisting(mod);
@@ -240,7 +240,7 @@ namespace MapNotify_3_28
 
         private void DrawModBrowser()
         {
-            if (_allModsList.Count == 0)
+            if (_modEntries.Count == 0)
             {
                 ImGui.Text("Mod database not loaded or empty.");
                 return;
@@ -349,7 +349,7 @@ namespace MapNotify_3_28
 
             ImGui.SameLine();
             var colorForPicker = displayColor; // Use the determined status color for the picker's initial state
-            if (ImGui.ColorEdit4("", ref colorForPicker, ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.NoInputs))
+            if (ImGui.ColorEdit4("", ref colorForPicker, ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaBar))
             {
                 displayColor = colorForPicker; // Update the display color immediately
                 // If any of these BaseMods already exist in config, update their Color

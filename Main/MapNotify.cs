@@ -82,7 +82,6 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     private List<CapturedMod> _capturedMods = new List<CapturedMod>();
     private List<string> _availableProfiles = new List<string>();
     private string _newProfileName = string.Empty;
-    private List<ModData> _allModsList = new List<ModData>();
     private bool _forceCapturedTab;
     private List<ModEntry> _modEntries = new List<ModEntry>(); // Store grouped mod entries for browser
 
@@ -174,12 +173,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                         Type = kvp.Value.Type
                     }).ToList();
 
-                    _allModsList = _modEntries
-                        .Where(m => m.BaseMods != null)
-                        .SelectMany(m => m.BaseMods.Select(bm => new ModData { BaseMod = bm, Description = m.Descriptions.FirstOrDefault() ?? m.GroupKey }))
-                        .ToList();
-
-                    LogMessage($"MapNotify: Successfully loaded {_allModsList.Count} mods from database at {path}.", 5);
+                    LogMessage($"MapNotify: Successfully loaded {_modEntries.Count} mods from database at {path}.", 5);
                 }
                 else
                 {
@@ -196,11 +190,6 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
             LogError($"MapNotify: mods.json not found at either standard or source path: {path}", 10);
         }
     }
-
-    public static nuVector2 boxSize;
-    public static float maxSize;
-    public static float rowSize;
-    public static int lastCol;
 
     public static string EscapeImGui(string text)
     {
