@@ -265,7 +265,7 @@ namespace MapNotify_3_28
             // Bricked highlight (High priority frame)
             if (Settings.BoxForBricked && itemDetails.Bricked)
             {
-                if (Settings.UseAdvancedOutlines)
+                if (Settings.UseSimpleOutlines)
                 {
                     // Draw an 'X' for bricked maps
                     Graphics.DrawLine(rect.TopLeft.ToVector2Num(), rect.BottomRight.ToVector2Num(), Settings.BorderThicknessMap.Value, Settings.Bricked.Value);
@@ -282,9 +282,9 @@ namespace MapNotify_3_28
             var hasGoodMod = Settings.BoxForMapBadWarnings && (itemDetails.ActiveGoodMods.Count > 0 || itemDetails.ConflictingMods.Count > 0);
 
 
-            if (Settings.UseAdvancedOutlines)
+            if (Settings.UseSimpleOutlines)
             {
-                DrawAdvancedOutlines(rect, hasGoodMod, hasBadMod);
+                DrawSimpleOutlines(rect, hasGoodMod, hasBadMod);
                 return; // Exit after drawing advanced outlines
             }
 
@@ -305,14 +305,14 @@ namespace MapNotify_3_28
             else if (hasGoodMod) Graphics.DrawBox(rect, Settings.MapBorderGood.Value);
         }
 
-        private void DrawAdvancedOutlines(RectangleF rect, bool hasGoodMod, bool hasBadMod)
+        private void DrawSimpleOutlines(RectangleF rect, bool hasGoodMod, bool hasBadMod)
         {
             var thickness = Settings.SimpleOutlinesThickness.Value;
             var goodColor = Settings.MapBorderGood.Value;
             var badColor = Settings.MapBorderBad.Value;
 
-            bool isHorizontal = Settings.AdvancedOutlineOrientation.Value == "Horizontal";
-            bool goodIsTopOrLeft = Settings.AdvancedOutlineGoodPosition.Value == "Top/Left";
+            bool isHorizontal = Settings.SimpleOutlineOrientation.Value == "Horizontal";
+            bool goodIsTopOrLeft = Settings.SimpleOutlineGoodPosition.Value == "Top/Left";
 
             // Use 25% of the side length for the bracket "wings"
             float wingWidth = rect.Width * 0.25f;

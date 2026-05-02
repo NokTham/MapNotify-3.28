@@ -308,11 +308,11 @@ namespace MapNotify_3_28
                     "Tooltip Border Thickness##BorderThickness",
                     Settings.BorderThickness, 400f
                 );
-                Settings.UseAdvancedOutlines.Value = Checkbox("Use Simple Outlines (Brackets)", Settings.UseAdvancedOutlines.Value);
+                Settings.UseSimpleOutlines.Value = Checkbox("Use Simple Outlines (Brackets)", Settings.UseSimpleOutlines.Value);
                 ImGui.SameLine();
                 HelpMarker("Replaces full borders with square brackets [ ] for Good/Bad mods and an 'X' for Bricked maps.\n" +
                            "Highly performant and clear on small icons.");
-                if (Settings.UseAdvancedOutlines.Value)
+                if (Settings.UseSimpleOutlines.Value)
                 {
                     ImGui.Indent();
                     Settings.SimpleOutlinesThickness.Value = IntSlider(
@@ -322,20 +322,73 @@ namespace MapNotify_3_28
 
                     ImGui.Text("Line Orientation:"); ImGui.SameLine();
                     ImGui.SetNextItemWidth(150);
-                    if (ImGui.BeginCombo("##AdvancedOutlineOrientation", Settings.AdvancedOutlineOrientation.Value))
+                    if (ImGui.BeginCombo("##SimpleOutlineOrientation", Settings.SimpleOutlineOrientation.Value))
                     {
-                        foreach (var val in Settings.AdvancedOutlineOrientation.Values)
-                            if (ImGui.Selectable(val, val == Settings.AdvancedOutlineOrientation.Value)) Settings.AdvancedOutlineOrientation.Value = val;
+                        foreach (var val in Settings.SimpleOutlineOrientation.Values)
+                            if (ImGui.Selectable(val, val == Settings.SimpleOutlineOrientation.Value)) Settings.SimpleOutlineOrientation.Value = val;
                         ImGui.EndCombo();
                     }
                     ImGui.Text("Good Mod Line Position:"); ImGui.SameLine();
                     ImGui.SetNextItemWidth(150);
-                    if (ImGui.BeginCombo("##AdvancedOutlineGoodPosition", Settings.AdvancedOutlineGoodPosition.Value))
+                    if (ImGui.BeginCombo("##SimpleOutlineGoodPosition", Settings.SimpleOutlineGoodPosition.Value))
                     {
-                        foreach (var val in Settings.AdvancedOutlineGoodPosition.Values)
-                            if (ImGui.Selectable(val, val == Settings.AdvancedOutlineGoodPosition.Value)) Settings.AdvancedOutlineGoodPosition.Value = val;
+                        foreach (var val in Settings.SimpleOutlineGoodPosition.Values)
+                            if (ImGui.Selectable(val, val == Settings.SimpleOutlineGoodPosition.Value)) Settings.SimpleOutlineGoodPosition.Value = val;
                         ImGui.EndCombo();
                     }
+
+                    ImGui.Spacing();
+                    ImGui.Text("Preview:"); ImGui.SameLine();
+                    var drawList = ImGui.GetWindowDrawList();
+                    var pPos = ImGui.GetCursorScreenPos();
+                    float pSize = 40f;
+                    ImGui.Dummy(new nuVector2(pSize, pSize));
+                    
+                    drawList.AddRectFilled(pPos, pPos + new nuVector2(pSize, pSize), ImGui.GetColorU32(ImGuiCol.FrameBg));
+                    drawList.AddText(pPos + new nuVector2(8, 12), ImGui.GetColorU32(ImGuiCol.TextDisabled), "MAP");
+
+                    var pThickness = Settings.SimpleOutlinesThickness.Value;
+                    var pGoodColor = ImGui.ColorConvertFloat4ToU32(SharpToNu(Settings.MapBorderGood.Value.ToVector4()));
+                    var pBadColor = ImGui.ColorConvertFloat4ToU32(SharpToNu(Settings.MapBorderBad.Value.ToVector4()));
+                    bool pIsHorizontal = Settings.SimpleOutlineOrientation.Value == "Horizontal";
+                    bool pGoodIsTopLeft = Settings.SimpleOutlineGoodPosition.Value == "Top/Left";
+                    float pWing = pSize * 0.25f;
+
+                    void DrawPreviewBracket(bool topOrLeft, uint color)
+                    {
+                        if (pIsHorizontal)
+                        {
+                            if (topOrLeft) // Top bracket ⊓
+                            {
+                                drawList.AddLine(pPos, pPos + new nuVector2(pSize, 0), color, pThickness);
+                                drawList.AddLine(pPos, pPos + new nuVector2(0, pWing), color, pThickness);
+                                drawList.AddLine(pPos + new nuVector2(pSize, 0), pPos + new nuVector2(pSize, pWing), color, pThickness);
+                            }
+                            else // Bottom bracket ⊔
+                            {
+                                drawList.AddLine(pPos + new nuVector2(0, pSize), pPos + new nuVector2(pSize, pSize), color, pThickness);
+                                drawList.AddLine(pPos + new nuVector2(0, pSize), pPos + new nuVector2(0, pSize - pWing), color, pThickness);
+                                drawList.AddLine(pPos + new nuVector2(pSize, pSize), pPos + new nuVector2(pSize, pSize - pWing), color, pThickness);
+                            }
+                        }
+                        else // Vertical
+                        {
+                            if (topOrLeft) // Left bracket [
+                            {
+                                drawList.AddLine(pPos, pPos + new nuVector2(0, pSize), color, pThickness);
+                                drawList.AddLine(pPos, pPos + new nuVector2(pWing, 0), color, pThickness);
+                                drawList.AddLine(pPos + new nuVector2(0, pSize), pPos + new nuVector2(pWing, pSize), color, pThickness);
+                            }
+                            else // Right bracket ]
+                            {
+                                drawList.AddLine(pPos + new nuVector2(pSize, 0), pPos + new nuVector2(pSize, pSize), color, pThickness);
+                                drawList.AddLine(pPos + new nuVector2(pSize, 0), pPos + new nuVector2(pSize - pWing, 0), color, pThickness);
+                                drawList.AddLine(pPos + new nuVector2(pSize, pSize), pPos + new nuVector2(pSize - pWing, pSize), color, pThickness);
+                            }
+                        }
+                    }
+                    DrawPreviewBracket(pGoodIsTopLeft, pGoodColor);
+                    DrawPreviewBracket(!pGoodIsTopLeft, pBadColor);
                     ImGui.Unindent();
                 }
                 ImGui.Dummy(new nuVector2(0, 2));
