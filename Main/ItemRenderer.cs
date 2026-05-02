@@ -74,7 +74,7 @@ namespace MapNotify_3_28
                             var max = ImGui.GetItemRectMax(); max.X += 8; max.Y += 8;
                             if (ItemDetails.Bricked)
                             {
-                                var brickColor = ColorToUint(Settings.Bricked);
+                                var brickColor = ColorToUint(SharpToNu(Settings.Bricked.Value.ToVector4()));
                                 var drawList = ImGui.GetForegroundDrawList();
                                 for (int i = 0; i < Settings.BorderThickness.Value; i++) drawList.AddRect(new nuVector2(min.X - i, min.Y - i), new nuVector2(max.X + i, max.Y + i), brickColor, 0f, 0, 1.0f);
                             }
@@ -165,7 +165,7 @@ namespace MapNotify_3_28
                 }
             }
             if (Settings.ShowChisel.Value && !string.IsNullOrEmpty(details.ChiselName)) 
-                ImGui.TextColored(Settings.ChiselColor, $"+{details.ChiselValue}%% {details.ChiselName}");
+                ImGui.TextColored(SharpToNu(Settings.ChiselColor.Value.ToVector4()), $"+{details.ChiselValue}%% {details.ChiselName}");
         }
 
         private void DrawHeistBlock(ItemDetails details)
@@ -278,7 +278,7 @@ namespace MapNotify_3_28
             // Bricked highlight (High priority frame)
             if (Settings.BoxForBricked && itemDetails.Bricked)
             {
-                Graphics.DrawFrame(rect, Settings.Bricked.ToSharpColor(), Settings.BorderThicknessMap);
+                Graphics.DrawFrame(rect, Settings.Bricked.Value, Settings.BorderThicknessMap);
             }
 
             // Mapping logic to match UI labels:
@@ -291,14 +291,14 @@ namespace MapNotify_3_28
                 Graphics.DrawRectFilledMultiColor(
                     rect.TopLeft.ToVector2Num(),
                     rect.BottomRight.ToVector2Num(),
-                    Settings.MapBorderBad.ToSharpColor(),  // TopLeft
-                    Settings.MapBorderGood.ToSharpColor(), // TopRight
-                    Settings.MapBorderBad.ToSharpColor(),  // BottomRight
-                    Settings.MapBorderGood.ToSharpColor()  // BottomLeft
+                    Settings.MapBorderBad.Value,  // TopLeft
+                    Settings.MapBorderGood.Value, // TopRight
+                    Settings.MapBorderBad.Value,  // BottomRight
+                    Settings.MapBorderGood.Value  // BottomLeft
                 );
             }
-            else if (hasBadMod) Graphics.DrawBox(rect, Settings.MapBorderBad.ToSharpColor());
-            else if (hasGoodMod) Graphics.DrawBox(rect, Settings.MapBorderGood.ToSharpColor());
+            else if (hasBadMod) Graphics.DrawBox(rect, Settings.MapBorderBad.Value);
+            else if (hasGoodMod) Graphics.DrawBox(rect, Settings.MapBorderGood.Value);
         }
     }
 }

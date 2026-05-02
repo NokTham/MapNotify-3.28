@@ -160,9 +160,9 @@ public partial class MapNotify_3_28
         var showMaven = Settings.ShowMavenWitnessHighlight.Value;
         if (!showAtlas && !showBonus && !showMaven) return;
 
-        var atlasColor = Settings.AtlasNotCompletedColor.ToSharpColor();
-        var bonusColor = Settings.AtlasBonusIncompleteColor.ToSharpColor();
-        var mavenColor = Settings.MavenWitnessColor.ToSharpColor();
+        var atlasColor = Settings.AtlasNotCompletedColor.Value;
+        var bonusColor = Settings.AtlasBonusIncompleteColor.Value;
+        var mavenColor = Settings.MavenWitnessColor.Value;
         var atlasRadius = Settings.AtlasHighlightRadius.Value;
         var bonusRadius = Settings.AtlasBonusHighlightRadius.Value;
         var mavenRadius = Settings.MavenWitnessHighlightRadius.Value;

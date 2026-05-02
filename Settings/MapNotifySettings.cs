@@ -1,6 +1,6 @@
 using ExileCore.Shared.Interfaces;
 using ExileCore.Shared.Nodes;
-using Vector4 = System.Numerics.Vector4;
+using SharpDX;
 
 namespace MapNotify_3_28
 {
@@ -53,17 +53,17 @@ namespace MapNotify_3_28
         public ToggleNode ShowChisel { get; set; } = new(true);
         public ToggleNode ShowHeistInfo { get; set; } = new(true);
         public ToggleNode ShowLogbookInfo { get; set; } = new(true);
-        public Vector4 ChiselColor { get; set; } = new(1f, 0.80f, 0.30f, 1f);
-        public Vector4 Bricked { get; set; } = new(1f, 0f, 0f, 1f);
-        public Vector4 MapBorderGood { get; set; } = new(0f, 1f, 0f, 0.35f);
-        public Vector4 MapBorderBad { get; set; } = new(1f, 0f, 0f, 0.35f);
+        public ColorNode ChiselColor { get; set; } = new ColorNode(new Color(1f, 0.80f, 0.30f, 1f));
+        public ColorNode Bricked { get; set; } = new ColorNode(new Color(1f, 0f, 0f, 1f));
+        public ColorNode MapBorderGood { get; set; } = new ColorNode(new Color(0f, 1f, 0f, 0.35f));
+        public ColorNode MapBorderBad { get; set; } = new ColorNode(new Color(1f, 0f, 0f, 0.35f));
         public RangeNode<int> BorderThicknessMap { get; set; } = new(2, 1, 6);
         public ToggleNode ShowAtlasHighlight { get; set; } = new(false);
         public ToggleNode ShowAtlasBonusHighlight { get; set; } = new(false);
         public ToggleNode ShowMavenWitnessHighlight { get; set; } = new(false);
-        public Vector4 AtlasNotCompletedColor { get; set; } = new(1f, 0f, 0f, 1.0f);
-        public Vector4 AtlasBonusIncompleteColor { get; set; } = new(1f, 0.5f, 0f, 1.0f);
-        public Vector4 MavenWitnessColor { get; set; } = new(0.7f, 0f, 1f, 1.0f);
+        public ColorNode AtlasNotCompletedColor { get; set; } = new ColorNode(new Color(1f, 0f, 0f, 1.0f));
+        public ColorNode AtlasBonusIncompleteColor { get; set; } = new ColorNode(new Color(1f, 0.5f, 0f, 1.0f));
+        public ColorNode MavenWitnessColor { get; set; } = new ColorNode(new Color(0.7f, 0f, 1f, 1.0f));
         public RangeNode<int> AtlasHighlightRadius { get; set; } = new(15, 1, 100);
         public RangeNode<int> AtlasBonusHighlightRadius { get; set; } = new(18, 1, 100);
         public RangeNode<int> MavenWitnessHighlightRadius { get; set; } = new(21, 1, 100);
