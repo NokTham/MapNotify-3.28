@@ -71,6 +71,8 @@ namespace MapNotify_3_28
             public bool IsHeist { get; set; }
             public bool IsValdoMap { get; set; }
 
+            private DateTime _lastUpdate = DateTime.MinValue;
+
             public class MapModStats
             {
                 public int Quantity { get; set; }
@@ -100,10 +102,16 @@ namespace MapNotify_3_28
             /// </summary>
             public void Update()
             {
+                if (DateTime.Now - _lastUpdate < TimeSpan.FromMilliseconds(pluginSettings.InventoryCacheInterval.Value))
+                    return;
+
+                _lastUpdate = DateTime.Now;
                 WindowID = $"##{Entity.Address}";
-                ActiveGoodMods.Clear();
-                ActiveBadMods.Clear();
-                ConflictingMods.Clear();
+                
+                var localGood = new List<StyledText>();
+                var localBad = new List<StyledText>();
+                var localConflicting = new List<StyledText>();
+
                 string path = Entity.Path ?? string.Empty;
 
                 var BaseItem = gameController?.Files?.BaseItemTypes?.Translate(path);
@@ -130,7 +138,7 @@ namespace MapNotify_3_28
 
                 LogbookAreaLevel = IsLogbook ? (expeditionSaga?.AreaLevel ?? (Tier > 0 ? Tier : 0)) : 0;
                 
-                if (IsLogbook) ProcessLogbookDetails(expeditionSaga);
+                if (IsLogbook) ProcessLogbookDetails(expeditionSaga, localGood, localBad);
 
                 // Performance and Stability: Only parse tooltips if the item is currently hovered.
                 // Tooltip parsing is expensive and prone to 'startIndex' errors when items are in lockers/stashes.
@@ -141,12 +149,16 @@ namespace MapNotify_3_28
                     ProcessQuality(qualityComponent, modsComponent);
                 }
                 
-                ProcessMods(modsComponent, path);
+                ProcessMods(modsComponent, path, localGood, localBad);
                 ProcessMapName(mapComponent, baseComponent, modsComponent, path, itemName);
                 ProcessItemColor(modsComponent);
+
+                ActiveGoodMods = localGood;
+                ActiveBadMods = localBad;
+                ConflictingMods = localConflicting;
             }
 
-            private void ProcessLogbookDetails(ExpeditionSaga expeditionSaga)
+            private void ProcessLogbookDetails(ExpeditionSaga expeditionSaga, List<StyledText> goodList, List<StyledText> badList)
             {
                 LogbookAreas.Clear();
                 if (expeditionSaga?.Areas == null) return;
@@ -176,7 +188,7 @@ namespace MapNotify_3_28
                         if (match != null)
                         {
                             if (match.Bricking) Bricked = true;
-                            ProcessModWarnings(mod.RawName);
+                            ProcessModWarnings(mod.RawName, goodList, badList);
                         }
                         logArea.Implicits.Add(styledMod);
                     }
@@ -187,7 +199,7 @@ namespace MapNotify_3_28
             /// <summary>
             /// Checks a mod against Good and Bad dictionaries and updates the item's active warning lists.
             /// </summary>
-            private void ProcessModWarnings(string rawName)
+            private void ProcessModWarnings(string rawName, List<StyledText> goodList, List<StyledText> badList)
             {
                 if (string.IsNullOrEmpty(rawName)) return;
 
@@ -198,13 +210,13 @@ namespace MapNotify_3_28
                 {
                     if (string.IsNullOrEmpty(match.EscapedText)) match.EscapedText = EscapeImGui(match.Text);
                     if (match.Bricking) Bricked = true;
-                    ActiveGoodMods.Add(match);
+                    goodList.Add(match);
                 }
                 else if (match != null && !isGood)
                 {
                     if (string.IsNullOrEmpty(match.EscapedText)) match.EscapedText = EscapeImGui(match.Text);
                     if (match.Bricking) Bricked = true;
-                    ActiveBadMods.Add(match);
+                    badList.Add(match);
                 }
             }
 
@@ -339,7 +351,7 @@ namespace MapNotify_3_28
                 Quantity = quantity; Rarity = rarity;
             }
 
-            private void ProcessMods(Mods modsComponent, string path)
+            private void ProcessMods(Mods modsComponent, string path, List<StyledText> goodList, List<StyledText> badList)
             {
                 int packSize = 0, quantity = Quantity, rarity = Rarity;
                 int originatorScarabs = 0, originatorCurrency = 0, originatorMaps = 0;
@@ -370,7 +382,7 @@ namespace MapNotify_3_28
                                         ref originatorScarabs, ref originatorCurrency, ref originatorMaps);
                             }
                             if (!IsOriginatorMap && (mod.RawName == "IsUberMap" || mod.RawName.Contains("MapZanaInfluence"))) IsOriginatorMap = true;
-                            ProcessModWarnings(mod.RawName);
+                            ProcessModWarnings(mod.RawName, goodList, badList);
                         }
                     }
                 }
