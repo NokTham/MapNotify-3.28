@@ -354,10 +354,9 @@ namespace MapNotify_3_28
 
             private void ProcessMods(Mods modsComponent, string path, List<StyledText> goodList, List<StyledText> badList)
             {
-                int packSize = 0, quantity = Quantity, rarity = Rarity;
-                int originatorScarabs = 0, originatorCurrency = 0, originatorMaps = 0;
                 PrefixStats = new MapModStats();
                 SuffixStats = new MapModStats();
+                var totals = new MapModStats { Quantity = Quantity, Rarity = Rarity };
 
                 var itemMods = modsComponent?.ItemMods;
                 ModCount = itemMods?.Count ?? 0;
@@ -378,56 +377,37 @@ namespace MapNotify_3_28
                             if (stats != null && values != null)
                             {
                                 for (int i = 0; i < stats.Length && i < values.Count; i++)
-                                    UpdateStatsFromMod(stats[i].Key, values[i], isPrefix, isSuffix, 
-                                        ref quantity, ref rarity, ref packSize, 
-                                        ref originatorScarabs, ref originatorCurrency, ref originatorMaps);
+                                    UpdateStatsFromMod(stats[i].Key, values[i], isPrefix, isSuffix, totals);
                             }
                             if (!IsOriginatorMap && (mod.RawName == "IsUberMap" || mod.RawName.Contains("MapZanaInfluence"))) IsOriginatorMap = true;
                             ProcessModWarnings(mod.RawName, goodList, badList);
                         }
                     }
                 }
-                Quantity = quantity; PackSize = packSize; Rarity = rarity;
-                OriginatorScarabs = originatorScarabs; OriginatorCurrency = originatorCurrency; OriginatorMaps = originatorMaps;
+                Quantity = totals.Quantity; PackSize = totals.PackSize; Rarity = totals.Rarity;
+                OriginatorScarabs = totals.MoreScarabs; OriginatorCurrency = totals.MoreCurrency; OriginatorMaps = totals.MoreMaps;
             }
 
-            private void UpdateStatsFromMod(string key, int val, bool isPrefix, bool isSuffix, 
-                ref int quantity, ref int rarity, ref int packSize, 
-                ref int scarabs, ref int currency, ref int maps)
+            private void UpdateStatsFromMod(string key, int val, bool isPrefix, bool isSuffix, MapModStats totals)
             {
                 if (string.IsNullOrEmpty(key)) return;
-                
-                // Using StringComparison.OrdinalIgnoreCase avoids allocating a new string with .ToLower()
-                if (key.Contains("quantity", StringComparison.OrdinalIgnoreCase))
+
+                void Apply(MapModStats target)
                 {
-                    quantity += val;
-                    if (isPrefix) PrefixStats.Quantity += val; else if (isSuffix) SuffixStats.Quantity += val;
+                    if (key.Contains("quantity", StringComparison.OrdinalIgnoreCase)) target.Quantity += val;
+                    else if (key.Contains("rarity", StringComparison.OrdinalIgnoreCase)) target.Rarity += val;
+                    else if (key.Contains("pack_size", StringComparison.OrdinalIgnoreCase)) target.PackSize += val;
+                    else if (key.Contains("scarab_drop_chance", StringComparison.OrdinalIgnoreCase)) { target.MoreScarabs += val; IsOriginatorMap = true; }
+                    else if (key.Contains("currency_drop_chance", StringComparison.OrdinalIgnoreCase)) { target.MoreCurrency += val; IsOriginatorMap = true; }
+                    else if (key.Contains("map_item_drop_chance", StringComparison.OrdinalIgnoreCase)) { target.MoreMaps += val; IsOriginatorMap = true; }
                 }
-                else if (key.Contains("rarity", StringComparison.OrdinalIgnoreCase))
-                {
-                    rarity += val;
-                    if (isPrefix) PrefixStats.Rarity += val; else if (isSuffix) SuffixStats.Rarity += val;
-                }
-                else if (key.Contains("pack_size", StringComparison.OrdinalIgnoreCase))
-                {
-                    packSize += val;
-                    if (isPrefix) PrefixStats.PackSize += val; else if (isSuffix) SuffixStats.PackSize += val;
-                }
-                else if (key.Contains("scarab_drop_chance", StringComparison.OrdinalIgnoreCase))
-                {
-                    scarabs += val; IsOriginatorMap = true;
-                    if (isPrefix) PrefixStats.MoreScarabs += val; else if (isSuffix) SuffixStats.MoreScarabs += val;
-                }
-                else if (key.Contains("currency_drop_chance", StringComparison.OrdinalIgnoreCase))
-                {
-                    currency += val; IsOriginatorMap = true;
-                    if (isPrefix) PrefixStats.MoreCurrency += val; else if (isSuffix) SuffixStats.MoreCurrency += val;
-                }
-                else if (key.Contains("map_item_drop_chance", StringComparison.OrdinalIgnoreCase))
-                {
-                    maps += val; IsOriginatorMap = true;
-                    if (isPrefix) PrefixStats.MoreMaps += val; else if (isSuffix) SuffixStats.MoreMaps += val;
-                }
+
+                // Always apply to the totals
+                Apply(totals);
+
+                // Apply specifically to Prefix or Suffix trackers if applicable
+                if (isPrefix) Apply(PrefixStats);
+                else if (isSuffix) Apply(SuffixStats);
             }
 
             private void ProcessMapName(ExileCore.PoEMemory.Components.MapKey mapComponent, Base baseComponent, Mods modsComponent, string path, string itemName)
