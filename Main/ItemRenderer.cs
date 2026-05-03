@@ -183,7 +183,8 @@ namespace MapNotify_3_28
 
         private void DrawOriginatorBlock(ItemDetails details)
         {
-            if (!details.IsOriginatorMap || !details.Identified) return;
+            if (!details.IsOriginatorMap || !details.Identified || 
+                (details.OriginatorMaps == 0 && details.OriginatorScarabs == 0 && details.OriginatorCurrency == 0)) return;
             var lines = Settings.ShowPrefixSuffixStats.Value ? details.GetOriginatorBreakdownLines() : null;
 
             if (Settings.ShowPrefixSuffixStats.Value && lines?.Count > 0)
