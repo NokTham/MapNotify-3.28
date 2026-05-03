@@ -319,6 +319,10 @@ namespace MapNotify_3_28
                         "Bracket Thickness##SimpleOutlinesThickness",
                         Settings.SimpleOutlinesThickness, 400f
                     );
+                    Settings.SimpleOutlinesBrickedSize.Value = IntSlider(
+                        "Bricked 'X' Size %##SimpleOutlinesBrickedSize",
+                        Settings.SimpleOutlinesBrickedSize, 400f
+                    );
 
                     ImGui.Text("Line Orientation:"); ImGui.SameLine();
                     ImGui.SetNextItemWidth(150);

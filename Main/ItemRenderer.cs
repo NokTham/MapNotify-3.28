@@ -268,8 +268,13 @@ namespace MapNotify_3_28
                 if (Settings.UseSimpleOutlines)
                 {
                     // Draw an 'X' for bricked maps
-                    Graphics.DrawLine(rect.TopLeft.ToVector2Num(), rect.BottomRight.ToVector2Num(), Settings.BorderThicknessMap.Value, Settings.Bricked.Value);
-                    Graphics.DrawLine(rect.TopRight.ToVector2Num(), rect.BottomLeft.ToVector2Num(), Settings.BorderThicknessMap.Value, Settings.Bricked.Value);
+                    var brickRect = rect;
+                    float sizeMult = Settings.SimpleOutlinesBrickedSize.Value / 100f;
+                    float inflateX = -(rect.Width * (1f - sizeMult) / 2f);
+                    float inflateY = -(rect.Height * (1f - sizeMult) / 2f);
+                    brickRect.Inflate(inflateX, inflateY);
+                    Graphics.DrawLine(brickRect.TopLeft.ToVector2Num(), brickRect.BottomRight.ToVector2Num(), Settings.BorderThicknessMap.Value, Settings.Bricked.Value);
+                    Graphics.DrawLine(brickRect.TopRight.ToVector2Num(), brickRect.BottomLeft.ToVector2Num(), Settings.BorderThicknessMap.Value, Settings.Bricked.Value);
                 }
                 else
                 {
