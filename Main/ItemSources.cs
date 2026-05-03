@@ -129,9 +129,9 @@ namespace MapNotify_3_28
 
             // Reverting to manual path traversal as MapReceptacleWindow is not accessible.
             // Root is verified at Index 67.
-            if (ui.ChildCount > UIIndices.MapDeviceRoot)
+            if (ui.ChildCount > Constants.UIIndices.MapDeviceRoot)
             {
-                var mapDeviceRoot = ui.GetChildAtIndex(UIIndices.MapDeviceRoot);
+                var mapDeviceRoot = ui.GetChildAtIndex(Constants.UIIndices.MapDeviceRoot);
                 if (mapDeviceRoot != null && mapDeviceRoot.IsVisible)
                 {
                     const int InvitationSlotParentIndex = 8;
@@ -183,7 +183,7 @@ namespace MapNotify_3_28
             if (ui == null) return result;
 
             // Try known index first, then fallback to robust search
-            var heistLocker = ui.ChildCount > UIIndices.HeistLockerDefault ? ui.GetChildAtIndex(UIIndices.HeistLockerDefault) : null;
+            var heistLocker = ui.ChildCount > Constants.UIIndices.HeistLockerDefault ? ui.GetChildAtIndex(Constants.UIIndices.HeistLockerDefault) : null;
             if (heistLocker == null || !heistLocker.IsVisible || heistLocker.ChildCount < 10)
             {
                 for (int i = 0; i < ui.ChildCount; i++)
@@ -229,7 +229,7 @@ namespace MapNotify_3_28
             if (ui == null) return result;
 
             // Robust search for Expedition Locker (Commonly at 101, 102, 103, or 104)
-            int[] possibleExpeditionIndices = { UIIndices.ExpeditionLockerDefault, 102, 103, 104 };
+            int[] possibleExpeditionIndices = { Constants.UIIndices.ExpeditionLockerDefault, 102, 103, 104 };
             var expeditionLocker = possibleExpeditionIndices
                 .Where(idx => ui.ChildCount > idx)
                 .Select(ui.GetChildAtIndex)

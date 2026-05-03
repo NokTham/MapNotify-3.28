@@ -22,7 +22,7 @@ namespace MapNotify_3_28
             var entity = Entity;
             if (entity != null && entity.Address != 0 && entity.IsValid)
             {
-                var ItemDetails = Entity.GetHudComponent<ItemDetails>();
+                var ItemDetails = entity.GetHudComponent<ItemDetails>(); // Use entity.GetHudComponent
                 if (ItemDetails == null)
                 {
                     ItemDetails = new ItemDetails(Item, Entity);

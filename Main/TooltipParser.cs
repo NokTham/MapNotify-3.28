@@ -65,13 +65,6 @@ namespace MapNotify_3_28
             for (int k = 0; k < (int)el.ChildCount; k++) ExtractTextRecursive(el.GetChildAtIndex(k), lines, depth + 1);
         }
 
-        public class TooltipData
-        {
-            public int Quality { get; set; }
-            public int Wings { get; set; } = 1;
-            public Dictionary<string, int> Requirements { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-        }
-
         public static TooltipData ParseTooltip(Element tooltip)
         {
             var data = new TooltipData();

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System;
-using System.Linq;
+using System.Linq; // Add this if not already present
 using ExileCore;
 using ExileCore.PoEMemory;
 using ExileCore.PoEMemory.Components;
@@ -19,47 +19,8 @@ using nuVector4 = System.Numerics.Vector4;
 
 namespace MapNotify_3_28;
 
-public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
+public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // This remains a partial class
 {
-    // JSON Database helper classes
-    public class ModsJson { public Dictionary<string, ModGroup> groups { get; set; } }
-    public class ModGroup { public List<string> BaseMods { get; set; } public List<string> Descriptions { get; set; } public string Type { get; set; } }
-    public class ModEntry { public string GroupKey { get; set; } public List<string> Descriptions { get; set; } public List<string> BaseMods { get; set; } public string Type { get; set; } }
-    public class ModData { public string BaseMod { get; set; } public string Description { get; set; } }
-
-    public static class UIIndices
-    {
-        public const int MapDeviceRoot = 67;
-        public const int HeistLockerDefault = 98;
-        public const int ExpeditionLockerDefault = 101;
-        public const int PurchaseWindowTabDetails = 8;
-        public const int StashMapTabItems = 3;
-    }
-
-    public static readonly string[] ModNameBlacklist =
-    {
-        "AfflictionMapDeliriumStacks",
-        "AfflictionMapReward",
-        "InfectedMap",
-        "MapForceCorruptedSideArea",
-        "MapGainsRandomZanaMod",
-        "MapDoesntConsumeSextantCharge",
-        "MapEnchant",
-        "Enchantment",
-        "MapBossSurroundedByTormentedSpirits",
-        "MapZanaSubAreaMissionDetails",
-        "MapZanaInfluence",
-        "IsUberMap",
-        "MapConqueror",
-        "MapElder",
-        "MapVaalTempleContainsVaalVessels",
-        "MavenInvitation",
-        "MapCorruptionRandomAtlasNotables",
-        "MapCorruptionAtlasEffect",
-        "MapCorruptionBossCorruption",
-        "MapCorruptionSoulGainPrevention"
-    };
-
     private RectangleF windowArea;
     private static GameController gameController;
     private static IngameState ingameState;
@@ -430,7 +391,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
                         m.ModRecord.AffixType.ToString().Contains("Unique") || // Include Unique modifiers for Valdo maps
                         m.ModRecord.AffixType.ToString().Contains("Enchant"))
             .Where(m => !string.IsNullOrEmpty(m.Name))
-            .Where(m => !ModNameBlacklist.Any(black => m.RawName.Contains(black)))
+            .Where(m => !Constants.ModNameBlacklist.Any(black => m.RawName.Contains(black)))
             .GroupBy(m => Regex.Replace(m.RawName, @"\s+", ""), StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
             .OrderBy(m =>

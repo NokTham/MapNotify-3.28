@@ -13,9 +13,6 @@ namespace MapNotify_3_28;
 
 public partial class MapNotify_3_28
 {
-    private static readonly Regex MapNameRegex = new Regex(@"<[^>]*>{([^}]*)}", RegexOptions.Compiled);
-    private static readonly int[] AtlasNodeOffsets = { 0x120, 0x110, 0x118, 0x128 };
-
     private static readonly Dictionary<string, string> SpecialNodeMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
         { "Moment of Loneliness", "IgnoranceBoss" },
@@ -220,7 +217,7 @@ public partial class MapNotify_3_28
                             uiMapName = nameElement.GetChildAtIndex(0)?.Text;
                     }
                     if (uiMapName != null && uiMapName.Length > 0 && uiMapName[0] == '<')
-                        uiMapName = MapNameRegex.Replace(uiMapName, "$1");
+                        uiMapName = Constants.MapNameRegex.Replace(uiMapName, "$1");
                 }
             }
 
@@ -228,7 +225,7 @@ public partial class MapNotify_3_28
             {
                 if (nameToNodeAddress.TryGetValue(uiMapName, out var targetAddress))
                 {
-                    foreach (var off in AtlasNodeOffsets)
+                    foreach (var off in Constants.AtlasNodeOffsets)
                     {
                         if (gameController.IngameState.M.Read<long>(element.Address + off) == targetAddress)
                         {
