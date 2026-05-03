@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ExileCore.Shared.Helpers;
+using SharpDX;
 using nuVector4 = System.Numerics.Vector4;
 using nuVector2 = System.Numerics.Vector2;
 
@@ -391,8 +392,26 @@ namespace MapNotify_3_28
                             }
                         }
                     }
+
+                    void DrawPreviewBrickedX(uint color)
+                    {
+                        var brickRect = new RectangleF(pPos.X, pPos.Y, pSize, pSize);
+                        float sizeMult = Settings.SimpleOutlinesBrickedSize.Value / 100f;
+                        float inflateX = -(brickRect.Width * (1f - sizeMult) / 2f);
+                        float inflateY = -(brickRect.Height * (1f - sizeMult) / 2f);
+                        brickRect.Inflate(inflateX, inflateY);
+
+                        drawList.AddLine(brickRect.TopLeft.ToVector2Num(), brickRect.BottomRight.ToVector2Num(), color, Settings.BorderThicknessMap.Value);
+                        drawList.AddLine(brickRect.TopRight.ToVector2Num(), brickRect.BottomLeft.ToVector2Num(), color, Settings.BorderThicknessMap.Value);
+                    }
+
                     DrawPreviewBracket(pGoodIsTopLeft, pGoodColor);
                     DrawPreviewBracket(!pGoodIsTopLeft, pBadColor);
+                    if (Settings.BoxForBricked.Value)
+                    {
+                        var pBrickedColor = ImGui.ColorConvertFloat4ToU32(SharpToNu(Settings.Bricked.Value.ToVector4()));
+                        DrawPreviewBrickedX(pBrickedColor);
+                    }
                     ImGui.Unindent();
                 }
                 ImGui.Dummy(new nuVector2(0, 2));
