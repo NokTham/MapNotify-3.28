@@ -280,7 +280,7 @@ namespace MapNotify_3_28
             var ui = ingameState?.IngameUi;
             if (ui == null) return result;
 
-            var atlasPanel = ui.Atlas ?? ui.GetChildAtIndex(Constants.UIIndices.AtlasPanel);
+            var atlasPanel = ui.Atlas?.IsVisible == true ? ui.Atlas : ui.GetChildAtIndex(Constants.UIIndices.AtlasPanel);
             if (atlasPanel == null || !atlasPanel.IsVisible) return result;
 
             var seenAddresses = new HashSet<long>();
