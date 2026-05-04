@@ -37,6 +37,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     private CachedValue<List<NormalInventoryItem>> _purchaseWindowItems;
     private CachedValue<List<NormalInventoryItem>> _heistLockerItems;
     private CachedValue<List<NormalInventoryItem>> _expeditionLockerItems;
+    private CachedValue<List<NormalInventoryItem>> _mapDeviceStorageItems;
 
     private bool _showPreviewWindow;
     private string _modFilter = string.Empty;
@@ -98,6 +99,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         _expeditionLockerItems = new TimeCache<List<NormalInventoryItem>>(
             GetExpeditionLockerItems,
             Settings.StashCacheInterval.Value
+        );
+        _mapDeviceStorageItems = new TimeCache<List<NormalInventoryItem>>(
+            GetMapDeviceStorageItems,
+            Settings.InventoryCacheInterval.Value
         );
         LoadModsDatabase();
         InitializeAtlasHighlighter(); // Call the new method to initialize Atlas-related caches
@@ -311,6 +316,9 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 DrawBordersForItems(new[] { item }, "Map Device");
             }
         }
+
+        if (Settings.ShowMapDeviceStorageHighlights.Value)
+            DrawBordersForItems(_mapDeviceStorageItems.Value, "Map Device Storage");
     }
 
     private void RenderHoveredItem()

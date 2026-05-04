@@ -28,6 +28,7 @@ namespace MapNotify_3_28
         public ToggleNode ShowForInvitations { get; set; } = new(false);
         public ToggleNode ShowHeistLockerHighlights { get; set; } = new(false);
         public ToggleNode ShowExpeditionLockerHighlights { get; set; } = new(false);
+        public ToggleNode ShowMapDeviceStorageHighlights { get; set; } = new ToggleNode(false);
         public ToggleNode BoxForBricked { get; set; } = new(true);
         public ToggleNode BoxForMapWarnings { get; set; } = new(true);
         public ToggleNode BoxForMapBadWarnings { get; set; } = new(true);

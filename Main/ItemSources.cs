@@ -87,7 +87,7 @@ namespace MapNotify_3_28
                 stashElement.VisibleStash.InvType != InventoryType.MapStash)
             {
                 result = GetItemsFromCollection(stashElement.VisibleStash.VisibleInventoryItems);
-                
+
                 // Fallback: if the collection is empty, the API might not have populated it yet; try UI recursion.
                 if (result.Count == 0) FindMapsInElement(stashElement, result);
             }
@@ -106,7 +106,7 @@ namespace MapNotify_3_28
                 if (isMapStash && Settings.FilterMapStash.Value)
                 {
                     result = GetItemsFromCollection(stashElement.VisibleStash.VisibleInventoryItems);
-                    
+
                     // Fallback to searching the specialized UI container (Index 3) for Map Stashes.
                     if (result.Count == 0) FindMapsInElement(stashElement.ChildCount > 3 ? stashElement.GetChildAtIndex(3) : stashElement, result);
                 }
@@ -169,8 +169,8 @@ namespace MapNotify_3_28
             if (!Settings.FilterShops.Value) return new List<NormalInventoryItem>();
 
             var merchantPanel = ingameState?.IngameUi?.OfflineMerchantPanel;
-            return (merchantPanel != null && merchantPanel.IsVisible) 
-                ? GetItemsFromCollection(merchantPanel.VisibleStash?.VisibleInventoryItems) 
+            return (merchantPanel != null && merchantPanel.IsVisible)
+                ? GetItemsFromCollection(merchantPanel.VisibleStash?.VisibleInventoryItems)
                 : new List<NormalInventoryItem>();
         }
 
@@ -234,7 +234,7 @@ namespace MapNotify_3_28
                 .Where(idx => ui.ChildCount > idx)
                 .Select(ui.GetChildAtIndex)
                 .FirstOrDefault(c => c is { IsVisible: true });
-            
+
             if (expeditionLocker == null || !expeditionLocker.IsVisible) // Expedition Locker usually has 10-30 children
             {
                 for (int i = 0; i < ui.ChildCount; i++)
@@ -247,7 +247,7 @@ namespace MapNotify_3_28
                     }
                 }
             }
-            
+
             if (expeditionLocker != null && expeditionLocker.IsVisible)
             {
                 var seenAddresses = new HashSet<long>();
@@ -272,6 +272,41 @@ namespace MapNotify_3_28
             return result;
         }
 
+        private List<NormalInventoryItem> GetMapDeviceStorageItems()
+        {
+            var result = new List<NormalInventoryItem>();
+            if (!Settings.ShowMapDeviceStorageHighlights.Value) return result;
+
+            var ui = ingameState?.IngameUi;
+            if (ui == null) return result;
+
+            var atlasPanel = ui.Atlas ?? ui.GetChildAtIndex(Constants.UIIndices.AtlasPanel);
+            if (atlasPanel == null || !atlasPanel.IsVisible) return result;
+
+            var seenAddresses = new HashSet<long>();
+
+            // Path 1: (Atlas/AtlasPanel)29->3->0->1->X (where X is 1 to 20)
+            var sidebar = atlasPanel.GetChildAtIndex(3)?.GetChildAtIndex(0)?.GetChildAtIndex(1);
+            if (sidebar != null && sidebar.IsVisible)
+            {
+                for (int i = 1; i <= 20; i++)
+                {
+                    var container = sidebar.GetChildAtIndex(i);
+                    if (container != null && container.IsVisible)
+                        FindMapsInElementRecursive(container, result, seenAddresses, 0);
+                }
+            }
+
+            // Path 2: (Atlas/AtlasPanel)29->7->0->2->0->1
+            var internalDevice = atlasPanel.GetChildAtIndex(7)?.GetChildAtIndex(0)?.GetChildAtIndex(2)?.GetChildAtIndex(0)?.GetChildAtIndex(1);
+            if (internalDevice != null && internalDevice.IsVisible)
+            {
+                FindMapsInElementRecursive(internalDevice, result, seenAddresses, 0);
+            }
+
+            return result;
+        }
+
         private List<NormalInventoryItem> GetPurchaseWindowItems()
         {
             var ui = ingameState?.IngameUi;
@@ -281,11 +316,11 @@ namespace MapNotify_3_28
             Element window = ui.PurchaseWindow?.IsVisible == true ? ui.PurchaseWindow :
                              ui.PurchaseWindowHideout?.IsVisible == true ? ui.PurchaseWindowHideout :
                              ui.HaggleWindow?.IsVisible == true ? ui.HaggleWindow : null;
-            
+
             var tradeWindow = ui.TradeWindow;
             if (window == null && tradeWindow.IsVisible) window = tradeWindow;
             if (window == null) return new List<NormalInventoryItem>();
-            
+
             if (window is TradeWindow trade)
             {
                 var result = GetItemsFromCollection(trade.YourOffer);
@@ -304,7 +339,7 @@ namespace MapNotify_3_28
                     if (currentTabContainer != null)
                     {
                         foreach (var tab in currentTabContainer.Children)
-                            if (tab.IsVisible && tab.ChildCount > 0) 
+                            if (tab.IsVisible && tab.ChildCount > 0)
                                 FindMapsInElement(tab.GetChildAtIndex(0), result);
                     }
                 }

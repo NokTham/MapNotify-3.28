@@ -15,6 +15,7 @@ namespace MapNotify_3_28
             public const int ExpeditionLockerDefault = 101;
             public const int PurchaseWindowTabDetails = 8;
             public const int StashMapTabItems = 3;
+            public const int AtlasPanel = 29;
         }
 
         public static readonly string[] ModNameBlacklist =

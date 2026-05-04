@@ -148,7 +148,8 @@ namespace MapNotify_3_28
 
                 Settings.ShowForInvitations.Value = Checkbox("Maven Invitations", Settings.ShowForInvitations.Value); ImGui.SameLine(0f, 25f);
                 Settings.ShowHeistLockerHighlights.Value = Checkbox("Heist Locker", Settings.ShowHeistLockerHighlights.Value); ImGui.SameLine(0f, 25f);
-                Settings.ShowExpeditionLockerHighlights.Value = Checkbox("Expedition Locker", Settings.ShowExpeditionLockerHighlights.Value);
+                Settings.ShowExpeditionLockerHighlights.Value = Checkbox("Expedition Locker", Settings.ShowExpeditionLockerHighlights.Value); ImGui.SameLine(0f, 25f);
+                Settings.ShowMapDeviceStorageHighlights.Value = Checkbox("Map Device Storage", Settings.ShowMapDeviceStorageHighlights.Value);
 
                 ImGui.Dummy(new nuVector2(0, 5));
 

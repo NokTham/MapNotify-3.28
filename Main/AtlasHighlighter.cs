@@ -116,7 +116,7 @@ public partial class MapNotify_3_28
     /// </summary>
     private void DrawAtlasHighlights()
     {
-        var atlasPanel = ingameState?.IngameUi?.Atlas ?? ingameState?.IngameUi?.GetChildAtIndex(29);
+        var atlasPanel = ingameState?.IngameUi?.Atlas ?? ingameState?.IngameUi?.GetChildAtIndex(Constants.UIIndices.AtlasPanel);
         if (atlasPanel == null || !atlasPanel.IsVisible || atlasPanel.Address == 0)
         {
             _discoveredAtlasOffset = -1; // Reset discovery on close to handle relogs/memory shifts
