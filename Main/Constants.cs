@@ -39,7 +39,8 @@ namespace MapNotify_3_28
             "MapCorruptionRandomAtlasNotables",
             "MapCorruptionAtlasEffect",
             "MapCorruptionBossCorruption",
-            "MapCorruptionSoulGainPrevention"
+            "MapCorruptionSoulGainPrevention",
+            "MapCorruptionItemQuantity"
         };
     }
 }
