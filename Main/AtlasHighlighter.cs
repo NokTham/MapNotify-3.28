@@ -13,6 +13,9 @@ namespace MapNotify_3_28;
 
 public partial class MapNotify_3_28
 {
+    /// The flag used to determine if an Atlas node is visible in the UI, based on memory inspection. Flag19.
+    private const ulong AtlasNodeVisibleFlag = 0x80000ul;
+
     private static readonly Dictionary<string, string> SpecialNodeMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
         { "Moment of Loneliness", "IgnoranceBoss" },
@@ -176,7 +179,7 @@ public partial class MapNotify_3_28
                 if (elem == null) continue;
                 if (_getFlagsDelegate != null)
                 {
-                    if ((_getFlagsDelegate(elem) & 0x80000ul) == 0)
+                    if ((_getFlagsDelegate(elem) & AtlasNodeVisibleFlag) == 0)
                         continue;
                 }
             }
