@@ -68,39 +68,59 @@ namespace MapNotify_3_28
         public static TooltipData ParseTooltip(Element tooltip)
         {
             var data = new TooltipData();
-            if (tooltip == null) return data;
+            if (tooltip == null)
+                return data;
             bool passedSummary = false;
 
             void Walk(Element el, int depth)
             {
-                if (el == null || depth > 20) return;
-                var text = el.TextNoTags ?? el.Text;
-                if (!string.IsNullOrEmpty(text))
+                if (el == null || depth > 20)
+                    return;
+                var rawText = el.TextNoTags ?? el.Text;
+                if (!string.IsNullOrEmpty(rawText))
                 {
-                    if (text.Contains("Wing ") || text.Contains("Reward:")) passedSummary = true;
+                    // Strip out tag markup (<...>) and brackets ({...})
+                    var cleanText = Regex
+                        .Replace(rawText, @"<[^>]*>", "")
+                        .Replace("{", "")
+                        .Replace("}", "");
 
-                    if (text.Contains("Quality"))
+                    if (cleanText.Contains("Wing ") || cleanText.Contains("Reward:"))
+                        passedSummary = true;
+
+                    if (cleanText.Contains("Quality"))
                     {
-                        int start = text.IndexOfAny("0123456789".ToCharArray());
+                        int start = cleanText.IndexOfAny("0123456789".ToCharArray());
                         if (start != -1)
                         {
-                            int end = text.IndexOf('%', start);
-                            if (end != -1 && int.TryParse(text.Substring(start, end - start), out var res)) data.Quality = res;
+                            int end = cleanText.IndexOf('%', start);
+                            if (
+                                end != -1
+                                && int.TryParse(
+                                    cleanText.Substring(start, end - start),
+                                    out var res
+                                )
+                            )
+                                data.Quality = res;
                         }
                     }
-                    else if (text.Contains("Wings Revealed"))
+                    else if (cleanText.Contains("Wings Revealed"))
                     {
-                        int colon = text.IndexOf(':');
+                        int colon = cleanText.IndexOf(':');
                         if (colon != -1)
                         {
-                            var match = Regex.Match(text.Substring(colon), @"\d+");
-                            if (match.Success && int.TryParse(match.Value, out var res)) data.Wings = res;
+                            var match = Regex.Match(cleanText.Substring(colon), @"\d+");
+                            if (match.Success && int.TryParse(match.Value, out var res))
+                                data.Wings = res;
                         }
                     }
-                    else if (!passedSummary && text.Contains("Requires "))
+                    else if (!passedSummary && cleanText.Contains("Requires "))
                     {
-                        var clean = text.Replace("{", "").Replace("}", "");
-                        var match = Regex.Match(clean, @"Requires\s+(?<job>.+?)\s*\(.*?(?<lvl>\d+)\)", RegexOptions.IgnoreCase);
+                        var match = Regex.Match(
+                            cleanText,
+                            @"Requires\s+(?<job>.+?)\s*\(.*?(?<lvl>\d+)\)",
+                            RegexOptions.IgnoreCase
+                        );
                         if (match.Success && int.TryParse(match.Groups["lvl"].Value, out var lvl))
                         {
                             var job = match.Groups["job"].Value.Trim();
@@ -113,7 +133,8 @@ namespace MapNotify_3_28
                 int count = (int)el.ChildCount;
                 if (count > 0 && count < 100)
                 {
-                    for (int i = 0; i < count; i++) Walk(el.GetChildAtIndex(i), depth + 1);
+                    for (int i = 0; i < count; i++)
+                        Walk(el.GetChildAtIndex(i), depth + 1);
                 }
             }
 
