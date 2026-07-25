@@ -10,9 +10,9 @@ namespace MapNotify_3_28
 
         public static class UIIndices
         {
-            public const int MapDeviceRoot = 67;
-            public const int HeistLockerDefault = 98;
-            public const int ExpeditionLockerDefault = 101;
+            public const int MapDeviceRoot = 74; /// Invitations Receptacle
+            public const int HeistLockerDefault = 105;
+            public const int ExpeditionLockerDefault = 108;
             public const int PurchaseWindowTabDetails = 8;
             public const int StashMapTabItems = 3;
             public const int AtlasPanel = 29;
