@@ -26,7 +26,8 @@ namespace MapNotify_3_28
                    path.StartsWith("Metadata/Items/Heist/HeistBlueprint", StringComparison.Ordinal) ||
                    path.Contains("ExpeditionLogbook", StringComparison.OrdinalIgnoreCase) ||
                    path.Contains("Maven", StringComparison.OrdinalIgnoreCase) ||
-                   path.Contains("Valdo", StringComparison.OrdinalIgnoreCase);
+                   path.Contains("Valdo", StringComparison.OrdinalIgnoreCase) ||
+                   path.StartsWith("Metadata/Items/MapFragments/Primordial/Currency", StringComparison.Ordinal);
         }
 
         private List<NormalInventoryItem> GetItemsFromCollection(IEnumerable<NormalInventoryItem> items)
