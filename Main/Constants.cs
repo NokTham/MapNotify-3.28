@@ -41,7 +41,8 @@ namespace MapNotify_3_28
             "MapCorruptionBossCorruption",
             "MapCorruptionSoulGainPrevention",
             "MapCorruptionItemQuantity"
-            "ChampionsFragment"
+            "ChampionsFragment",
+            "MapShaperInfluence"
         };
     }
 }
