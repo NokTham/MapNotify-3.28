@@ -42,7 +42,8 @@ namespace MapNotify_3_28
             "MapCorruptionSoulGainPrevention",
             "MapCorruptionItemQuantity"
             "ChampionsFragment",
-            "MapShaperInfluence"
+            "MapShaperInfluence",
+            "BlightFragmentMushrune"
         };
     }
 }
