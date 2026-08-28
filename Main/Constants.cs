@@ -40,10 +40,10 @@ namespace MapNotify_3_28
             "MapCorruptionAtlasEffect",
             "MapCorruptionBossCorruption",
             "MapCorruptionSoulGainPrevention",
-            "MapCorruptionItemQuantity"
+            "MapCorruptionItemQuantity",
             "ChampionsFragment",
             "MapShaperInfluence",
-            "BlightFragmentMushrune",
+            "BlightFragmentMushrune"
         };
     }
 }
