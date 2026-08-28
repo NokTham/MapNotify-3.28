@@ -43,7 +43,7 @@ namespace MapNotify_3_28
             "MapCorruptionItemQuantity"
             "ChampionsFragment",
             "MapShaperInfluence",
-            "BlightFragmentMushrune"
+            "BlightFragmentMushrune",
         };
     }
 }
