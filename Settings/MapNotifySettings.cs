@@ -80,6 +80,8 @@ namespace MapNotify_3_28
         public ColorNode MapBorderBad { get; set; } = new ColorNode(new Color(1f, 0f, 0f, 0.35f));
         public ColorNode Bricked { get; set; } = new ColorNode(new Color(1f, 0f, 0f, 1f));
         public RangeNode<int> BorderThicknessMap { get; set; } = new(2, 1, 6);
+        public ToggleNode ShowEightModRibbon { get; set; } = new(false);
+        public ColorNode EightModRibbonColor { get; set; } = new ColorNode(new Color(1f, 0.72f, 0.15f, 1f));
 
         // Config Files and Other
         public RangeNode<int> TooltipOffsetX { get; set; } = new(25, -150, 150);
