@@ -246,6 +246,30 @@ namespace MapNotify_3_28
             }
         }
 
+        private void DrawEightModRibbon(RectangleF rect, ItemDetails itemDetails)
+       {
+            if (!Settings.ShowEightModRibbon || itemDetails.ModCount < 8) return;
+
+            var drawList = ImGui.GetWindowDrawList();
+            var color = ColorToUint(SharpToNu(Settings.EightModRibbonColor.Value.ToVector4()));
+
+            var corner = rect.TopRight.ToVector2Num();
+            float ribbonLength = System.Math.Min(rect.Width, rect.Height) * 0.5f;
+            float bandWidth = System.Math.Max(6f, rect.Height * 0.12f);
+
+            var dir = new nuVector2(-1, 1) / (float)System.Math.Sqrt(2);
+            var normal = new nuVector2(dir.Y, -dir.X);
+            var half = ribbonLength / 2f;
+            var halfWidth = bandWidth / 2f;
+
+            var p1 = corner + dir * half + normal * halfWidth;
+            var p2 = corner + dir * half - normal * halfWidth;
+            var p3 = corner - dir * half - normal * halfWidth;
+            var p4 = corner - dir * half + normal * halfWidth;
+
+            drawList.AddQuadFilled(p1, p2, p3, p4, color);
+        }
+        
         /// <summary>
         /// Draws colored highlights (borders or filled rects) around items in inventory or stash tabs.
         /// </summary>
@@ -291,6 +315,7 @@ namespace MapNotify_3_28
             if (Settings.UseSimpleOutlines)
             {
                 DrawSimpleOutlines(rect, hasGoodMod, hasBadMod);
+                DrawEightModRibbon(rect, itemDetails);
                 return; // Exit after drawing advanced outlines
             }
 
@@ -309,6 +334,8 @@ namespace MapNotify_3_28
             }
             else if (hasBadMod) Graphics.DrawBox(rect, Settings.MapBorderBad.Value);
             else if (hasGoodMod) Graphics.DrawBox(rect, Settings.MapBorderGood.Value);
+            
+            DrawEightModRibbon(rect, itemDetails);
         }
 
         private void DrawSimpleOutlines(RectangleF rect, bool hasGoodMod, bool hasBadMod)
