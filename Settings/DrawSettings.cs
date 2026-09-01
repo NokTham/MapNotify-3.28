@@ -434,15 +434,15 @@ namespace MapNotify_3_28
                 nuVector4 brickedColor = SharpToNu(Settings.Bricked.Value.ToVector4());
                 if (ImGui.ColorEdit4("Bricked Map", ref brickedColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar))
                     Settings.Bricked.Value = brickedColor.ToSharpColor();
+                    ImGui.SameLine(0f, 20f);
+                nuVector4 eightModColor = SharpToNu(Settings.EightModRibbonColor.Value.ToVector4());
+                if (ImGui.ColorEdit4("8-Mod Ribbon", ref eightModColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar))
+                Settings.EightModRibbonColor.Value = eightModColor.ToSharpColor();
                 ImGui.Dummy(new nuVector2(0, 2));
                 Settings.BorderThicknessMap.Value = IntSlider(
                     "Border Thickness for Bricked Maps##BorderThickness Maps",
                     Settings.BorderThicknessMap, 400f);
-                ImGui.SameLine(0f, 20f);
-                nuVector4 eightModColor = SharpToNu(Settings.EightModRibbonColor.Value.ToVector4());
-                if (ImGui.ColorEdit4("8-Mod Ribbon", ref eightModColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar))
-                Settings.EightModRibbonColor.Value = eightModColor.ToSharpColor();
-            }
+                }
 
             if (ImGui.TreeNodeEx("Config Files and Other", ImGuiTreeNodeFlags.CollapsingHeader))
             {
