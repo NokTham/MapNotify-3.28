@@ -250,7 +250,7 @@ namespace MapNotify_3_28
         {
             if (!Settings.ShowEightModRibbon || itemDetails.ModCount < 8) return;
 
-            var drawList = ImGui.GetForegroundDrawList();
+            var drawList = ImGui.GetBackgroundDrawList();
             var color = ColorToUint(SharpToNu(Settings.EightModRibbonColor.Value.ToVector4()));
 
             float size = System.Math.Min(rect.Width, rect.Height) * 0.35f;
