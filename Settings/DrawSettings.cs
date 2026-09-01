@@ -162,6 +162,9 @@ namespace MapNotify_3_28
                 Settings.BoxForMapBadWarnings.Value = Checkbox("Mark Good Mods", Settings.BoxForMapBadWarnings.Value);
                 ImGui.SameLine();
                 HelpMarker("Highlights maps if there are good mods. Configure color in the 'Borders and Highlight Colours' section.");
+                Settings.ShowEightModRibbon.Value = Checkbox("Mark 8-Mod Maps", Settings.ShowEightModRibbon.Value);
+                ImGui.SameLine();
+                HelpMarker("Draws a corner ribbon on 8mod maps.");
             }
 
             if (ImGui.TreeNodeEx("Map Tooltip Settings", ImGuiTreeNodeFlags.CollapsingHeader))
@@ -434,8 +437,11 @@ namespace MapNotify_3_28
                 ImGui.Dummy(new nuVector2(0, 2));
                 Settings.BorderThicknessMap.Value = IntSlider(
                     "Border Thickness for Bricked Maps##BorderThickness Maps",
-                    Settings.BorderThicknessMap, 400f
-                );
+                    Settings.BorderThicknessMap, 400f);
+                ImGui.SameLine(0f, 20f);
+                nuVector4 eightModColor = SharpToNu(Settings.EightModRibbonColor.Value.ToVector4());
+                if (ImGui.ColorEdit4("8-Mod Ribbon", ref eightModColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar))
+                Settings.EightModRibbonColor.Value = eightModColor.ToSharpColor();
             }
 
             if (ImGui.TreeNodeEx("Config Files and Other", ImGuiTreeNodeFlags.CollapsingHeader))
