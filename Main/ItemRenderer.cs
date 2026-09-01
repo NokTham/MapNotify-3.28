@@ -246,12 +246,12 @@ namespace MapNotify_3_28
             }
         }
 
-        private void DrawEightModRibbon(RectangleF rect, ItemDetails itemDetails)
+        private void DrawEightModTriangle(RectangleF rect, ItemDetails itemDetails)
         {
-            if (!Settings.ShowEightModRibbon || itemDetails.ModCount < 8) return;
+            if (!Settings.ShowEightModTriangle || itemDetails.ModCount < 8) return;
 
             var drawList = ImGui.GetBackgroundDrawList();
-            var color = ColorToUint(SharpToNu(Settings.EightModRibbonColor.Value.ToVector4()));
+            var color = ColorToUint(SharpToNu(Settings.EightModTriangleColor.Value.ToVector4()));
 
             float size = System.Math.Min(rect.Width, rect.Height) * 0.35f;
             var corner = rect.TopRight.ToVector2Num();
@@ -308,7 +308,7 @@ namespace MapNotify_3_28
             if (Settings.UseSimpleOutlines)
             {
                 DrawSimpleOutlines(rect, hasGoodMod, hasBadMod);
-                DrawEightModRibbon(rect, itemDetails);
+                DrawEightModTriangle(rect, itemDetails);
                 return; // Exit after drawing advanced outlines
             }
 
@@ -328,7 +328,7 @@ namespace MapNotify_3_28
             else if (hasBadMod) Graphics.DrawBox(rect, Settings.MapBorderBad.Value);
             else if (hasGoodMod) Graphics.DrawBox(rect, Settings.MapBorderGood.Value);
             
-            DrawEightModRibbon(rect, itemDetails);
+            DrawEightModTriangle(rect, itemDetails);
         }
 
         private void DrawSimpleOutlines(RectangleF rect, bool hasGoodMod, bool hasBadMod)
