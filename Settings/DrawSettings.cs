@@ -162,7 +162,7 @@ namespace MapNotify_3_28
                 Settings.BoxForMapBadWarnings.Value = Checkbox("Mark Good Mods", Settings.BoxForMapBadWarnings.Value);
                 ImGui.SameLine();
                 HelpMarker("Highlights maps if there are good mods. Configure color in the 'Borders and Highlight Colours' section.");
-                Settings.ShowEightModRibbon.Value = Checkbox("Mark 8-Mod Maps", Settings.ShowEightModRibbon.Value);
+                Settings.ShowEightModTriangle.Value = Checkbox("Mark 8-Mod Maps", Settings.ShowEightModTriangle.Value);
                 ImGui.SameLine();
                 HelpMarker("Draws a corner triangle on 8mod maps.");
             }
@@ -435,9 +435,9 @@ namespace MapNotify_3_28
                 if (ImGui.ColorEdit4("Bricked Map", ref brickedColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar))
                     Settings.Bricked.Value = brickedColor.ToSharpColor();
                     ImGui.SameLine(0f, 20f);
-                nuVector4 eightModColor = SharpToNu(Settings.EightModRibbonColor.Value.ToVector4());
+                nuVector4 eightModColor = SharpToNu(Settings.EightModTriangleColor.Value.ToVector4());
                 if (ImGui.ColorEdit4("8-Mod Triangle", ref eightModColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar))
-                Settings.EightModRibbonColor.Value = eightModColor.ToSharpColor();
+                Settings.EightModTriangleColor.Value = eightModColor.ToSharpColor();
                 ImGui.Dummy(new nuVector2(0, 2));
                 Settings.BorderThicknessMap.Value = IntSlider(
                     "Border Thickness for Bricked Maps##BorderThickness Maps",
