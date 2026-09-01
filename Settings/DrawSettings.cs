@@ -164,7 +164,7 @@ namespace MapNotify_3_28
                 HelpMarker("Highlights maps if there are good mods. Configure color in the 'Borders and Highlight Colours' section.");
                 Settings.ShowEightModRibbon.Value = Checkbox("Mark 8-Mod Maps", Settings.ShowEightModRibbon.Value);
                 ImGui.SameLine();
-                HelpMarker("Draws a corner ribbon on 8mod maps.");
+                HelpMarker("Draws a corner triangle on 8mod maps.");
             }
 
             if (ImGui.TreeNodeEx("Map Tooltip Settings", ImGuiTreeNodeFlags.CollapsingHeader))
