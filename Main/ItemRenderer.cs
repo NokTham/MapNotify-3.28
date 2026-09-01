@@ -246,6 +246,23 @@ namespace MapNotify_3_28
             }
         }
 
+        private void DrawEightModTriangle(RectangleF rect, ItemDetails itemDetails)
+        {
+            if (!Settings.ShowEightModTriangle || itemDetails.ModCount < 8) return;
+
+            var drawList = ImGui.GetBackgroundDrawList();
+            var color = ColorToUint(SharpToNu(Settings.EightModTriangleColor.Value.ToVector4()));
+
+            float size = System.Math.Min(rect.Width, rect.Height) * 0.35f;
+            var corner = rect.TopRight.ToVector2Num();
+
+            var p1 = corner;                                 // the corner itself
+            var p2 = corner - new nuVector2(size, 0);        // inward along the top edge
+            var p3 = corner + new nuVector2(0, size);        // inward along the right edge
+
+            drawList.AddTriangleFilled(p1, p2, p3, color);
+        }
+        
         /// <summary>
         /// Draws colored highlights (borders or filled rects) around items in inventory or stash tabs.
         /// </summary>
@@ -291,6 +308,7 @@ namespace MapNotify_3_28
             if (Settings.UseSimpleOutlines)
             {
                 DrawSimpleOutlines(rect, hasGoodMod, hasBadMod);
+                DrawEightModTriangle(rect, itemDetails);
                 return; // Exit after drawing advanced outlines
             }
 
@@ -309,6 +327,8 @@ namespace MapNotify_3_28
             }
             else if (hasBadMod) Graphics.DrawBox(rect, Settings.MapBorderBad.Value);
             else if (hasGoodMod) Graphics.DrawBox(rect, Settings.MapBorderGood.Value);
+            
+            DrawEightModTriangle(rect, itemDetails);
         }
 
         private void DrawSimpleOutlines(RectangleF rect, bool hasGoodMod, bool hasBadMod)
