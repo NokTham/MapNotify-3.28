@@ -436,7 +436,7 @@ namespace MapNotify_3_28
                     Settings.Bricked.Value = brickedColor.ToSharpColor();
                     ImGui.SameLine(0f, 20f);
                 nuVector4 eightModColor = SharpToNu(Settings.EightModRibbonColor.Value.ToVector4());
-                if (ImGui.ColorEdit4("8-Mod Ribbon", ref eightModColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar))
+                if (ImGui.ColorEdit4("8-Mod Triangle", ref eightModColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar))
                 Settings.EightModRibbonColor.Value = eightModColor.ToSharpColor();
                 ImGui.Dummy(new nuVector2(0, 2));
                 Settings.BorderThicknessMap.Value = IntSlider(
