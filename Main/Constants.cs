@@ -46,7 +46,8 @@ namespace MapNotify_3_28
             "BlightFragmentMushrune",
             "MapCorruptionPackSize",
             "MapCorruptionModEffect",
-            "MapCorruptionItemRarity"
+            "MapCorruptionItemRarity",
+            "MapCorruptionRandomScarab"
         };
     }
 }
