@@ -47,7 +47,8 @@ namespace MapNotify_3_28
             "MapCorruptionPackSize",
             "MapCorruptionModEffect",
             "MapCorruptionItemRarity",
-            "MapCorruptionRandomScarab"
+            "MapCorruptionRandomScarab",
+            "MapCorruptionVaalVessel"
         };
     }
 }
