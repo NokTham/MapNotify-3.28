@@ -82,6 +82,7 @@ namespace MapNotify_3_28
         public RangeNode<int> BorderThicknessMap { get; set; } = new(2, 1, 6);
         public ToggleNode ShowEightModTriangle { get; set; } = new(false);
         public ColorNode EightModTriangleColor { get; set; } = new ColorNode(new Color(1f, 0.72f, 0.15f, 1f));
+        public ListNode EightModTriangleCorner { get; set; } = new ListNode { Value = "Top Right", Values = new List<string> { "Top Right", "Top Left", "Bottom Right", "Bottom Left" } };
 
         // Config Files and Other
         public RangeNode<int> TooltipOffsetX { get; set; } = new(25, -150, 150);

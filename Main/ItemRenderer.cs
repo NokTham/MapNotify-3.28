@@ -254,13 +254,34 @@ namespace MapNotify_3_28
             var color = ColorToUint(SharpToNu(Settings.EightModTriangleColor.Value.ToVector4()));
 
             float size = System.Math.Min(rect.Width, rect.Height) * 0.35f;
-            var corner = rect.TopRight.ToVector2Num();
 
-            var p1 = corner;                                 // the corner itself
-            var p2 = corner - new nuVector2(size, 0);        // inward along the top edge
-            var p3 = corner + new nuVector2(0, size);        // inward along the right edge
+            nuVector2 corner, alongHorizontal, alongVertical;
 
-            drawList.AddTriangleFilled(p1, p2, p3, color);
+            switch (Settings.EightModTriangleCorner.Value)
+            {
+                case "Top Left":
+                    corner = rect.TopLeft.ToVector2Num();
+                    alongHorizontal = new nuVector2(size, 0);
+                    alongVertical = new nuVector2(0, size);
+                    break;
+                case "Bottom Right":
+                    corner = rect.BottomRight.ToVector2Num();
+                    alongHorizontal = new nuVector2(-size, 0);
+                    alongVertical = new nuVector2(0, -size);
+                    break;
+                case "Bottom Left":
+                    corner = rect.BottomLeft.ToVector2Num();
+                    alongHorizontal = new nuVector2(size, 0);
+                    alongVertical = new nuVector2(0, -size);
+                    break;
+                default: // "Top Right"
+                    corner = rect.TopRight.ToVector2Num();
+                    alongHorizontal = new nuVector2(-size, 0);
+                    alongVertical = new nuVector2(0, size);
+                    break;
+            }
+
+                drawList.AddTriangleFilled(corner, corner + alongHorizontal, corner + alongVertical, color);
         }
         
         /// <summary>
