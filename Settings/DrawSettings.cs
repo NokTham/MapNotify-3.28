@@ -438,6 +438,15 @@ namespace MapNotify_3_28
                 nuVector4 eightModColor = SharpToNu(Settings.EightModTriangleColor.Value.ToVector4());
                 if (ImGui.ColorEdit4("8-Mod Triangle", ref eightModColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar))
                 Settings.EightModTriangleColor.Value = eightModColor.ToSharpColor();
+                ImGui.SameLine(0f, 20f);
+                ImGui.Text("8-Mod Triangle Position:"); ImGui.SameLine();
+				ImGui.SetNextItemWidth(150);
+				if (ImGui.BeginCombo("##EightModTriangleCorner", Settings.EightModTriangleCorner.Value))
+				{
+				    foreach (var val in Settings.EightModTriangleCorner.Values)
+				        if (ImGui.Selectable(val, val == Settings.EightModTriangleCorner.Value)) Settings.EightModTriangleCorner.Value = val;
+				    ImGui.EndCombo();
+				}
                 ImGui.Dummy(new nuVector2(0, 2));
                 Settings.BorderThicknessMap.Value = IntSlider(
                     "Border Thickness for Bricked Maps##BorderThickness Maps",
