@@ -267,18 +267,18 @@ namespace MapNotify_3_28
                 case "Bottom Right":
                     corner = rect.BottomRight.ToVector2Num();
                     alongHorizontal = new nuVector2(-size, 0);
-                        alongVertical = new nuVector2(0, -size);
-                        break;
+                    alongVertical = new nuVector2(0, -size);
+                    break;
                 case "Bottom Left":
-                        corner = rect.BottomLeft.ToVector2Num();
-                        alongHorizontal = new nuVector2(size, 0);
-                        alongVertical = new nuVector2(0, -size);
-                        break;
+                    corner = rect.BottomLeft.ToVector2Num();
+                    alongHorizontal = new nuVector2(size, 0);
+                    alongVertical = new nuVector2(0, -size);
+                    break;
                 default: // "Top Right"
-                        corner = rect.TopRight.ToVector2Num();
-                        alongHorizontal = new nuVector2(-size, 0);
-                        alongVertical = new nuVector2(0, size);
-                        break;
+                    corner = rect.TopRight.ToVector2Num();
+                    alongHorizontal = new nuVector2(-size, 0);
+                    alongVertical = new nuVector2(0, size);
+                    break;
             }
 
                 drawList.AddTriangleFilled(corner, corner + alongHorizontal, corner + alongVertical, color);
