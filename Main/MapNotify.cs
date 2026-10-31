@@ -456,6 +456,26 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
             var (existingEntry, _) = MatchMod(mod.RawName);
 
+            // Extract per-mod stat contributions
+            int modIIQ = 0, modIIR = 0, modPS = 0, modMM = 0, modMS = 0, modMC = 0;
+            var stats = mod.ModRecord?.StatNames;
+            var values = mod.Values;
+            if (stats != null && values != null)
+            {
+                for (int i = 0; i < stats.Length && i < values.Count; i++)
+                {
+                    var key = stats[i].Key;
+                    if (string.IsNullOrEmpty(key)) continue;
+                    var val = values[i];
+                    if (key.Contains("quantity", StringComparison.OrdinalIgnoreCase)) modIIQ += val;
+                    else if (key.Contains("rarity", StringComparison.OrdinalIgnoreCase)) modIIR += val;
+                    else if (key.Contains("pack_size", StringComparison.OrdinalIgnoreCase)) modPS += val;
+                    else if (key.Contains("scarab_drop_chance", StringComparison.OrdinalIgnoreCase)) modMS += val;
+                    else if (key.Contains("currency_drop_chance", StringComparison.OrdinalIgnoreCase)) modMC += val;
+                    else if (key.Contains("map_item_drop_chance", StringComparison.OrdinalIgnoreCase)) modMM += val;
+                }
+            }
+
             captured.Add(new CapturedMod
             {
                 RawName = mod.RawName.Trim(),
@@ -463,7 +483,13 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 DisplayName = existingEntry?.Text ?? (matchedDescription ?? mod.Name),
                 Description = matchedDescription ?? (!string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name),
                 Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
-                IsBricking = existingEntry?.Bricking ?? false
+                IsBricking = existingEntry?.Bricking ?? false,
+                Quantity = modIIQ,
+                Rarity = modIIR,
+                PackSize = modPS,
+                MoreMaps = modMM,
+                MoreScarabs = modMS,
+                MoreCurrency = modMC
             });
         }
         return captured;

@@ -158,6 +158,16 @@ namespace MapNotify_3_28
                         ImGui.EndTabItem();
                     }
 
+                    if (ImGui.BeginTabItem("Captured Mods Stats"))
+                    {
+                        if (ImGui.BeginChild("CapturedStatsScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Border))
+                        {
+                            DrawCapturedModsStats();
+                            ImGui.EndChild();
+                        }
+                        ImGui.EndTabItem();
+                    }
+
                     if (ImGui.BeginTabItem("Mod Browser"))
                     {
                         if (ImGui.BeginChild("BrowserScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Border))
@@ -239,6 +249,115 @@ namespace MapNotify_3_28
                     lastAffixType = mod.AffixType;
                 }
                 DrawModEntry(mod);
+            }
+        }
+
+        private void DrawCapturedModsStats()
+        {
+            if (_capturedMods.Count == 0)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, new nuVector4(0.7f, 0.7f, 0.7f, 1f));
+                ImGui.TextWrapped("No mods captured. Hover over a map and press your hotkey to see and configure its modifiers.");
+                ImGui.PopStyleColor();
+                return;
+            }
+
+            // Stat colors (matching the plugin's existing color conventions)
+            var iiqColor = new nuVector4(0.5f, 0.85f, 1f, 1f);       // Cyan
+            var iirColor = new nuVector4(1f, 0.95f, 0.4f, 1f);       // Yellow
+            var psColor = new nuVector4(0.4f, 1f, 0.4f, 1f);         // Lime
+            var mmColor = new nuVector4(0.5f, 0.85f, 1f, 1f);        // Blue (Maps)
+            var msColor = new nuVector4(0.85f, 0.45f, 0.85f, 1f);    // Purple (Scarabs)
+            var mcColor = new nuVector4(0.0f, 1.0f, 0.0f, 1.0f);     // Green (Currency)
+            var dimWhite = new nuVector4(0.45f, 0.45f, 0.45f, 1f);
+
+            // Column offsets for aligned stat display (relative to indent start)
+            // Layout: [value IIQ]  [value PS]   [value IIR]
+            //         [value MM]   [value MS]   [value MC]
+            const float col1 = 0f;
+            const float col2 = 75f;
+            const float col3 = 150f;
+
+            // Helper: draw a single stat cell at a fixed column position
+            void DrawStatCell(float colOffset, float baseX, int value, string label, nuVector4 color)
+            {
+                ImGui.SameLine();
+                ImGui.SetCursorPosX(baseX + colOffset);
+                if (value != 0)
+                    ImGui.TextColored(color, $"{value}%% {label}");
+                else
+                    ImGui.TextColored(dimWhite, $"-- {label}");
+            }
+
+            // Helper: draw two aligned lines of stats (IIQ/PS/IIR then MM/MS/MC)
+            void DrawStatsBlock(int iiq, int ps, int iir, int mm, int ms, int mc, float indentAmount)
+            {
+                var baseX = ImGui.GetCursorPosX() + indentAmount;
+
+                // Line 1: IIQ  PS  IIR
+                ImGui.SetCursorPosX(baseX + col1);
+                if (iiq != 0) ImGui.TextColored(iiqColor, $"{iiq}%% IIQ");
+                else ImGui.TextColored(dimWhite, "-- IIQ");
+                DrawStatCell(col2, baseX, ps, "PS", psColor);
+                DrawStatCell(col3, baseX, iir, "IIR", iirColor);
+
+                // Line 2: MM  MS  MC
+                ImGui.SetCursorPosX(baseX + col1);
+                if (mm != 0) ImGui.TextColored(mmColor, $"{mm}%% MM");
+                else ImGui.TextColored(dimWhite, "-- MM");
+                DrawStatCell(col2, baseX, ms, "MS", msColor);
+                DrawStatCell(col3, baseX, mc, "MC", mcColor);
+            }
+
+            // Calculate totals
+            int totalIIQ = 0, totalIIR = 0, totalPS = 0, totalMM = 0, totalMS = 0, totalMC = 0;
+            foreach (var mod in _capturedMods)
+            {
+                totalIIQ += mod.Quantity;
+                totalIIR += mod.Rarity;
+                totalPS += mod.PackSize;
+                totalMM += mod.MoreMaps;
+                totalMS += mod.MoreScarabs;
+                totalMC += mod.MoreCurrency;
+            }
+
+            // Draw totals header
+            ImGui.TextColored(new nuVector4(1f, 0.85f, 0.3f, 1f), "--- Totals ---");
+            ImGui.Separator();
+            DrawStatsBlock(totalIIQ, totalPS, totalIIR, totalMM, totalMS, totalMC, 0f);
+
+            ImGui.Dummy(new nuVector2(0, 6));
+            ImGui.TextColored(new nuVector4(1f, 0.85f, 0.3f, 1f), "--- Per-Mod Breakdown ---");
+            ImGui.Separator();
+
+            // Group mods by AffixType and draw with section headers
+            string lastAffixType = null;
+            for (int i = 0; i < _capturedMods.Count; i++)
+            {
+                var mod = _capturedMods[i];
+                if (!string.IsNullOrEmpty(_modFilter) &&
+                    !mod.RawName.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) &&
+                    !mod.Description.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase) &&
+                    !mod.DisplayName.Contains(_modFilter, System.StringComparison.OrdinalIgnoreCase)) continue;
+
+                // Section header when affix type changes
+                if (mod.AffixType != lastAffixType)
+                {
+                    if (lastAffixType != null) ImGui.Dummy(new nuVector2(0, 6));
+                    ImGui.TextColored(new nuVector4(0.502f, 0.8f, 1f, 1f), $"--- {mod.AffixType} ---");
+                    ImGui.Separator();
+                    lastAffixType = mod.AffixType;
+                }
+
+                // Mod description
+                ImGui.PushStyleColor(ImGuiCol.Text, mod.Color);
+                ImGui.TextWrapped(EscapeImGui(string.IsNullOrEmpty(mod.Description) ? mod.RawName : mod.Description).Replace("\\n", "\n"));
+                ImGui.PopStyleColor();
+
+                // Aligned stats block below the description
+                DrawStatsBlock(mod.Quantity, mod.PackSize, mod.Rarity, mod.MoreMaps, mod.MoreScarabs, mod.MoreCurrency, 10f);
+
+                ImGui.Separator();
             }
         }
 

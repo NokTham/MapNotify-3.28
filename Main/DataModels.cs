@@ -24,5 +24,15 @@ namespace MapNotify_3_28
         public string AffixType { get; set; }
         public System.Numerics.Vector4 Color { get; set; } = new System.Numerics.Vector4(1, 1, 1, 1);
         public bool IsBricking { get; set; }
+
+        // Per-mod stat contributions
+        public int Quantity { get; set; }
+        public int Rarity { get; set; }
+        public int PackSize { get; set; }
+        public int MoreMaps { get; set; }
+        public int MoreScarabs { get; set; }
+        public int MoreCurrency { get; set; }
+
+        public bool HasAnyStats => Quantity != 0 || Rarity != 0 || PackSize != 0 || MoreMaps != 0 || MoreScarabs != 0 || MoreCurrency != 0;
     }
 }
