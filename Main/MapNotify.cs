@@ -8,6 +8,7 @@ using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.Elements;
 using ExileCore.PoEMemory.Elements.InventoryElements;
 using ExileCore.PoEMemory.MemoryObjects;
+using ExileCore.PoEMemory.FilesInMemory;
 using ExileCore.Shared.Cache;
 using ExileCore.Shared.Enums;
 using ExileCore.Shared.Helpers;
@@ -46,6 +47,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     private string _newProfileName = string.Empty;
     private bool _forceCapturedTab;
     private List<ModEntry> _modEntries = new List<ModEntry>(); // Store grouped mod entries for browser
+    private bool _modEntriesLoadedFromMemory;
     private string _lastCharacterName = string.Empty;
 
     public MapNotify_3_28()
@@ -111,6 +113,324 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
     private void LoadModsDatabase()
     {
+        if (LoadModsFromMemory())
+            return;
+
+        LoadModsFromJson();
+    }
+
+    public bool LoadModsFromMemory()
+    {
+        try
+        {
+            var modsTable = GameController?.Files?.Mods;
+            var records = modsTable?.records;
+            if (records == null || records.Count == 0)
+            {
+                LogMessage("MapNotify: GameController.Files.Mods is not loaded yet or empty. Will fall back to mods.json.", 5);
+                return false;
+            }
+
+            var mapStatDesc = GameController.Files?.MapStatDescriptions;
+            var statDesc = GameController.Files?.StatDescriptions;
+
+            bool IsYieldModKey(string key)
+            {
+                if (string.IsNullOrEmpty(key)) return false;
+                return key.StartsWith("MapItemDropChance", StringComparison.OrdinalIgnoreCase) ||
+                       key.StartsWith("MapItemQuantity", StringComparison.OrdinalIgnoreCase) ||
+                       key.StartsWith("MapItemRarity", StringComparison.OrdinalIgnoreCase) ||
+                       key.StartsWith("MapPackSize", StringComparison.OrdinalIgnoreCase) ||
+                       key.StartsWith("MapMonsterPackSize", StringComparison.OrdinalIgnoreCase) ||
+                       key.StartsWith("MapScarabDropChance", StringComparison.OrdinalIgnoreCase) ||
+                       key.StartsWith("MapCurrencyDropChance", StringComparison.OrdinalIgnoreCase) ||
+                       key.StartsWith("MapMapDropChance", StringComparison.OrdinalIgnoreCase) ||
+                       key.StartsWith("MapTotalItemQuantity", StringComparison.OrdinalIgnoreCase) ||
+                       key.StartsWith("MapTotalItemRarity", StringComparison.OrdinalIgnoreCase) ||
+                       key.StartsWith("MapTotalPackSize", StringComparison.OrdinalIgnoreCase) ||
+                       key.StartsWith("MapTierDropChance", StringComparison.OrdinalIgnoreCase) ||
+                       key.StartsWith("MapOriginator", StringComparison.OrdinalIgnoreCase);
+            }
+
+            bool IsYieldStatLine(string line)
+            {
+                if (string.IsNullOrWhiteSpace(line)) return false;
+                if (line.Contains("quantity of items", StringComparison.OrdinalIgnoreCase)) return true;
+                if (line.Contains("rarity of items", StringComparison.OrdinalIgnoreCase)) return true;
+                if (line.Contains("pack size", StringComparison.OrdinalIgnoreCase)) return true;
+                if (Regex.IsMatch(line, @"\bmore\s+(scarabs?|currency(\s+items?)?|maps?)\b", RegexOptions.IgnoreCase)) return true;
+                if (Regex.IsMatch(line, @"\b(increased|more)\s+(map|scarab|currency)\s+drop", RegexOptions.IgnoreCase)) return true;
+                return false;
+            }
+
+            // Load known mappings from mods.json if available
+            var knownLookup = new Dictionary<string, (string GroupKey, List<string> Descriptions, string Type)>(StringComparer.OrdinalIgnoreCase);
+            var jsonPath = Path.Combine(DirectoryFullName, "data", "mods.json");
+            if (!File.Exists(jsonPath))
+            {
+                var srcPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins", "Source", "MapNotify-3.28", "data", "mods.json");
+                if (File.Exists(srcPath)) jsonPath = srcPath;
+            }
+
+            if (File.Exists(jsonPath))
+            {
+                try
+                {
+                    var json = File.ReadAllText(jsonPath);
+                    var database = Newtonsoft.Json.JsonConvert.DeserializeObject<ModsJson>(json);
+                    if (database?.groups != null)
+                    {
+                        foreach (var kvp in database.groups)
+                        {
+                            if (IsYieldStatLine(kvp.Key) || IsYieldModKey(kvp.Key)) continue;
+                            if (kvp.Value.BaseMods != null)
+                            {
+                                var cleanDescs = (kvp.Value.Descriptions ?? new List<string>()).Where(d => !IsYieldStatLine(d)).ToList();
+                                foreach (var bm in kvp.Value.BaseMods)
+                                {
+                                    if (string.IsNullOrWhiteSpace(bm) || IsYieldModKey(bm)) continue;
+                                    var norm = BaseModExtractor.GetBaseMod(bm);
+                                    if (!knownLookup.ContainsKey(norm))
+                                        knownLookup[norm] = (kvp.Key, cleanDescs, kvp.Value.Type);
+                                    if (!knownLookup.ContainsKey(bm))
+                                        knownLookup[bm] = (kvp.Key, cleanDescs, kvp.Value.Type);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            // Filter strictly for true rollable map mods
+            var relevantMods = records.Values
+                .Where(m => m != null && !string.IsNullOrEmpty(m.Key))
+                .Where(m =>
+                {
+                    if (IsYieldModKey(m.Key)) return false;
+
+                    // Blacklist check
+                    if (Constants.ModNameBlacklist.Any(black => m.Key.Contains(black, StringComparison.OrdinalIgnoreCase)))
+                        return false;
+
+                    // 1. Strict AffixType filter - only true rollable affixes
+                    bool isRollableAffix = m.AffixType == ModType.Prefix ||
+                                           m.AffixType == ModType.Suffix ||
+                                           m.AffixType == ModType.Unique ||
+                                           m.AffixType == ModType.ExpeditionLogbook ||
+                                           m.AffixType == ModType.Enchantment;
+                    if (!isRollableAffix) return false;
+
+                    // 2. Strict Domain / Family filter
+                    var normKey = BaseModExtractor.GetBaseMod(m.Key);
+                    bool isKnown = knownLookup.ContainsKey(m.Key) || knownLookup.ContainsKey(normKey);
+                    bool isMapWorlds = m.Key.Contains("Worlds", StringComparison.OrdinalIgnoreCase);
+                    bool isUber = m.Key.Contains("Uber", StringComparison.OrdinalIgnoreCase) || m.Domain == ModDomain.UberMap;
+                    bool isExpedition = m.Key.Contains("Expedition", StringComparison.OrdinalIgnoreCase) ||
+                                        m.Key.Contains("Logbook", StringComparison.OrdinalIgnoreCase) ||
+                                        m.Domain == ModDomain.ExpeditionRelic ||
+                                        m.AffixType == ModType.ExpeditionLogbook;
+                    bool isValdo = m.Key.Contains("Valdo", StringComparison.OrdinalIgnoreCase) ||
+                                   m.Key.Contains("Puzzle", StringComparison.OrdinalIgnoreCase) ||
+                                   (m.AffixType == ModType.Unique && m.Key.StartsWith("Map", StringComparison.OrdinalIgnoreCase));
+
+                    if (!isKnown && !isMapWorlds && !isUber && !isExpedition && !isValdo)
+                        return false;
+
+                    // Exclude non-map domains unless Valdo or known
+                    if (m.Domain == ModDomain.Flask || m.Domain == ModDomain.Monster || m.Domain == ModDomain.Chest)
+                        return false;
+
+                    return true;
+                })
+                .ToList();
+
+            if (relevantMods.Count == 0)
+            {
+                LogMessage("MapNotify: No relevant map mods found in memory records. Will fall back to mods.json.", 5);
+                return false;
+            }
+
+            string DetermineModType(ModsDat.ModRecord m)
+            {
+                if (m.Key.Contains("Expedition", StringComparison.OrdinalIgnoreCase) ||
+                    m.Key.Contains("Logbook", StringComparison.OrdinalIgnoreCase) ||
+                    m.Domain == ModDomain.ExpeditionRelic ||
+                    m.AffixType == ModType.ExpeditionLogbook)
+                    return "Expedition";
+
+                if (m.Key.Contains("Uber", StringComparison.OrdinalIgnoreCase) ||
+                    m.Domain == ModDomain.UberMap)
+                    return "Uber";
+
+                if (m.Key.Contains("Valdo", StringComparison.OrdinalIgnoreCase) ||
+                    m.Key.Contains("Puzzle", StringComparison.OrdinalIgnoreCase) ||
+                    m.AffixType == ModType.Unique)
+                    return "Valdo";
+
+                return "Generic";
+            }
+
+            string DetermineAffix(ModsDat.ModRecord m)
+            {
+                if (m.AffixType == ModType.Prefix) return "Prefix";
+                if (m.AffixType == ModType.Suffix) return "Suffix";
+                if (m.AffixType == ModType.Unique) return "Unique";
+                if (m.AffixType == ModType.ExpeditionLogbook) return "Logbook";
+                return m.AffixType.ToString();
+            }
+
+            bool IsCleanTranslation(string text)
+            {
+                if (string.IsNullOrWhiteSpace(text)) return false;
+                if (text.Contains("<unknown", StringComparison.OrdinalIgnoreCase)) return false;
+                if (text.Contains("CachedStatDescription", StringComparison.OrdinalIgnoreCase)) return false;
+                if (text.Contains("System.Collections.Generic", StringComparison.OrdinalIgnoreCase)) return false;
+                return true;
+            }
+
+            List<string> TranslateFromMemory(ModsDat.ModRecord mod)
+            {
+                var descs = new List<string>();
+                if (mod.StatNames == null || mod.StatNames.Length == 0)
+                    return descs;
+
+                try
+                {
+                    var statDict = new Dictionary<GameStat, int>();
+                    for (int i = 0; i < mod.StatNames.Length; i++)
+                    {
+                        var statRec = mod.StatNames[i];
+                        if (statRec == null) continue;
+                        var stat = statRec.MatchingStat;
+                        int val = 1;
+                        if (mod.StatRange != null && i < mod.StatRange.Length)
+                        {
+                            var r = mod.StatRange[i];
+                            val = r.Min != 0 ? r.Min : (r.Max != 0 ? r.Max : 1);
+                        }
+                        statDict[stat] = val;
+                    }
+
+                    string translated = null;
+                    if (mapStatDesc != null)
+                    {
+                        try { translated = mapStatDesc.TranslateMod(statDict); } catch { }
+                    }
+                    if ((!IsCleanTranslation(translated)) && statDesc != null)
+                    {
+                        try { translated = statDesc.TranslateMod(statDict); } catch { }
+                    }
+
+                    if (IsCleanTranslation(translated))
+                    {
+                        var lines = translated.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+                                              .Select(l => l.Trim())
+                                              .Where(l => IsCleanTranslation(l) && !IsYieldStatLine(l));
+                        descs.AddRange(lines);
+                    }
+                }
+                catch { }
+
+                return descs;
+            }
+
+            // Group relevant mods by resolved group, type, and affix
+            var groupedEntries = new Dictionary<string, (string GroupKey, List<string> Descriptions, string Type, string Affix, HashSet<string> BaseMods)>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var mod in relevantMods)
+            {
+                string groupKey = null;
+                List<string> descriptions = null;
+                string type = DetermineModType(mod);
+                string affix = DetermineAffix(mod);
+
+                // 1. Try matching with known lookup from raw name
+                var normKey = BaseModExtractor.GetBaseMod(mod.Key);
+                if (knownLookup.TryGetValue(mod.Key, out var known) || knownLookup.TryGetValue(normKey, out known))
+                {
+                    groupKey = known.GroupKey;
+                    descriptions = known.Descriptions;
+                    if (!string.IsNullOrEmpty(known.Type))
+                        type = known.Type;
+                }
+
+                // 2. If not known, try translating from memory
+                if (descriptions == null || descriptions.Count == 0)
+                {
+                    var memoryDescs = TranslateFromMemory(mod);
+                    if (memoryDescs.Count > 0)
+                    {
+                        descriptions = memoryDescs;
+                        groupKey = memoryDescs[0];
+                    }
+                }
+
+                // 3. If translation not available or was unknown, use human-readable mod name from raw name
+                if (descriptions == null || descriptions.Count == 0)
+                {
+                    var readableName = BaseModExtractor.GetReadableName(mod.Key);
+                    descriptions = new List<string> { readableName };
+                    groupKey = readableName;
+                }
+
+                // Clean descriptions of any yield stat lines
+                descriptions = descriptions?.Where(d => !IsYieldStatLine(d)).ToList();
+
+                // If this is purely a yield stat mod, ignore it
+                if (IsYieldStatLine(groupKey))
+                {
+                    if (descriptions != null && descriptions.Count > 0)
+                        groupKey = descriptions[0];
+                    else
+                        continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(groupKey) || IsYieldStatLine(groupKey))
+                    continue;
+
+                if (descriptions == null || descriptions.Count == 0)
+                    descriptions = new List<string> { groupKey };
+
+                // Key for deduplication/grouping
+                var dictKey = $"{type}_{affix}_{groupKey}".ToLowerInvariant();
+                if (!groupedEntries.TryGetValue(dictKey, out var entry))
+                {
+                    entry = (groupKey, descriptions, type, affix, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+                    groupedEntries[dictKey] = entry;
+                }
+
+                entry.BaseMods.Add(mod.Key);
+            }
+
+            var entries = groupedEntries.Values
+                .Where(v => !IsYieldStatLine(v.GroupKey) && v.Descriptions.Count > 0)
+                .Select(v => new ModEntry
+                {
+                    GroupKey = v.GroupKey,
+                    Descriptions = v.Descriptions.Where(d => !IsYieldStatLine(d)).ToList(),
+                    BaseMods = v.BaseMods.OrderBy(k => k).ToList(),
+                    Type = v.Type,
+                    Affix = v.Affix
+                })
+                .Where(e => e.Descriptions.Count > 0)
+                .OrderBy(e => e.Type).ThenBy(e => e.Affix).ThenBy(e => e.GroupKey).ToList();
+
+            _modEntries = entries;
+            _modEntriesLoadedFromMemory = true;
+            LogMessage($"MapNotify: Successfully loaded {_modEntries.Count} mod groups ({relevantMods.Count} raw mods) from game memory.", 5);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogError($"MapNotify: Error fetching mods from memory: {ex.Message}", 10);
+            return false;
+        }
+    }
+
+    public void LoadModsFromJson()
+    {
+        _modEntriesLoadedFromMemory = false;
         // First, try the standard location relative to the plugin's DLL (for compiled plugins)
         var path = Path.Combine(DirectoryFullName, "data", "mods.json");
         LogMessage($"MapNotify: Attempting to load mods database from standard path: {path}", 5);
@@ -481,7 +801,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 RawName = mod.RawName.Trim(),
                 AffixType = mod.ModRecord.AffixType.ToString(),
                 DisplayName = existingEntry?.Text ?? (matchedDescription ?? mod.Name),
-                Description = matchedDescription ?? (!string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name),
+                Description = matchedDescription ?? (!string.IsNullOrEmpty(mod.Translation) && !mod.Translation.Contains("<unknown") ? mod.Translation : BaseModExtractor.GetReadableName(mod.RawName)),
                 Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
                 IsBricking = existingEntry?.Bricking ?? false,
                 Quantity = modIIQ,

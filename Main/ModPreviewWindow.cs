@@ -12,6 +12,8 @@ namespace MapNotify_3_28
     {
         private Dictionary<string, string> _browserDisplayNameEdits = new Dictionary<string, string>();
         private Dictionary<string, bool> _browserBrickingEdits = new Dictionary<string, bool>();
+        private int _browserAffixFilterIndex = 0;
+        private int _browserStatusFilterIndex = 0;
 
         /// <summary>
         /// Renders the ImGui interface for the Map Mod Preview window.
@@ -411,22 +413,84 @@ namespace MapNotify_3_28
         {
             if (_modEntries.Count == 0)
             {
-                ImGui.Text("Mod database not loaded or empty.");
-                return;
+                LoadModsDatabase();
+                if (_modEntries.Count == 0)
+                {
+                    ImGui.Text("Mod database not loaded or empty.");
+                    if (ImGui.Button("Load from Game Memory"))
+                    {
+                        LoadModsFromMemory();
+                    }
+                    ImGui.SameLine();
+                    if (ImGui.Button("Load from JSON"))
+                    {
+                        LoadModsFromJson();
+                    }
+                    return;
+                }
             }
+
+            // Quick Filters
+            ImGui.Text("Affix:");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(90);
+            string[] affixOptions = { "All", "Prefix", "Suffix", "Unique" };
+            ImGui.Combo("##browserAffix", ref _browserAffixFilterIndex, affixOptions, affixOptions.Length);
+
+            ImGui.SameLine();
+            ImGui.Text("Status:");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(120);
+            string[] statusOptions = { "All", "Configured", "Unconfigured" };
+            ImGui.Combo("##browserStatus", ref _browserStatusFilterIndex, statusOptions, statusOptions.Length);
 
             var filtered = _modEntries
                 .Where(entry => string.IsNullOrEmpty(_modFilter) ||
                                 entry.GroupKey.Contains(_modFilter, StringComparison.OrdinalIgnoreCase) ||
                                 (entry.Descriptions != null && entry.Descriptions.Any(d => d.Contains(_modFilter, StringComparison.OrdinalIgnoreCase))) ||
                                 (entry.BaseMods != null && entry.BaseMods.Any(bm => bm.Contains(_modFilter, StringComparison.OrdinalIgnoreCase))))
+                .Where(entry =>
+                {
+                    if (_browserAffixFilterIndex == 1 && entry.Affix != "Prefix") return false;
+                    if (_browserAffixFilterIndex == 2 && entry.Affix != "Suffix") return false;
+                    if (_browserAffixFilterIndex == 3 && entry.Affix != "Unique") return false;
+
+                    if (_browserStatusFilterIndex != 0)
+                    {
+                        bool isConfigured = entry.BaseMods != null && entry.BaseMods.Any(bm =>
+                        {
+                            var (match, _) = MatchMod(bm);
+                            return match != null;
+                        });
+
+                        if (_browserStatusFilterIndex == 1 && !isConfigured) return false;
+                        if (_browserStatusFilterIndex == 2 && isConfigured) return false;
+                    }
+
+                    return true;
+                })
                 .ToList();
 
-            ImGui.Text($"Showing {filtered.Count} mods from database.");
+            ImGui.Text($"Showing {filtered.Count} mods ({(_modEntriesLoadedFromMemory ? "Game Memory" : "mods.json")}).");
+            ImGui.SameLine();
+            if (ImGui.SmallButton("Reload from Memory"))
+            {
+                LoadModsFromMemory();
+            }
+            ImGui.SameLine();
+            if (ImGui.SmallButton("Reload from JSON"))
+            {
+                LoadModsFromJson();
+            }
             ImGui.Separator();
 
             string[] typeOrder = { "Generic", "Uber", "Expedition", "Valdo" };
-            foreach (var sectionType in typeOrder)
+            var otherTypes = filtered.Select(m => string.IsNullOrEmpty(m.Type) ? "Generic" : m.Type)
+                                     .Distinct(StringComparer.OrdinalIgnoreCase)
+                                     .Except(typeOrder, StringComparer.OrdinalIgnoreCase)
+                                     .ToList();
+
+            foreach (var sectionType in typeOrder.Concat(otherTypes))
             {
                 var sectionMods = filtered.Where(m =>
                     (string.IsNullOrEmpty(m.Type) ? "Generic" : m.Type).Equals(sectionType, StringComparison.OrdinalIgnoreCase)).ToList();

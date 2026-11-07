@@ -8,7 +8,7 @@ namespace MapNotify_3_28
     // JSON Database helper classes
     public class ModsJson { public Dictionary<string, ModGroup> groups { get; set; } }
     public class ModGroup { public List<string> BaseMods { get; set; } public List<string> Descriptions { get; set; } public string Type { get; set; } }
-    public class ModEntry { public string GroupKey { get; set; } public List<string> Descriptions { get; set; } public List<string> BaseMods { get; set; } public string Type { get; set; } }
+    public class ModEntry { public string GroupKey { get; set; } public List<string> Descriptions { get; set; } public List<string> BaseMods { get; set; } public string Type { get; set; } public string Affix { get; set; } }
     public class ModData { public string BaseMod { get; set; } public string Description { get; set; } }
 
     /// <summary>
