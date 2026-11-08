@@ -474,6 +474,28 @@ namespace MapNotify_3_28
                     Settings.BorderDeflation,
                     400f
                 );
+                Settings.UseCircleHighlight.Value = Checkbox(
+                    "Circle Highlight",
+                    Settings.UseCircleHighlight.Value
+                );
+                ImGui.SameLine();
+                HelpMarker(
+                    "Draws a filled circle instead of a filled square for Good/Bad mod highlights.\n"
+                        + "Does not affect the Bricked border or Simple Outlines mode."
+                );
+                if (Settings.UseCircleHighlight.Value)
+                {
+                    ImGui.SameLine();
+                    Settings.CircleHighlightRadius.Value = IntSlider(
+                        "Circle Radius %##CircleHighlightRadius",
+                        Settings.CircleHighlightRadius,
+                        250f
+                    );
+                    ImGui.SameLine();
+                    HelpMarker(
+                        "Radius of the circle as a percentage of half the item's shorter side.\n100% = circle touches the item edge."
+                    );
+                }
                 Settings.BorderThickness.Value = IntSlider(
                     "Tooltip Border Thickness##BorderThickness",
                     Settings.BorderThickness,

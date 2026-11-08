@@ -497,7 +497,88 @@ namespace MapNotify_3_28
                 return; // Exit after drawing advanced outlines
             }
 
-            // Default to filled boxes if neither simple nor advanced outlines are enabled
+            if (Settings.UseCircleHighlight.Value)
+                DrawCircleHighlight(rect, hasGoodMod, hasBadMod);
+            else
+                DrawBoxHighlight(rect, hasGoodMod, hasBadMod);
+
+            DrawEightModTriangle(rect, itemDetails);
+        }
+
+        /// <summary>
+        /// Draws solid filled circle(s) for Good/Bad mod highlights.
+        /// For both mods: X-split circle using 4 arc sectors, no blending.
+        /// </summary>
+        private void DrawCircleHighlight(RectangleF rect, bool hasGoodMod, bool hasBadMod)
+        {
+            if (!hasGoodMod && !hasBadMod) return;
+
+            var drawList = ImGui.GetBackgroundDrawList();
+            var center = new nuVector2(
+                (rect.TopLeft.X + rect.BottomRight.X) * 0.5f,
+                (rect.TopLeft.Y + rect.BottomRight.Y) * 0.5f
+            );
+            float radius = Settings.CircleHighlightRadius.Value / 100f
+                           * System.Math.Min(rect.Width, rect.Height) * 0.5f;
+            const int segs = 32;
+
+            if (!hasBadMod)
+            {
+                // Good only — solid circle
+                uint goodCol = ColorToUint(SharpToNu(Settings.MapBorderGood.Value.ToVector4()));
+                drawList.AddCircleFilled(center, radius, goodCol, segs);
+                return;
+            }
+            if (!hasGoodMod)
+            {
+                // Bad only — solid circle
+                uint badCol = ColorToUint(SharpToNu(Settings.MapBorderBad.Value.ToVector4()));
+                drawList.AddCircleFilled(center, radius, badCol, segs);
+                return;
+            }
+
+            // Both — X-split circle: 4 arc sectors radiating from center.
+            // Sector boundary angles at 45°/135°/225°/315° (matching the rectangular X-split).
+            uint bad  = ColorToUint(SharpToNu(Settings.MapBorderBad.Value.ToVector4()));
+            uint good = ColorToUint(SharpToNu(Settings.MapBorderGood.Value.ToVector4()));
+
+            bool goodOnTop = Settings.GoodModXPosition.Value == "Top/Bottom";
+            uint topBotCol = goodOnTop ? good : bad;
+            uint sideCol   = goodOnTop ? bad  : good;
+
+            float pi = (float)System.Math.PI;
+            // Angles (radians): 0=right, π/2=down, in screen-space (Y+ down)
+            float a45  = pi * 0.25f;  // 45°
+            float a135 = pi * 0.75f;  // 135°
+            float a225 = pi * 1.25f;  // 225°
+            float a315 = pi * 1.75f;  // 315°
+
+            // Top sector  225°→315° — topBotCol
+            drawList.PathLineTo(center);
+            drawList.PathArcTo(center, radius, a225, a315, segs / 4);
+            drawList.PathFillConvex(topBotCol);
+
+            // Right sector 315°→405° (315°→45° wrapping) — sideCol
+            drawList.PathLineTo(center);
+            drawList.PathArcTo(center, radius, a315, a45 + 2 * pi, segs / 4);
+            drawList.PathFillConvex(sideCol);
+
+            // Bottom sector 45°→135° — topBotCol
+            drawList.PathLineTo(center);
+            drawList.PathArcTo(center, radius, a45, a135, segs / 4);
+            drawList.PathFillConvex(topBotCol);
+
+            // Left sector 135°→225° — sideCol
+            drawList.PathLineTo(center);
+            drawList.PathArcTo(center, radius, a135, a225, segs / 4);
+            drawList.PathFillConvex(sideCol);
+        }
+
+        /// <summary>
+        /// Draws filled box/X-split highlights for Good/Bad mods (original behaviour).
+        /// </summary>
+        private void DrawBoxHighlight(RectangleF rect, bool hasGoodMod, bool hasBadMod)
+        {
             if (hasGoodMod && hasBadMod)
             {
                 // Both good and bad mods: draw four solid triangles forming an X split.
@@ -509,12 +590,12 @@ namespace MapNotify_3_28
                 var br = rect.BottomRight.ToVector2Num();
                 var center = new nuVector2((tl.X + br.X) * 0.5f, (tl.Y + br.Y) * 0.5f);
 
-                uint badCol = ColorToUint(SharpToNu(Settings.MapBorderBad.Value.ToVector4()));
+                uint badCol  = ColorToUint(SharpToNu(Settings.MapBorderBad.Value.ToVector4()));
                 uint goodCol = ColorToUint(SharpToNu(Settings.MapBorderGood.Value.ToVector4()));
 
                 bool goodOnTop = Settings.GoodModXPosition.Value == "Top/Bottom";
                 uint topBotCol = goodOnTop ? goodCol : badCol;
-                uint sideCol = goodOnTop ? badCol : goodCol;
+                uint sideCol   = goodOnTop ? badCol  : goodCol;
 
                 // Top triangle    (TL → TR → Center)
                 drawList.AddTriangleFilled(tl, tr, center, topBotCol);
@@ -529,8 +610,6 @@ namespace MapNotify_3_28
                 Graphics.DrawBox(rect, Settings.MapBorderBad.Value);
             else if (hasGoodMod)
                 Graphics.DrawBox(rect, Settings.MapBorderGood.Value);
-
-            DrawEightModTriangle(rect, itemDetails);
         }
 
         private void DrawSimpleOutlines(RectangleF rect, bool hasGoodMod, bool hasBadMod)
