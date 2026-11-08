@@ -717,7 +717,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                         m.ModRecord.AffixType.ToString().Contains("Suffix") ||
                         m.ModRecord.AffixType.ToString().Contains("Implicit") ||
                         m.ModRecord.AffixType.ToString().Contains("Unique") || // Include Unique modifiers for Valdo maps
-                        m.ModRecord.AffixType.ToString().Contains("Enchant"))
+                        m.ModRecord.AffixType.ToString().Contains("Enchant") ||
+                        m.RawName.Contains("Enchant"))
             .Where(m => !string.IsNullOrEmpty(m.Name))
             .Where(m => !Constants.ModNameBlacklist.Any(black => m.RawName.Contains(black)))
             .GroupBy(m => Regex.Replace(m.RawName, @"\s+", ""), StringComparer.OrdinalIgnoreCase)
@@ -725,12 +726,12 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             .OrderBy(m =>
             {
                 var type = m.ModRecord.AffixType.ToString();
-                if (type.Contains("Enchant")) return 0;
+                if (type.Contains("Enchant") || m.RawName.Contains("Enchant")) return 0;
                 if (type.Contains("Implicit")) return 1;
-                if (type.Contains("Unique")) return 2; // Order Unique modifiers after Implicit
                 if (type.Contains("Prefix")) return 2;
                 if (type.Contains("Suffix")) return 3;
-                return 4;
+                if (type.Contains("Unique")) return 4;
+                return 5;
             })
             .ToList();
 
@@ -796,10 +797,14 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 }
             }
 
+            string affixType = mod.ModRecord.AffixType.ToString();
+            if (mod.RawName.Contains("Enchant") || affixType.Contains("Enchant"))
+                affixType = "Enchant";
+
             captured.Add(new CapturedMod
             {
                 RawName = mod.RawName.Trim(),
-                AffixType = mod.ModRecord.AffixType.ToString(),
+                AffixType = affixType,
                 DisplayName = existingEntry?.Text ?? (matchedDescription ?? mod.Name),
                 Description = matchedDescription ?? (!string.IsNullOrEmpty(mod.Translation) && !mod.Translation.Contains("<unknown") ? mod.Translation : BaseModExtractor.GetReadableName(mod.RawName)),
                 Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
