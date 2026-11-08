@@ -114,6 +114,8 @@ namespace MapNotify_3_28
                 Value = "Top/Bottom",
                 Values = new List<string> { "Top/Bottom", "Sides" },
             };
+        public ToggleNode UseCircleHighlight { get; set; } = new(false);
+        public RangeNode<int> CircleHighlightRadius { get; set; } = new(80, 10, 100);
 
         // Config Files and Other
         public RangeNode<int> TooltipOffsetX { get; set; } = new(25, -150, 150);
