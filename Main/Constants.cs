@@ -4,13 +4,21 @@ namespace MapNotify_3_28
 {
     public static class Constants
     {
-        public static readonly Regex MapTierRegex = new Regex(@"\s*\(Tier\s+\d+\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        public static readonly Regex MapNameRegex = new Regex(@"<[^>]*>{([^}]*)}", RegexOptions.Compiled);
+        public static readonly Regex MapTierRegex = new Regex(
+            @"\s*\(Tier\s+\d+\)",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase
+        );
+        public static readonly Regex MapNameRegex = new Regex(
+            @"<[^>]*>{([^}]*)}",
+            RegexOptions.Compiled
+        );
         public static readonly int[] AtlasNodeOffsets = { 0x120, 0x110, 0x118, 0x128 };
 
         public static class UIIndices
         {
-            public const int MapDeviceRoot = 76; /// Invitations Receptacle
+            public const int MapDeviceRoot = 76;
+
+            /// Invitations Receptacle
             public const int HeistLockerDefault = 107;
             public const int ExpeditionLockerDefault = 110;
             public const int PurchaseWindowTabDetails = 8;
@@ -26,8 +34,6 @@ namespace MapNotify_3_28
             "MapForceCorruptedSideArea",
             "MapGainsRandomZanaMod",
             "MapDoesntConsumeSextantCharge",
-            "MapEnchant",
-            "Enchantment",
             "MapBossSurroundedByTormentedSpirits",
             "MapZanaSubAreaMissionDetails",
             "MapZanaInfluence",
@@ -48,7 +54,7 @@ namespace MapNotify_3_28
             "MapCorruptionModEffect",
             "MapCorruptionItemRarity",
             "MapCorruptionRandomScarab",
-            "MapCorruptionVaalVessel"
+            "MapCorruptionVaalVessel",
         };
     }
 }
