@@ -59,13 +59,16 @@ namespace MapNotify_3_28
 
         // Atlas Highlights
         public ToggleNode ShowAtlasHighlight { get; set; } = new(false);
-        public ColorNode AtlasNotCompletedColor { get; set; } = new ColorNode(new Color(1f, 0f, 0f, 1.0f));
+        public ColorNode AtlasNotCompletedColor { get; set; } =
+            new ColorNode(new Color(1f, 0f, 0f, 1.0f));
         public RangeNode<int> AtlasHighlightRadius { get; set; } = new(15, 1, 100);
         public ToggleNode ShowAtlasBonusHighlight { get; set; } = new(false);
-        public ColorNode AtlasBonusIncompleteColor { get; set; } = new ColorNode(new Color(1f, 0.5f, 0f, 1.0f));
+        public ColorNode AtlasBonusIncompleteColor { get; set; } =
+            new ColorNode(new Color(1f, 0.5f, 0f, 1.0f));
         public RangeNode<int> AtlasBonusHighlightRadius { get; set; } = new(18, 1, 100);
         public ToggleNode ShowMavenWitnessHighlight { get; set; } = new(false);
-        public ColorNode MavenWitnessColor { get; set; } = new ColorNode(new Color(0.7f, 0f, 1f, 1.0f));
+        public ColorNode MavenWitnessColor { get; set; } =
+            new ColorNode(new Color(0.7f, 0f, 1f, 1.0f));
         public RangeNode<int> MavenWitnessHighlightRadius { get; set; } = new(21, 1, 100);
 
         // Borders and Highlight Colours
@@ -74,15 +77,43 @@ namespace MapNotify_3_28
         public RangeNode<int> SimpleOutlinesThickness { get; set; } = new(2, 1, 6);
         public RangeNode<int> SimpleOutlinesBrickedSize { get; set; } = new(60, 10, 100);
         public ToggleNode UseSimpleOutlines { get; set; } = new(false);
-        public ListNode SimpleOutlineOrientation { get; set; } = new ListNode { Value = "Horizontal", Values = new List<string> { "Horizontal", "Vertical" } };
-        public ListNode SimpleOutlineGoodPosition { get; set; } = new ListNode { Value = "Top/Left", Values = new List<string> { "Top/Left", "Bottom/Right" } };
+        public ListNode SimpleOutlineOrientation { get; set; } =
+            new ListNode
+            {
+                Value = "Horizontal",
+                Values = new List<string> { "Horizontal", "Vertical" },
+            };
+        public ListNode SimpleOutlineGoodPosition { get; set; } =
+            new ListNode
+            {
+                Value = "Top/Left",
+                Values = new List<string> { "Top/Left", "Bottom/Right" },
+            };
         public ColorNode MapBorderGood { get; set; } = new ColorNode(new Color(0f, 1f, 0f, 0.35f));
         public ColorNode MapBorderBad { get; set; } = new ColorNode(new Color(1f, 0f, 0f, 0.35f));
         public ColorNode Bricked { get; set; } = new ColorNode(new Color(1f, 0f, 0f, 1f));
         public RangeNode<int> BorderThicknessMap { get; set; } = new(2, 1, 6);
         public ToggleNode ShowEightModTriangle { get; set; } = new(false);
-        public ColorNode EightModTriangleColor { get; set; } = new ColorNode(new Color(1f, 0.72f, 0.15f, 1f));
-        public ListNode EightModTriangleCorner { get; set; } = new ListNode { Value = "Top Right", Values = new List<string> { "Top Right", "Top Left", "Bottom Right", "Bottom Left" } };
+        public ColorNode EightModTriangleColor { get; set; } =
+            new ColorNode(new Color(1f, 0.72f, 0.15f, 1f));
+        public ListNode EightModTriangleCorner { get; set; } =
+            new ListNode
+            {
+                Value = "Top Right",
+                Values = new List<string>
+                {
+                    "Top Right",
+                    "Top Left",
+                    "Bottom Right",
+                    "Bottom Left",
+                },
+            };
+        public ListNode GoodModXPosition { get; set; } =
+            new ListNode
+            {
+                Value = "Top/Bottom",
+                Values = new List<string> { "Top/Bottom", "Sides" },
+            };
 
         // Config Files and Other
         public RangeNode<int> TooltipOffsetX { get; set; } = new(25, -150, 150);
