@@ -469,19 +469,113 @@ namespace MapNotify_3_28
                 )
             )
             {
-                Settings.BorderDeflation.Value = IntSlider(
-                    "Map Border Deflation##MapBorderDeflation",
-                    Settings.BorderDeflation,
+                Settings.AreaFill.Value = IntSlider(
+                    "Map Highlight Area##MapAreaFill",
+                    Settings.AreaFill,
                     400f
                 );
+
+                Settings.BorderThickness.Value = IntSlider(
+                    "Tooltip Border Thickness##BorderThickness",
+                    Settings.BorderThickness,
+                    400f
+                );
+
+                ImGui.Dummy(new nuVector2(0, 2));
+                nuVector4 mapBorderGood = SharpToNu(Settings.MapBorderGood.Value.ToVector4());
+                if (
+                    ImGui.ColorEdit4(
+                        "Good Mods Color",
+                        ref mapBorderGood,
+                        ImGuiColorEditFlags.NoInputs
+                            | ImGuiColorEditFlags.AlphaPreviewHalf
+                            | ImGuiColorEditFlags.AlphaBar
+                    )
+                )
+                    Settings.MapBorderGood.Value = mapBorderGood.ToSharpColor();
+                ImGui.SameLine();
+                HelpMarker("Set transparency (Alpha) to see the map icon through the highlight.");
+                ImGui.SameLine(0f, 20f);
+                nuVector4 mapBorderBad = SharpToNu(Settings.MapBorderBad.Value.ToVector4());
+                if (
+                    ImGui.ColorEdit4(
+                        "Bad Mods Color",
+                        ref mapBorderBad,
+                        ImGuiColorEditFlags.NoInputs
+                            | ImGuiColorEditFlags.AlphaPreviewHalf
+                            | ImGuiColorEditFlags.AlphaBar
+                    )
+                )
+                    Settings.MapBorderBad.Value = mapBorderBad.ToSharpColor();
+                ImGui.SameLine();
+                HelpMarker("Set transparency (Alpha) to see the map icon through the highlight.");
+                ImGui.SameLine(0f, 20f);
+                nuVector4 brickedColor = SharpToNu(Settings.Bricked.Value.ToVector4());
+                if (
+                    ImGui.ColorEdit4(
+                        "Bricked Map Border",
+                        ref brickedColor,
+                        ImGuiColorEditFlags.NoInputs
+                            | ImGuiColorEditFlags.AlphaPreviewHalf
+                            | ImGuiColorEditFlags.AlphaBar
+                    )
+                )
+                    Settings.Bricked.Value = brickedColor.ToSharpColor();
+                ImGui.SameLine(0f, 20f);
+                nuVector4 eightModColor = SharpToNu(
+                    Settings.EightModTriangleColor.Value.ToVector4()
+                );
+                if (
+                    ImGui.ColorEdit4(
+                        "8-Mod Triangle",
+                        ref eightModColor,
+                        ImGuiColorEditFlags.NoInputs
+                            | ImGuiColorEditFlags.AlphaPreviewHalf
+                            | ImGuiColorEditFlags.AlphaBar
+                    )
+                )
+                    Settings.EightModTriangleColor.Value = eightModColor.ToSharpColor();
+                ImGui.Dummy(new nuVector2(0, 2));
+                ImGui.Text("Good Mod Position:");
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(150);
+                if (ImGui.BeginCombo("##GoodModXPosition", Settings.GoodModXPosition.Value))
+                {
+                    foreach (var val in Settings.GoodModXPosition.Values)
+                        if (ImGui.Selectable(val, val == Settings.GoodModXPosition.Value))
+                            Settings.GoodModXPosition.Value = val;
+                    ImGui.EndCombo();
+                }
+                ImGui.SameLine(0f, 20f);
+                ImGui.Text("8-Mod Triangle Position:");
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(150);
+                if (
+                    ImGui.BeginCombo(
+                        "##EightModTriangleCorner",
+                        Settings.EightModTriangleCorner.Value
+                    )
+                )
+                {
+                    foreach (var val in Settings.EightModTriangleCorner.Values)
+                        if (ImGui.Selectable(val, val == Settings.EightModTriangleCorner.Value))
+                            Settings.EightModTriangleCorner.Value = val;
+                    ImGui.EndCombo();
+                }
+                ImGui.Dummy(new nuVector2(0, 2));
+                Settings.BorderThicknessMap.Value = IntSlider(
+                    "Border Thickness for Bricked Maps##BorderThickness Maps",
+                    Settings.BorderThicknessMap,
+                    400f
+                );
+
                 Settings.UseCircleHighlight.Value = Checkbox(
                     "Circle Highlight",
                     Settings.UseCircleHighlight.Value
                 );
                 ImGui.SameLine();
                 HelpMarker(
-                    "Draws a filled circle instead of a filled square for Good/Bad mod highlights.\n"
-                        + "Does not affect the Bricked border or Simple Outlines mode."
+                    "Draws a filled circle instead of a filled square for Good/Bad mod highlights."
                 );
                 if (Settings.UseCircleHighlight.Value)
                 {
@@ -489,18 +583,14 @@ namespace MapNotify_3_28
                     Settings.CircleHighlightRadius.Value = IntSlider(
                         "Circle Radius %##CircleHighlightRadius",
                         Settings.CircleHighlightRadius,
-                        250f
+                        230f
                     );
                     ImGui.SameLine();
                     HelpMarker(
                         "Radius of the circle as a percentage of half the item's shorter side.\n100% = circle touches the item edge."
                     );
                 }
-                Settings.BorderThickness.Value = IntSlider(
-                    "Tooltip Border Thickness##BorderThickness",
-                    Settings.BorderThickness,
-                    400f
-                );
+
                 Settings.UseSimpleOutlines.Value = Checkbox(
                     "Use Simple Outlines (Brackets)",
                     Settings.UseSimpleOutlines.Value
@@ -722,97 +812,6 @@ namespace MapNotify_3_28
                     }
                     ImGui.Unindent();
                 }
-                ImGui.Dummy(new nuVector2(0, 2));
-                nuVector4 mapBorderGood = SharpToNu(Settings.MapBorderGood.Value.ToVector4());
-                if (
-                    ImGui.ColorEdit4(
-                        "Good Mods Color",
-                        ref mapBorderGood,
-                        ImGuiColorEditFlags.NoInputs
-                            | ImGuiColorEditFlags.AlphaPreviewHalf
-                            | ImGuiColorEditFlags.AlphaBar
-                    )
-                )
-                    Settings.MapBorderGood.Value = mapBorderGood.ToSharpColor();
-                ImGui.SameLine();
-                HelpMarker("Set transparency (Alpha) to see the map icon through the highlight.");
-                ImGui.SameLine(0f, 20f);
-                nuVector4 mapBorderBad = SharpToNu(Settings.MapBorderBad.Value.ToVector4());
-                if (
-                    ImGui.ColorEdit4(
-                        "Bad Mods Color",
-                        ref mapBorderBad,
-                        ImGuiColorEditFlags.NoInputs
-                            | ImGuiColorEditFlags.AlphaPreviewHalf
-                            | ImGuiColorEditFlags.AlphaBar
-                    )
-                )
-                    Settings.MapBorderBad.Value = mapBorderBad.ToSharpColor();
-                ImGui.SameLine();
-                HelpMarker("Set transparency (Alpha) to see the map icon through the highlight.");
-                ImGui.SameLine(0f, 20f);
-                nuVector4 brickedColor = SharpToNu(Settings.Bricked.Value.ToVector4());
-                if (
-                    ImGui.ColorEdit4(
-                        "Bricked Map",
-                        ref brickedColor,
-                        ImGuiColorEditFlags.NoInputs
-                            | ImGuiColorEditFlags.AlphaPreviewHalf
-                            | ImGuiColorEditFlags.AlphaBar
-                    )
-                )
-                    Settings.Bricked.Value = brickedColor.ToSharpColor();
-                ImGui.SameLine(0f, 20f);
-                nuVector4 eightModColor = SharpToNu(
-                    Settings.EightModTriangleColor.Value.ToVector4()
-                );
-                if (
-                    ImGui.ColorEdit4(
-                        "8-Mod Triangle",
-                        ref eightModColor,
-                        ImGuiColorEditFlags.NoInputs
-                            | ImGuiColorEditFlags.AlphaPreviewHalf
-                            | ImGuiColorEditFlags.AlphaBar
-                    )
-                )
-                    Settings.EightModTriangleColor.Value = eightModColor.ToSharpColor();
-                ImGui.Dummy(new nuVector2(0, 2));
-                ImGui.Text("Good Mod Position:");
-                ImGui.SameLine();
-                HelpMarker(
-                    "When a map has both Good and Bad mods, controls which triangles of the X are colored with the Good color.\n\"Top\" = Good on top & bottom, Bad on sides.\n\"Sides\" = Good on left & right, Bad on top & bottom."
-                );
-                ImGui.SameLine();
-                ImGui.SetNextItemWidth(150);
-                if (ImGui.BeginCombo("##GoodModXPosition", Settings.GoodModXPosition.Value))
-                {
-                    foreach (var val in Settings.GoodModXPosition.Values)
-                        if (ImGui.Selectable(val, val == Settings.GoodModXPosition.Value))
-                            Settings.GoodModXPosition.Value = val;
-                    ImGui.EndCombo();
-                }
-                ImGui.SameLine(0f, 20f);
-                ImGui.Text("8-Mod Triangle Position:");
-                ImGui.SameLine();
-                ImGui.SetNextItemWidth(150);
-                if (
-                    ImGui.BeginCombo(
-                        "##EightModTriangleCorner",
-                        Settings.EightModTriangleCorner.Value
-                    )
-                )
-                {
-                    foreach (var val in Settings.EightModTriangleCorner.Values)
-                        if (ImGui.Selectable(val, val == Settings.EightModTriangleCorner.Value))
-                            Settings.EightModTriangleCorner.Value = val;
-                    ImGui.EndCombo();
-                }
-                ImGui.Dummy(new nuVector2(0, 2));
-                Settings.BorderThicknessMap.Value = IntSlider(
-                    "Border Thickness for Bricked Maps##BorderThickness Maps",
-                    Settings.BorderThicknessMap,
-                    400f
-                );
             }
 
             if (ImGui.TreeNodeEx("Config Files and Other", ImGuiTreeNodeFlags.CollapsingHeader))

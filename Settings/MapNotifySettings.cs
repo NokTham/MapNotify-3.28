@@ -72,7 +72,7 @@ namespace MapNotify_3_28
         public RangeNode<int> MavenWitnessHighlightRadius { get; set; } = new(21, 1, 100);
 
         // Borders and Highlight Colours
-        public RangeNode<int> BorderDeflation { get; set; } = new(4, 0, 50);
+        public RangeNode<int> AreaFill { get; set; } = new(92, 0, 100);
         public RangeNode<int> BorderThickness { get; set; } = new(1, 1, 6);
         public RangeNode<int> SimpleOutlinesThickness { get; set; } = new(2, 1, 6);
         public RangeNode<int> SimpleOutlinesBrickedSize { get; set; } = new(60, 10, 100);

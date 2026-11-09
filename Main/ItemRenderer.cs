@@ -441,9 +441,10 @@ namespace MapNotify_3_28
         )
         {
             var rect = rectOverride ?? item.GetClientRect();
-            double deflatePercent = Settings.BorderDeflation;
-            var deflateWidth = (int)(rect.Width * (deflatePercent / 100.0));
-            var deflateHeight = (int)(rect.Height * (deflatePercent / 100.0));
+            double fillPercent = Settings.AreaFill; // 0 = nothing, 100 = full item area
+            double shrinkPerSide = (100.0 - fillPercent) / 200.0;
+            var deflateWidth = (int)(rect.Width * shrinkPerSide);
+            var deflateHeight = (int)(rect.Height * shrinkPerSide);
             rect.Inflate(-deflateWidth, -deflateHeight);
             var itemDetails = entity.GetHudComponent<ItemDetails>();
             if (itemDetails == null)
@@ -511,15 +512,19 @@ namespace MapNotify_3_28
         /// </summary>
         private void DrawCircleHighlight(RectangleF rect, bool hasGoodMod, bool hasBadMod)
         {
-            if (!hasGoodMod && !hasBadMod) return;
+            if (!hasGoodMod && !hasBadMod)
+                return;
 
             var drawList = ImGui.GetBackgroundDrawList();
             var center = new nuVector2(
                 (rect.TopLeft.X + rect.BottomRight.X) * 0.5f,
                 (rect.TopLeft.Y + rect.BottomRight.Y) * 0.5f
             );
-            float radius = Settings.CircleHighlightRadius.Value / 100f
-                           * System.Math.Min(rect.Width, rect.Height) * 0.5f;
+            float radius =
+                Settings.CircleHighlightRadius.Value
+                / 100f
+                * System.Math.Min(rect.Width, rect.Height)
+                * 0.5f;
             const int segs = 32;
 
             if (!hasBadMod)
@@ -539,19 +544,19 @@ namespace MapNotify_3_28
 
             // Both — X-split circle: 4 arc sectors radiating from center.
             // Sector boundary angles at 45°/135°/225°/315° (matching the rectangular X-split).
-            uint bad  = ColorToUint(SharpToNu(Settings.MapBorderBad.Value.ToVector4()));
+            uint bad = ColorToUint(SharpToNu(Settings.MapBorderBad.Value.ToVector4()));
             uint good = ColorToUint(SharpToNu(Settings.MapBorderGood.Value.ToVector4()));
 
             bool goodOnTop = Settings.GoodModXPosition.Value == "Top/Bottom";
             uint topBotCol = goodOnTop ? good : bad;
-            uint sideCol   = goodOnTop ? bad  : good;
+            uint sideCol = goodOnTop ? bad : good;
 
             float pi = (float)System.Math.PI;
             // Angles (radians): 0=right, π/2=down, in screen-space (Y+ down)
-            float a45  = pi * 0.25f;  // 45°
-            float a135 = pi * 0.75f;  // 135°
-            float a225 = pi * 1.25f;  // 225°
-            float a315 = pi * 1.75f;  // 315°
+            float a45 = pi * 0.25f; // 45°
+            float a135 = pi * 0.75f; // 135°
+            float a225 = pi * 1.25f; // 225°
+            float a315 = pi * 1.75f; // 315°
 
             // Top sector  225°→315° — topBotCol
             drawList.PathLineTo(center);
@@ -590,12 +595,12 @@ namespace MapNotify_3_28
                 var br = rect.BottomRight.ToVector2Num();
                 var center = new nuVector2((tl.X + br.X) * 0.5f, (tl.Y + br.Y) * 0.5f);
 
-                uint badCol  = ColorToUint(SharpToNu(Settings.MapBorderBad.Value.ToVector4()));
+                uint badCol = ColorToUint(SharpToNu(Settings.MapBorderBad.Value.ToVector4()));
                 uint goodCol = ColorToUint(SharpToNu(Settings.MapBorderGood.Value.ToVector4()));
 
                 bool goodOnTop = Settings.GoodModXPosition.Value == "Top/Bottom";
                 uint topBotCol = goodOnTop ? goodCol : badCol;
-                uint sideCol   = goodOnTop ? badCol  : goodCol;
+                uint sideCol = goodOnTop ? badCol : goodCol;
 
                 // Top triangle    (TL → TR → Center)
                 drawList.AddTriangleFilled(tl, tr, center, topBotCol);
