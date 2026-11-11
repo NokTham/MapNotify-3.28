@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.Elements.InventoryElements;
@@ -39,6 +40,7 @@ namespace MapNotify_3_28
                     alwaysShow
                     || ItemDetails.ActiveGoodMods.Count > 0
                     || ItemDetails.ActiveBadMods.Count > 0
+                    || (Settings.ShowModsOfInterest.Value && ItemDetails.ActiveInterestMods.Count > 0)
                 )
                 {
                     var mousePos = MouseLite.GetCursorPositionVector();
@@ -145,8 +147,12 @@ namespace MapNotify_3_28
                 );
             }
 
-            if (Settings.ShowModWarnings.Value)
-                DrawWarningsBlock(details);
+            if (Settings.ShowModWarnings.Value || Settings.ShowModsOfInterest.Value)
+                DrawWarningsBlock(
+                    details,
+                    Settings.ShowModWarnings.Value,
+                    Settings.ShowModsOfInterest.Value
+                );
         }
 
         private void DrawStatsBlock(ItemDetails details)
@@ -341,47 +347,133 @@ namespace MapNotify_3_28
             ImGui.TextColored(color, label);
         }
 
-        private void DrawWarningsBlock(ItemDetails details)
+        private void DrawWarningsBlock(ItemDetails details, bool showGoodBad, bool showInterest)
         {
-            foreach (var styled in details.ConflictingMods)
+            bool IsShownInLogbook(StyledText styled) =>
+                details.IsLogbook
+                && Settings.ShowLogbookInfo.Value
+                && details.LogbookAreas.Any(a => a.Implicits.Contains(styled));
+
+            bool IsShadowed(StyledText styled) =>
+                showInterest && details.InterestShadowedMods.Contains(styled);
+
+            var conflictLines = showGoodBad
+                ? details.ConflictingMods
+                : new List<StyledText>();
+            var goodLines = showGoodBad
+                ? details
+                    .ActiveGoodMods.Where(s => !IsShownInLogbook(s) && !IsShadowed(s))
+                    .ToList()
+                : new List<StyledText>();
+            var interestLines = showInterest
+                ? details.ActiveInterestMods.ToList()
+                : new List<StyledText>();
+            var badLines = showGoodBad
+                ? details
+                    .ActiveBadMods.Where(s => !IsShownInLogbook(s) && !IsShadowed(s))
+                    .ToList()
+                : new List<StyledText>();
+
+            bool drawnAny = false;
+
+            void DrawGroup(List<StyledText> lines, bool addBrickPrefix)
             {
-                ImGui.TextColored(styled.Color, styled.EscapedText);
+                if (lines.Count == 0)
+                    return;
+                if (drawnAny)
+                    ImGui.Dummy(new nuVector2(0, 5));
+                foreach (var styled in lines)
+                {
+                    var text = addBrickPrefix
+                        ? $"{(styled.Bricking ? "[B] " : "")}{styled.EscapedText}"
+                        : styled.EscapedText;
+                    ImGui.TextColored(styled.Color, text);
+                }
+                drawnAny = true;
             }
-            if (
-                details.ConflictingMods.Count > 0
-                && (details.ActiveGoodMods.Count > 0 || details.ActiveBadMods.Count > 0)
-            )
-                ImGui.Dummy(new nuVector2(0, 5));
 
-            foreach (var styled in details.ActiveGoodMods)
+            DrawGroup(conflictLines, false);
+            DrawGroup(goodLines, false);
+            DrawGroup(interestLines, true);
+            DrawGroup(badLines, true);
+        }
+
+        /// <summary>
+        /// Draws one colored arc per mod of interest on an inner ring around the map icon.
+        /// Interest is independent of the Good/Bad highlight.
+        /// </summary>
+        private void DrawInterestArcs(RectangleF rect, ItemDetails details)
+        {
+            if (!Settings.MarkModsOfInterest.Value || details.ActiveInterestMods.Count == 0)
+                return;
+
+            float minSide = System.Math.Min(rect.Width, rect.Height);
+            if (minSide <= 0)
+                return;
+
+            var center = new nuVector2(
+                (rect.TopLeft.X + rect.BottomRight.X) * 0.5f,
+                (rect.TopLeft.Y + rect.BottomRight.Y) * 0.5f
+            );
+
+            float circleR = Settings.CircleHighlightRadius.Value / 100f * minSide * 0.5f;
+            float ringR = circleR * Settings.InterestArcRingRadius.Value / 100f;
+            if (ringR <= 0.5f)
+                return;
+
+            float thick = minSide * Settings.InterestArcThickness.Value / 100f;
+            int maxMods = System.Math.Max(1, Settings.InterestArcMaxMods.Value);
+            float step = 360f / maxMods;
+
+            const float pi = (float)System.Math.PI;
+            float gapPx = minSide * Settings.InterestArcGap.Value / 100f;
+            float gapDeg = System.Math.Min((gapPx / ringR) * (180f / pi), step * 0.5f);
+            float arcDeg = step - gapDeg;
+            if (arcDeg <= 0f)
+                return;
+
+            int n = System.Math.Min(details.ActiveInterestMods.Count, maxMods);
+            float spanDeg = n * step - gapDeg;
+
+            var drawList = ImGui.GetBackgroundDrawList();
+            float outlineThickness = thick * 0.2f;
+            float ext = outlineThickness / ringR; // radians
+
+            // Outline pass for every arc, then the colored pass on top.
+            for (int i = 0; i < n; i++)
             {
-                if (
-                    details.IsLogbook
-                    && Settings.ShowLogbookInfo.Value
-                    && details.LogbookAreas.Any(a => a.Implicits.Contains(styled))
-                )
-                    continue;
-                ImGui.TextColored(styled.Color, styled.EscapedText);
-            }
+                var styled = details.ActiveInterestMods[i];
+                float a2 = 90f + spanDeg / 2f - i * step;
+                float a1 = a2 - arcDeg;
+                float rad1 = (a1 - ext) * pi / 180f;
+                float rad2 = (a2 + ext) * pi / 180f;
+                int segs = System.Math.Max(6, (int)((rad2 - rad1) / (2f * pi) * 48f));
 
-            if (
-                (details.ActiveGoodMods.Count > 0 || details.ConflictingMods.Count > 0)
-                && details.ActiveBadMods.Count > 0
-            )
-                ImGui.Dummy(new nuVector2(0, 5));
-
-            foreach (var styled in details.ActiveBadMods)
-            {
-                if (
-                    details.IsLogbook
-                    && Settings.ShowLogbookInfo.Value
-                    && details.LogbookAreas.Any(a => a.Implicits.Contains(styled))
-                )
-                    continue;
-                ImGui.TextColored(
-                    styled.Color,
-                    $"{(styled.Bricking ? "[B] " : "")}{styled.EscapedText}"
+                var outlineColor = new nuVector4(
+                    0x0C / 255f,
+                    0x10 / 255f,
+                    0x24 / 255f,
+                    styled.Color.W
                 );
+                drawList.PathArcTo(center, ringR, rad1, rad2, segs);
+                drawList.PathStroke(
+                    ColorToUint(outlineColor),
+                    ImDrawFlags.None,
+                    thick + 2f * outlineThickness
+                );
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                var styled = details.ActiveInterestMods[i];
+                float a2 = 90f + spanDeg / 2f - i * step;
+                float a1 = a2 - arcDeg;
+                float rad1 = a1 * pi / 180f;
+                float rad2 = a2 * pi / 180f;
+                int segs = System.Math.Max(6, (int)((rad2 - rad1) / (2f * pi) * 48f));
+
+                drawList.PathArcTo(center, ringR, rad1, rad2, segs);
+                drawList.PathStroke(ColorToUint(styled.Color), ImDrawFlags.None, thick);
             }
         }
 
@@ -391,7 +483,11 @@ namespace MapNotify_3_28
                 return;
 
             var drawList = ImGui.GetBackgroundDrawList();
-            var color = ColorToUint(SharpToNu(Settings.EightModTriangleColor.Value.ToVector4()));
+            var triangleColor =
+                itemDetails.ModCount >= 9
+                    ? Settings.NineModTriangleColor.Value
+                    : Settings.EightModTriangleColor.Value;
+            var color = ColorToUint(SharpToNu(triangleColor.ToVector4()));
 
             float size = System.Math.Min(rect.Width, rect.Height) * 0.35f;
 
@@ -494,6 +590,7 @@ namespace MapNotify_3_28
             if (Settings.UseSimpleOutlines)
             {
                 DrawSimpleOutlines(rect, hasGoodMod, hasBadMod);
+                DrawInterestArcs(rect, itemDetails);
                 DrawEightModTriangle(rect, itemDetails);
                 return; // Exit after drawing advanced outlines
             }
@@ -503,6 +600,7 @@ namespace MapNotify_3_28
             else
                 DrawBoxHighlight(rect, hasGoodMod, hasBadMod);
 
+            DrawInterestArcs(rect, itemDetails);
             DrawEightModTriangle(rect, itemDetails);
         }
 

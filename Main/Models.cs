@@ -33,6 +33,8 @@ namespace MapNotify_3_28
         public string Description { get; set; }
         public nuVector4 Color { get; set; }
         public bool IsBricking { get; set; }
+        public bool IsOfInterest { get; set; }
+        public nuVector4 InterestColor { get; set; }
 
         // Per-mod stat contributions
         public int Quantity { get; set; }

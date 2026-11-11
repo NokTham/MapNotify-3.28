@@ -26,6 +26,8 @@ namespace MapNotify_3_28 // Keep the same namespace
         // Mod state
         public List<StyledText> ActiveGoodMods { get; set; } = new List<StyledText>();
         public List<StyledText> ActiveBadMods { get; set; } = new List<StyledText>();
+        public List<StyledText> ActiveInterestMods { get; set; } = new List<StyledText>();
+        public HashSet<StyledText> InterestShadowedMods { get; set; } = new HashSet<StyledText>();
         public List<StyledText> ConflictingMods { get; set; } = new List<StyledText>();
         public bool Bricked { get; set; }
         public bool Corrupted { get; set; }
@@ -33,6 +35,7 @@ namespace MapNotify_3_28 // Keep the same namespace
 
         // Base Stats
         public int Tier { get; set; }
+        // Number of map mods (enchantments excluded). Used by the mod counter and the 8/9-mod marker.
         public int ModCount { get; set; }
         public int PackSize { get; set; }
         public int Quantity { get; set; }
@@ -110,6 +113,9 @@ namespace MapNotify_3_28 // Keep the same namespace
 
             var localGood = new List<StyledText>();
             var localBad = new List<StyledText>();
+            var localInterest = new List<StyledText>();
+            var localInterestKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var localInterestShadowed = new HashSet<StyledText>();
             var localConflicting = new List<StyledText>();
 
             string path = Entity.Path ?? string.Empty;
@@ -138,7 +144,7 @@ namespace MapNotify_3_28 // Keep the same namespace
 
             LogbookAreaLevel = IsLogbook ? (expeditionSaga?.AreaLevel ?? (Tier > 0 ? Tier : 0)) : 0;
 
-            if (IsLogbook) ProcessLogbookDetails(expeditionSaga, localGood, localBad);
+            if (IsLogbook) ProcessLogbookDetails(expeditionSaga, localGood, localBad, localInterest, localInterestKeys, localInterestShadowed);
 
             // Performance and Stability: Only parse tooltips if the item is currently hovered.
             // Tooltip parsing is expensive and prone to 'startIndex' errors when items are in lockers/stashes.
@@ -150,16 +156,19 @@ namespace MapNotify_3_28 // Keep the same namespace
                 ProcessQuality(qualityComponent, modsComponent, tooltipData);
             }
 
-            ProcessMods(modsComponent, path, localGood, localBad);
+            ProcessMods(modsComponent, path, localGood, localBad, localInterest, localInterestKeys, localInterestShadowed);
             ProcessMapName(mapComponent, baseComponent, modsComponent, path, itemName);
             ProcessItemColor(modsComponent);
 
             ActiveGoodMods = localGood;
             ActiveBadMods = localBad;
+            ActiveInterestMods = localInterest;
+            InterestShadowedMods = localInterestShadowed;
             ConflictingMods = localConflicting;
         }
 
-        private void ProcessLogbookDetails(ExpeditionSaga expeditionSaga, List<StyledText> goodList, List<StyledText> badList)
+        private void ProcessLogbookDetails(ExpeditionSaga expeditionSaga, List<StyledText> goodList, List<StyledText> badList,
+            List<StyledText> interestList, HashSet<string> interestKeys, HashSet<StyledText> interestShadowed)
         {
             LogbookAreas.Clear();
             if (expeditionSaga?.Areas == null) return;
@@ -178,6 +187,7 @@ namespace MapNotify_3_28 // Keep the same namespace
                     if (string.IsNullOrEmpty(cleanText)) continue;
 
                     var (match, _) = MatchMod(mod.RawName);
+                    var interestMatch = MatchInterest(mod.RawName);
                     var styledMod = new StyledText
                     {
                         Text = match?.Text ?? cleanText,
@@ -186,10 +196,10 @@ namespace MapNotify_3_28 // Keep the same namespace
                         Bricking = match?.Bricking ?? false
                     };
 
-                    if (match != null)
+                    if (match != null || interestMatch != null)
                     {
-                        if (match.Bricking) Bricked = true;
-                        ProcessModWarnings(mod.RawName, goodList, badList);
+                        if (match != null && match.Bricking) Bricked = true;
+                        ProcessModWarnings(mod.RawName, goodList, badList, interestList, interestKeys, interestShadowed);
                     }
                     logArea.Implicits.Add(styledMod);
                 }
@@ -200,7 +210,8 @@ namespace MapNotify_3_28 // Keep the same namespace
         /// <summary>
         /// Checks a mod against Good and Bad dictionaries and updates the item's active warning lists.
         /// </summary>
-        private void ProcessModWarnings(string rawName, List<StyledText> goodList, List<StyledText> badList)
+        private void ProcessModWarnings(string rawName, List<StyledText> goodList, List<StyledText> badList,
+            List<StyledText> interestList, HashSet<string> interestKeys, HashSet<StyledText> interestShadowed)
         {
             if (string.IsNullOrEmpty(rawName)) return;
 
@@ -218,6 +229,28 @@ namespace MapNotify_3_28 // Keep the same namespace
                 if (string.IsNullOrEmpty(match.EscapedText)) match.EscapedText = EscapeImGui(match.Text);
                 if (match.Bricking) Bricked = true;
                 badList.Add(match);
+            }
+
+            // Interest is independent of Good/Bad: a mod may be both.
+            var interestMatch = MatchInterest(rawName);
+            if (interestMatch != null)
+            {
+                var baseKey = BaseModExtractor.GetBaseMod(rawName);
+                if (interestKeys.Add(baseKey))
+                {
+                    interestList.Add(new StyledText
+                    {
+                        Text = interestMatch.Text,
+                        EscapedText = string.IsNullOrEmpty(interestMatch.EscapedText)
+                            ? EscapeImGui(interestMatch.Text)
+                            : interestMatch.EscapedText,
+                        Color = interestMatch.Color,
+                        Bricking = match?.Bricking ?? false
+                    });
+                }
+
+                if (match != null)
+                    interestShadowed.Add(match);
             }
         }
 
@@ -353,7 +386,8 @@ namespace MapNotify_3_28 // Keep the same namespace
             Quantity = quantity; Rarity = rarity;
         }
 
-        private void ProcessMods(Mods modsComponent, string path, List<StyledText> goodList, List<StyledText> badList)
+        private void ProcessMods(Mods modsComponent, string path, List<StyledText> goodList, List<StyledText> badList,
+            List<StyledText> interestList, HashSet<string> interestKeys, HashSet<StyledText> interestShadowed)
         {
             PrefixStats = new MapModStats();
             SuffixStats = new MapModStats();
@@ -361,7 +395,23 @@ namespace MapNotify_3_28 // Keep the same namespace
 
             var itemMods = modsComponent?.ItemMods;
             ModCount = itemMods?.Count ?? 0;
-            if (modsComponent != null && itemMods != null && ModCount > 0)
+
+            // Count only map mods: blacklisted entries and enchantments are not part of the count.
+            if (itemMods != null)
+            {
+                foreach (var mod in itemMods)
+                {
+                    if (string.IsNullOrEmpty(mod.RawName)) continue;
+                    if (Constants.ModNameBlacklist.Any(black => mod.RawName.Contains(black))) { ModCount--; continue; }
+
+                    var type = mod.ModRecord?.AffixType.ToString() ?? "";
+                    if (type.Contains("Enchant", StringComparison.OrdinalIgnoreCase) ||
+                        mod.RawName.Contains("Enchant", StringComparison.OrdinalIgnoreCase))
+                        ModCount--;
+                }
+            }
+
+            if (modsComponent != null && itemMods != null && itemMods.Count > 0)
             {
                 if (modsComponent.ItemRarity != ItemRarity.Unique || Tier == 17)
                 {
@@ -372,7 +422,7 @@ namespace MapNotify_3_28 // Keep the same namespace
                         // Check for Originator/Nightmare flags before hitting the blacklist
                         if (!IsOriginatorMap && (mod.RawName == "IsUberMap" || mod.RawName.Contains("MapZanaInfluence"))) IsOriginatorMap = true;
 
-                        if (Constants.ModNameBlacklist.Any(black => mod.RawName.Contains(black))) { ModCount--; continue; }
+                        if (Constants.ModNameBlacklist.Any(black => mod.RawName.Contains(black))) continue;
 
                         var type = mod.ModRecord?.AffixType.ToString() ?? "";
                         bool isPrefix = type.Contains("Prefix");
@@ -384,7 +434,7 @@ namespace MapNotify_3_28 // Keep the same namespace
                             for (int i = 0; i < stats.Length && i < values.Count; i++)
                                 UpdateStatsFromMod(stats[i].Key, values[i], isPrefix, isSuffix, totals);
                         }
-                        ProcessModWarnings(mod.RawName, goodList, badList);
+                        ProcessModWarnings(mod.RawName, goodList, badList, interestList, interestKeys, interestShadowed);
                     }
                 }
             }

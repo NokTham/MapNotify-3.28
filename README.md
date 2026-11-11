@@ -30,6 +30,7 @@ MapNotify-3.28 is a plugin for Exile API designed to highlight map modifiers and
 *   **Character-Specific Profiles:** Automatically switch mod filters based on your current character's name.
 *   **Mod Preview Window:** Capture modifiers from hovered items using a hotkey to categorize them, set colors, or mark them as bricking.
 *   **Mod Browser:** A built-in database to search and add modifiers (Generic, Uber, Expedition, and Valdo mods).
+*   **Mods of Interest:** Mark any map mod or enchantment with its own color, independent of the Good/Bad lists, and show a colored arc per interest mod on the map icon.
 
 ### Tooltip Overlays
 *   **Stat Breakdown:** Displays Item Quantity (IIQ), Item Rarity (IIR), and Pack Size (PS).
@@ -63,6 +64,7 @@ MapNotify-3.28 is a plugin for Exile API designed to highlight map modifiers and
 The plugin stores settings and mod lists in:
 *   `config/MapNotify-3.28/Profiles/[ProfileName]/GoodMods.txt`
 *   `config/MapNotify-3.28/Profiles/[ProfileName]/BadMods.txt`
+*   `config/MapNotify-3.28/Profiles/[ProfileName]/InterestMods.txt`
 
 # Credits
 *   **Original Plugin**: Lachrymatory https://github.com/Sirais/MapNotify

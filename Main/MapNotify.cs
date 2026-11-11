@@ -28,6 +28,38 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     private static MapNotifySettings pluginSettings;
     public static Dictionary<string, StyledText> GoodModsDictionary;
     public static Dictionary<string, StyledText> BadModsDictionary;
+    public static Dictionary<string, StyledText> InterestModsDictionary;
+
+    public static readonly string[] InterestPaletteHex = new[]
+    {
+        "B8B2F5FF",
+        "FAC775FF",
+        "5DCAFFFF",
+        "F472B6FF",
+        "F0F0F0FF",
+        "F08C5AFF"
+    };
+
+    public static nuVector4 GetNextInterestColor()
+    {
+        var palette = InterestPaletteHex.Select(h => SharpToNu(HexToSDXVector4(h))).ToList();
+        if (InterestModsDictionary != null && InterestModsDictionary.Count > 0)
+        {
+            var usedColors = InterestModsDictionary.Values
+                .Select(v => ToHex(v.Color).Substring(0, 6))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var hex in InterestPaletteHex)
+            {
+                if (!usedColors.Contains(hex.Substring(0, 6)))
+                    return SharpToNu(HexToSDXVector4(hex));
+            }
+
+            return palette[InterestModsDictionary.Count % palette.Count];
+        }
+
+        return palette[0];
+    }
     public static HashSet<string> ExpectedNodes = new HashSet<string>();
     public static HashSet<string> ExpectedBonusNodes = new HashSet<string>();
     private CachedValue<List<NormalInventoryItem>> _inventoryItems;
@@ -63,8 +95,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         EnsureProfileStructure();
         RefreshProfileList();
         windowArea = GameController.Window.GetWindowRectangle();
-        GoodModsDictionary = LoadConfigGoodMod();
-        BadModsDictionary = LoadConfigBadMod();
+        ReloadModDictionaries();
         ExpectedNodes = LoadExpectedNodes();
         ExpectedBonusNodes = LoadExpectedBonusNodes();
         gameController = GameController;
@@ -499,13 +530,21 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 if (Settings.SelectedProfile.Value != profileToSet)
                 {
                     Settings.SelectedProfile.Value = profileToSet;
-                    GoodModsDictionary = LoadConfigGoodMod();
-                    BadModsDictionary = LoadConfigBadMod();
+                    ReloadModDictionaries();
                     LogMessage($"MapNotify: Auto-switched to {(profileToSet == "Default" ? "Default profile" : $"character profile: {playerName}")}", 5);
                 }
             }
         }
 
+        return null;
+    }
+
+    public static StyledText MatchInterest(string rawName)
+    {
+        if (string.IsNullOrEmpty(rawName) || InterestModsDictionary == null) return null;
+        var normalizedInput = BaseModExtractor.GetBaseMod(rawName);
+        if (InterestModsDictionary.TryGetValue(normalizedInput, out var match))
+            return match;
         return null;
     }
 
@@ -679,8 +718,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         if (ingameState == null) return;
 
         // Force reload from files before capturing to ensure we have the latest settings
-        GoodModsDictionary = LoadConfigGoodMod();
-        BadModsDictionary = LoadConfigBadMod();
+        ReloadModDictionaries();
         RefreshProfileList();
 
         var hoverItem = ingameState.UIHover?.AsObject<NormalInventoryItem>();
@@ -801,14 +839,18 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             if (mod.RawName.Contains("Enchant") || affixType.Contains("Enchant"))
                 affixType = "Enchant";
 
+            var interestEntry = MatchInterest(mod.RawName);
+
             captured.Add(new CapturedMod
             {
                 RawName = mod.RawName.Trim(),
                 AffixType = affixType,
-                DisplayName = existingEntry?.Text ?? (matchedDescription ?? mod.Name),
+                DisplayName = existingEntry?.Text ?? interestEntry?.Text ?? (matchedDescription ?? mod.Name),
                 Description = matchedDescription ?? (!string.IsNullOrEmpty(mod.Translation) && !mod.Translation.Contains("<unknown") ? mod.Translation : BaseModExtractor.GetReadableName(mod.RawName)),
                 Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
                 IsBricking = existingEntry?.Bricking ?? false,
+                IsOfInterest = interestEntry != null,
+                InterestColor = interestEntry?.Color ?? GetNextInterestColor(),
                 Quantity = modIIQ,
                 Rarity = modIIR,
                 PackSize = modPS,
@@ -839,6 +881,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                     if (_capturedMods.Any(m => m.RawName == mod.RawName)) continue;
 
                     var (existingEntry, _) = MatchMod(mod.RawName);
+                    var interestEntry = MatchInterest(mod.RawName);
 
                     var modText = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
                     var cleanDesc = modText.Replace("{", "").Replace("}", "").Trim();
@@ -847,10 +890,12 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                     {
                         RawName = mod.RawName.Trim(),
                         AffixType = "Logbook Implicit",
-                        DisplayName = existingEntry?.Text ?? cleanDesc,
+                        DisplayName = existingEntry?.Text ?? interestEntry?.Text ?? cleanDesc,
                         Description = cleanDesc,
                         Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
-                        IsBricking = existingEntry?.Bricking ?? false
+                        IsBricking = existingEntry?.Bricking ?? false,
+                        IsOfInterest = interestEntry != null,
+                        InterestColor = interestEntry?.Color ?? GetNextInterestColor()
                     });
                 }
             }

@@ -237,11 +237,21 @@ namespace MapNotify_3_28
                     "Highlights maps if there are good mods. Configure color in the 'Borders and Highlight Colours' section."
                 );
                 Settings.ShowEightModTriangle.Value = Checkbox(
-                    "Mark 8-Mod Maps",
+                    "Mark 8/9-Mod Maps",
                     Settings.ShowEightModTriangle.Value
                 );
                 ImGui.SameLine();
-                HelpMarker("Draws a corner triangle on 8mod maps.");
+                HelpMarker(
+                    "Draws a corner triangle on 8-mod and 9-mod maps. Only map mods are counted; enchantments are ignored. The triangle uses a separate colour for 9-mod maps."
+                );
+                Settings.MarkModsOfInterest.Value = Checkbox(
+                    "Mark mods of interest",
+                    Settings.MarkModsOfInterest.Value
+                );
+                ImGui.SameLine();
+                HelpMarker(
+                    "Draws a colored arc on the map icon for each mod of interest. Mark mods with 'Of Interest' in the Map Mod Preview window."
+                );
             }
 
             if (ImGui.TreeNodeEx("Map Tooltip Settings", ImGuiTreeNodeFlags.CollapsingHeader))
@@ -264,6 +274,10 @@ namespace MapNotify_3_28
                 Settings.ShowModWarnings.Value = Checkbox(
                     "Show Good/Bad mods",
                     Settings.ShowModWarnings.Value
+                );
+                Settings.ShowModsOfInterest.Value = Checkbox(
+                    "Show Mods of Interest",
+                    Settings.ShowModsOfInterest.Value
                 );
                 Settings.ShowModCount.Value = Checkbox(
                     "Show Number of Mods",
@@ -535,6 +549,20 @@ namespace MapNotify_3_28
                     )
                 )
                     Settings.EightModTriangleColor.Value = eightModColor.ToSharpColor();
+                ImGui.SameLine(0f, 20f);
+                nuVector4 nineModColor = SharpToNu(
+                    Settings.NineModTriangleColor.Value.ToVector4()
+                );
+                if (
+                    ImGui.ColorEdit4(
+                        "9-Mod Triangle",
+                        ref nineModColor,
+                        ImGuiColorEditFlags.NoInputs
+                            | ImGuiColorEditFlags.AlphaPreviewHalf
+                            | ImGuiColorEditFlags.AlphaBar
+                    )
+                )
+                    Settings.NineModTriangleColor.Value = nineModColor.ToSharpColor();
                 ImGui.Dummy(new nuVector2(0, 2));
                 ImGui.Text("Good Mod Position:");
                 ImGui.SameLine();
@@ -547,7 +575,7 @@ namespace MapNotify_3_28
                     ImGui.EndCombo();
                 }
                 ImGui.SameLine(0f, 20f);
-                ImGui.Text("8-Mod Triangle Position:");
+                ImGui.Text("8/9-Mod Triangle Position:");
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(150);
                 if (
@@ -589,6 +617,50 @@ namespace MapNotify_3_28
                     HelpMarker(
                         "Radius of the circle as a percentage of half the item's shorter side.\n100% = circle touches the item edge."
                     );
+                }
+
+                if (Settings.MarkModsOfInterest.Value)
+                {
+                    ImGui.Dummy(new nuVector2(0, 2));
+                    ImGui.Text("Mods of Interest Arcs:");
+                    ImGui.Indent();
+                    Settings.InterestArcMaxMods.Value = IntSlider(
+                        "Max Mods on Ring##InterestArcMaxMods",
+                        Settings.InterestArcMaxMods,
+                        220f
+                    );
+                    ImGui.SameLine();
+                    HelpMarker(
+                        "Number of slots around the ring. The ring closes at this count, so fewer mods leave a larger empty gap."
+                    );
+                    Settings.InterestArcRingRadius.Value = IntSlider(
+                        "Ring Radius %##InterestArcRingRadius",
+                        Settings.InterestArcRingRadius,
+                        220f
+                    );
+                    ImGui.SameLine();
+                    HelpMarker(
+                        "Radius of the arc ring as a percentage of the circle highlight radius."
+                    );
+                    Settings.InterestArcThickness.Value = IntSlider(
+                        "Arc Thickness %##InterestArcThickness",
+                        Settings.InterestArcThickness,
+                        220f
+                    );
+                    ImGui.SameLine();
+                    HelpMarker(
+                        "Arc thickness as a percentage of the item's shorter side."
+                    );
+                    Settings.InterestArcGap.Value = IntSlider(
+                        "Arc Gap %##InterestArcGap",
+                        Settings.InterestArcGap,
+                        220f
+                    );
+                    ImGui.SameLine();
+                    HelpMarker(
+                        "Gap between arcs as a percentage of the item's shorter side."
+                    );
+                    ImGui.Unindent();
                 }
 
                 Settings.UseSimpleOutlines.Value = Checkbox(
@@ -818,8 +890,7 @@ namespace MapNotify_3_28
             {
                 if (ImGui.Button("Reload Warnings Text Files"))
                 {
-                    GoodModsDictionary = LoadConfigGoodMod();
-                    BadModsDictionary = LoadConfigBadMod();
+                    ReloadModDictionaries();
                     ExpectedNodes = LoadExpectedNodes();
                     ExpectedBonusNodes = LoadExpectedBonusNodes();
                     LoadModsDatabase();

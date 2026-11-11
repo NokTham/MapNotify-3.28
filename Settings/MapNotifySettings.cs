@@ -32,12 +32,14 @@ namespace MapNotify_3_28
         public ToggleNode BoxForBricked { get; set; } = new(true);
         public ToggleNode BoxForMapWarnings { get; set; } = new(true);
         public ToggleNode BoxForMapBadWarnings { get; set; } = new(true);
+        public ToggleNode MarkModsOfInterest { get; set; } = new(false);
 
         // Map Tooltip Settings
         public ToggleNode AlwaysShowTooltip { get; set; } = new(false);
         public ToggleNode HorizontalLines { get; set; } = new(true);
         public ToggleNode ShowMapName { get; set; } = new(true);
         public ToggleNode ShowModWarnings { get; set; } = new(true);
+        public ToggleNode ShowModsOfInterest { get; set; } = new(false);
         public ToggleNode ShowModCount { get; set; } = new(true);
         public ToggleNode ShowQuantityPercent { get; set; } = new(true);
         public ToggleNode ShowPackSizePercent { get; set; } = new(true);
@@ -96,6 +98,8 @@ namespace MapNotify_3_28
         public ToggleNode ShowEightModTriangle { get; set; } = new(false);
         public ColorNode EightModTriangleColor { get; set; } =
             new ColorNode(new Color(1f, 0.72f, 0.15f, 1f));
+        public ColorNode NineModTriangleColor { get; set; } =
+            new ColorNode(new Color(1f, 0.35f, 0.85f, 1f));
         public ListNode EightModTriangleCorner { get; set; } =
             new ListNode
             {
@@ -116,6 +120,10 @@ namespace MapNotify_3_28
             };
         public ToggleNode UseCircleHighlight { get; set; } = new(false);
         public RangeNode<int> CircleHighlightRadius { get; set; } = new(80, 10, 100);
+        public RangeNode<int> InterestArcMaxMods { get; set; } = new(6, 1, 10);
+        public RangeNode<int> InterestArcRingRadius { get; set; } = new(83, 40, 120);
+        public RangeNode<int> InterestArcThickness { get; set; } = new(8, 2, 20);
+        public RangeNode<int> InterestArcGap { get; set; } = new(6, 1, 20);
 
         // Config Files and Other
         public RangeNode<int> TooltipOffsetX { get; set; } = new(25, -150, 150);

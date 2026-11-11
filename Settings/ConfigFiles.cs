@@ -47,7 +47,7 @@ namespace MapNotify_3_28
         public void ResetConfigs()
         {
             LogMessage("Deleting existing config files...");
-            string[] files = { "GoodMods.txt", "BadMods.txt", "ExpectedNodes.txt", "ExpectedBonusNodes.txt" };
+            string[] files = { "GoodMods.txt", "BadMods.txt", "InterestMods.txt", "ExpectedNodes.txt", "ExpectedBonusNodes.txt" };
             foreach (var file in files)
             {
                 var path = (file.Contains("Mods")) ? Path.Combine(GetProfileDirectory(), file) : Path.Combine(ConfigDirectory, file);
@@ -55,9 +55,7 @@ namespace MapNotify_3_28
             }
             ExpectedNodes = LoadExpectedNodes();
             ExpectedBonusNodes = LoadExpectedBonusNodes();
-            GoodModsDictionary = LoadConfigGoodMod();
-            BadModsDictionary = LoadConfigBadMod();
-
+            ReloadModDictionaries();
         }
 
         private HashSet<string> LoadExpectedNodes()
@@ -110,6 +108,23 @@ namespace MapNotify_3_28
         {
             LogMessage("Loading Bad Mods...");
             return LoadConfigBad(Path.Combine(GetProfileDirectory(), "BadMods.txt"));
+        }
+
+        private Dictionary<string, StyledText> LoadConfigInterestMod()
+        {
+            LogMessage("Loading Interest Mods...");
+            var path = Path.Combine(GetProfileDirectory(), "InterestMods.txt");
+            if (!File.Exists(path))
+                return new Dictionary<string, StyledText>(StringComparer.OrdinalIgnoreCase);
+
+            return SafeLoadDictionary(path);
+        }
+
+        public void ReloadModDictionaries()
+        {
+            GoodModsDictionary = LoadConfigGoodMod();
+            BadModsDictionary = LoadConfigBadMod();
+            InterestModsDictionary = LoadConfigInterestMod();
         }
 
 

@@ -24,6 +24,8 @@ namespace MapNotify_3_28
         public string AffixType { get; set; }
         public System.Numerics.Vector4 Color { get; set; } = new System.Numerics.Vector4(1, 1, 1, 1);
         public bool IsBricking { get; set; }
+        public bool IsOfInterest { get; set; }
+        public System.Numerics.Vector4 InterestColor { get; set; }
 
         // Per-mod stat contributions
         public int Quantity { get; set; }

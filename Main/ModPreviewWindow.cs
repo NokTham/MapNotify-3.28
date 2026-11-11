@@ -12,6 +12,8 @@ namespace MapNotify_3_28
     {
         private Dictionary<string, string> _browserDisplayNameEdits = new Dictionary<string, string>();
         private Dictionary<string, bool> _browserBrickingEdits = new Dictionary<string, bool>();
+        private Dictionary<string, bool> _browserInterestEdits = new Dictionary<string, bool>();
+        private Dictionary<string, nuVector4> _browserInterestColorEdits = new Dictionary<string, nuVector4>();
         private int _browserAffixFilterIndex = 0;
         private int _browserStatusFilterIndex = 0;
 
@@ -36,10 +38,11 @@ namespace MapNotify_3_28
                         if (ImGui.Selectable(profile, profile == Settings.SelectedProfile.Value))
                         {
                             Settings.SelectedProfile.Value = profile;
-                            GoodModsDictionary = LoadConfigGoodMod();
-                            BadModsDictionary = LoadConfigBadMod();
+                            ReloadModDictionaries();
                             _browserDisplayNameEdits.Clear();
                             _browserBrickingEdits.Clear();
+                            _browserInterestEdits.Clear();
+                            _browserInterestColorEdits.Clear();
                         }
                     }
                     ImGui.EndCombo();
@@ -67,10 +70,11 @@ namespace MapNotify_3_28
                         Directory.Delete(GetProfileDirectory(), true);
                         Settings.SelectedProfile.Value = "Default";
                         RefreshProfileList();
-                        GoodModsDictionary = LoadConfigGoodMod();
-                        BadModsDictionary = LoadConfigBadMod();
+                        ReloadModDictionaries();
                         _browserDisplayNameEdits.Clear();
                         _browserBrickingEdits.Clear();
+                        _browserInterestEdits.Clear();
+                        _browserInterestColorEdits.Clear();
                     }
                 }
 
@@ -112,6 +116,7 @@ namespace MapNotify_3_28
                                 Directory.Move(oldPath, newPath);
                                 Settings.SelectedProfile.Value = _newProfileName;
                                 RefreshProfileList();
+                                ReloadModDictionaries();
                                 LogMessage($"MapNotify: Profile renamed to {_newProfileName}", 5);
                             }
                             catch (Exception ex) { LogError($"MapNotify: Rename failed: {ex.Message}", 10); }
@@ -193,7 +198,8 @@ namespace MapNotify_3_28
 
         private void DrawActiveMods()
         {
-            void DrawSection(Dictionary<string, StyledText> dict, string label, nuVector4 color, Dictionary<string, StyledText> otherDict)
+            void DrawSection(Dictionary<string, StyledText> dict, string label, nuVector4 color,
+                Dictionary<string, StyledText> otherDict, Action<string> removeAction, bool showInterestMarker)
             {
                 if (dict == null || dict.Count == 0) return;
                 var groups = dict
@@ -209,21 +215,27 @@ namespace MapNotify_3_28
                 foreach (var group in groups)
                 {
                     ImGui.PushID($"{label}_{group.Key}");
-                    if (ImGui.Button("X")) { foreach (var m in group) DeleteModFromConfig(m.Key); }
+                    if (ImGui.Button("X")) { foreach (var m in group) removeAction(m.Key); }
                     ImGui.SameLine();
                     HelpMarker($"{string.Join("\n", group.Select(m => m.Key))}");
                     ImGui.SameLine();
                     var firstMod = group.First().Value;
                     bool isAnyBricked = group.Any(m => m.Value.Bricking);
                     bool hasConflict = group.Any(m => otherDict?.ContainsKey(m.Key) ?? false);
-                    ImGui.TextColored(firstMod.Color, $"{EscapeImGui(group.Key)}{(isAnyBricked ? " [B]" : "")}{(hasConflict ? " [!] CONFLICT" : "")}");
+                    bool isOfInterest = showInterestMarker &&
+                        group.Any(m => InterestModsDictionary?.ContainsKey(m.Key) ?? false);
+                    ImGui.TextColored(firstMod.Color, $"{EscapeImGui(group.Key)}{(isAnyBricked ? " [B]" : "")}{(isOfInterest ? " [I]" : "")}{(hasConflict ? " [!] CONFLICT" : "")}");
                     ImGui.PopID();
                 }
                 ImGui.Unindent();
             }
 
-            DrawSection(GoodModsDictionary, "Good Mods:", new nuVector4(0.4f, 1f, 0.4f, 1f), BadModsDictionary);
-            DrawSection(BadModsDictionary, "Bad Mods:", new nuVector4(1f, 0.4f, 0.4f, 1f), GoodModsDictionary);
+            DrawSection(GoodModsDictionary, "Good Mods:", new nuVector4(0.4f, 1f, 0.4f, 1f), BadModsDictionary,
+                key => DeleteModFromConfig(key), true);
+            DrawSection(BadModsDictionary, "Bad Mods:", new nuVector4(1f, 0.4f, 0.4f, 1f), GoodModsDictionary,
+                key => DeleteModFromConfig(key), true);
+            DrawSection(InterestModsDictionary, "Mods of Interest:", new nuVector4(0.72f, 0.70f, 0.96f, 1f), null,
+                key => RemoveInterestFromConfig(key), false);
         }
 
         private void DrawCapturedMods()
@@ -405,6 +417,35 @@ namespace MapNotify_3_28
                 mod.IsBricking = isBricking;
                 AutoSaveIfExisting(mod);
             }
+
+            ImGui.SameLine();
+            var interestBaseKey = BaseModExtractor.GetBaseMod(mod.RawName);
+            bool isOfInterest = InterestModsDictionary?.ContainsKey(interestBaseKey) ?? false;
+            if (ImGui.Checkbox("Of Interest", ref isOfInterest))
+            {
+                mod.IsOfInterest = isOfInterest;
+                if (isOfInterest) SaveInterestToConfig(mod);
+                else RemoveInterestFromConfig(mod.RawName);
+            }
+
+            if (isOfInterest)
+            {
+                ImGui.SameLine();
+                var interestColor = mod.InterestColor;
+                if (
+                    ImGui.ColorEdit4(
+                        "##interestcolor",
+                        ref interestColor,
+                        ImGuiColorEditFlags.NoInputs
+                            | ImGuiColorEditFlags.AlphaPreviewHalf
+                            | ImGuiColorEditFlags.AlphaBar
+                    )
+                )
+                {
+                    mod.InterestColor = interestColor;
+                    SaveInterestToConfig(mod);
+                }
+            }
             ImGui.Separator();
             ImGui.PopID();
         }
@@ -460,7 +501,7 @@ namespace MapNotify_3_28
                         bool isConfigured = entry.BaseMods != null && entry.BaseMods.Any(bm =>
                         {
                             var (match, _) = MatchMod(bm);
-                            return match != null;
+                            return match != null || MatchInterest(bm) != null;
                         });
 
                         if (_browserStatusFilterIndex == 1 && !isConfigured) return false;
@@ -524,6 +565,19 @@ namespace MapNotify_3_28
                 _browserBrickingEdits[modEntry.GroupKey] = currentBricking;
             }
 
+            bool anyInterest = modEntry.BaseMods.Any(bm => MatchInterest(bm) != null);
+            if (!_browserInterestEdits.TryGetValue(modEntry.GroupKey, out var currentInterest))
+            {
+                currentInterest = anyInterest;
+                _browserInterestEdits[modEntry.GroupKey] = currentInterest;
+            }
+            if (!_browserInterestColorEdits.TryGetValue(modEntry.GroupKey, out var currentInterestColor))
+            {
+                var firstInterest = modEntry.BaseMods.Select(MatchInterest).FirstOrDefault(m => m != null);
+                currentInterestColor = firstInterest?.Color ?? GetNextInterestColor();
+                _browserInterestColorEdits[modEntry.GroupKey] = currentInterestColor;
+            }
+
             // Get the color from the first matched mod in the group, or fall back to defaults
             var matchResult = browserMatches.FirstOrDefault(m => m.match != null);
             nuVector4 displayColor = matchResult.match?.Color ?? new nuVector4(1, 1, 1, 1);
@@ -560,6 +614,13 @@ namespace MapNotify_3_28
                         defaultDisplayName = existing.Text;
                         break; // Found one, use it
                     }
+
+                    var existingInterest = MatchInterest(bm);
+                    if (existingInterest != null && !string.Equals(existingInterest.Text, bm, StringComparison.OrdinalIgnoreCase))
+                    {
+                        defaultDisplayName = existingInterest.Text;
+                        break;
+                    }
                 }
                 currentEditName = defaultDisplayName;
                 _browserDisplayNameEdits[modEntry.GroupKey] = currentEditName;
@@ -576,6 +637,19 @@ namespace MapNotify_3_28
                     {
                         // Create a temp CapturedMod to pass to SaveModToConfig for updating
                         SaveModToConfig(new CapturedMod { RawName = bm, DisplayName = currentEditName, Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey, Color = existing.Color, IsBricking = existing.Bricking }, isGood ? "GoodMods.txt" : "BadMods.txt", matchedKey);
+                    }
+
+                    // Keep display-name edits in sync for interest-only mods too.
+                    var existingInterest = MatchInterest(bm);
+                    if (existingInterest != null)
+                    {
+                        SaveInterestToConfig(new CapturedMod
+                        {
+                            RawName = bm,
+                            DisplayName = currentEditName,
+                            Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey,
+                            InterestColor = existingInterest.Color
+                        }, bm);
                     }
                 }
             }
@@ -608,8 +682,9 @@ namespace MapNotify_3_28
                 }
                 _browserDisplayNameEdits.Remove(modEntry.GroupKey); // Clear edit after action
                 _browserBrickingEdits.Remove(modEntry.GroupKey);
-                GoodModsDictionary = LoadConfigGoodMod(); // Reload dictionaries to reflect changes
-                BadModsDictionary = LoadConfigBadMod();
+                _browserInterestEdits.Remove(modEntry.GroupKey);
+                _browserInterestColorEdits.Remove(modEntry.GroupKey);
+                ReloadModDictionaries(); // Reload dictionaries to reflect changes
             }
             ImGui.SameLine();
             if (ImGui.Button("Add Bad"))
@@ -629,8 +704,9 @@ namespace MapNotify_3_28
                 }
                 _browserDisplayNameEdits.Remove(modEntry.GroupKey); // Clear edit after action
                 _browserBrickingEdits.Remove(modEntry.GroupKey);
-                GoodModsDictionary = LoadConfigGoodMod(); // Reload dictionaries to reflect changes
-                BadModsDictionary = LoadConfigBadMod();
+                _browserInterestEdits.Remove(modEntry.GroupKey);
+                _browserInterestColorEdits.Remove(modEntry.GroupKey);
+                ReloadModDictionaries(); // Reload dictionaries to reflect changes
             }
             ImGui.SameLine();
             if (ImGui.Button("Delete"))
@@ -641,6 +717,8 @@ namespace MapNotify_3_28
                 }
                 _browserDisplayNameEdits.Remove(modEntry.GroupKey); // Clear edit after action
                 _browserBrickingEdits.Remove(modEntry.GroupKey);
+                _browserInterestEdits.Remove(modEntry.GroupKey);
+                _browserInterestColorEdits.Remove(modEntry.GroupKey);
             }
             ImGui.SameLine();
             if (ImGui.Checkbox("Brick", ref currentBricking))
@@ -653,8 +731,59 @@ namespace MapNotify_3_28
                     // AutoSaveIfExisting will handle finding if it's good/bad and saving
                     AutoSaveIfExisting(tempMod);
                 }
-                GoodModsDictionary = LoadConfigGoodMod(); // Reload dictionaries to reflect changes
-                BadModsDictionary = LoadConfigBadMod();
+                ReloadModDictionaries(); // Reload dictionaries to reflect changes
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Checkbox("Of Interest", ref currentInterest))
+            {
+                _browserInterestEdits[modEntry.GroupKey] = currentInterest;
+                foreach (var bm in modEntry.BaseMods)
+                {
+                    if (currentInterest)
+                    {
+                        var tempMod = new CapturedMod
+                        {
+                            RawName = bm,
+                            DisplayName = currentEditName,
+                            Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey,
+                            InterestColor = currentInterestColor
+                        };
+                        SaveInterestToConfig(tempMod, bm);
+                    }
+                    else
+                    {
+                        RemoveInterestFromConfig(bm);
+                    }
+                }
+            }
+
+            if (currentInterest)
+            {
+                ImGui.SameLine();
+                if (
+                    ImGui.ColorEdit4(
+                        "##interestcolor",
+                        ref currentInterestColor,
+                        ImGuiColorEditFlags.NoInputs
+                            | ImGuiColorEditFlags.AlphaPreviewHalf
+                            | ImGuiColorEditFlags.AlphaBar
+                    )
+                )
+                {
+                    _browserInterestColorEdits[modEntry.GroupKey] = currentInterestColor;
+                    foreach (var bm in modEntry.BaseMods)
+                    {
+                        var tempMod = new CapturedMod
+                        {
+                            RawName = bm,
+                            DisplayName = currentEditName,
+                            Description = modEntry.Descriptions.FirstOrDefault() ?? modEntry.GroupKey,
+                            InterestColor = currentInterestColor
+                        };
+                        SaveInterestToConfig(tempMod, bm);
+                    }
+                }
             }
 
             ImGui.Separator();
@@ -684,6 +813,14 @@ namespace MapNotify_3_28
                 // Then save to file to persist the updated values
                 SaveModToConfig(mod, isGood ? "GoodMods.txt" : "BadMods.txt", matchedKey);
             }
+
+            // Keep the interest tooltip name in sync for interest-only mods too.
+            var interestMatch = MatchInterest(mod.RawName);
+            if (interestMatch != null)
+            {
+                mod.InterestColor = interestMatch.Color;
+                SaveInterestToConfig(mod);
+            }
         }
 
         /// <summary>
@@ -708,9 +845,46 @@ namespace MapNotify_3_28
             var newLine = $"{baseMod};{mod.DisplayName};{hexColor};{mod.IsBricking}";
 
             UpdateModInFile(path, mod.RawName, newLine);
-            GoodModsDictionary = LoadConfigGoodMod();
-            BadModsDictionary = LoadConfigBadMod();
+            ReloadModDictionaries();
             LogMessage($"Saved/Updated mod: {mod.RawName}", 5);
+        }
+
+        /// <summary>
+        /// Writes a captured mod entry to InterestMods.txt. Interest is independent of
+        /// the Good/Bad lists and only stores the tooltip name and the interest color.
+        /// </summary>
+        private void SaveInterestToConfig(CapturedMod mod, string baseMod = null)
+        {
+            var key = BaseModExtractor.GetBaseMod(baseMod ?? mod.RawName);
+            if (string.IsNullOrEmpty(key)) return;
+
+            var color = mod.InterestColor;
+            if (color == default(nuVector4) && InterestModsDictionary != null &&
+                InterestModsDictionary.TryGetValue(key, out var existingInterest))
+                color = existingInterest.Color;
+
+            var display = mod.DisplayName;
+            if (string.IsNullOrWhiteSpace(display)) display = mod.Description;
+            if (string.IsNullOrWhiteSpace(display)) display = BaseModExtractor.GetReadableName(key);
+
+            var path = Path.Combine(GetProfileDirectory(), "InterestMods.txt");
+            if (!File.Exists(path))
+                File.WriteAllText(path, "#Contains;Name in tooltip;RGBA colour code\n");
+
+            var newLine = $"{key};{display};{ToHex(color)}";
+            UpdateModInFile(path, mod.RawName, newLine);
+            ReloadModDictionaries();
+            LogMessage($"Saved/Updated interest mod: {mod.RawName}", 5);
+        }
+
+        /// <summary>
+        /// Removes a mod from InterestMods.txt without touching the Good/Bad lists.
+        /// </summary>
+        private void RemoveInterestFromConfig(string rawName)
+        {
+            if (RemoveModFromFile(Path.Combine(GetProfileDirectory(), "InterestMods.txt"), rawName))
+                LogMessage($"Removed interest mod entry: {rawName}", 5);
+            ReloadModDictionaries();
         }
 
         private void UpdateModInFile(string path, string rawName, string newLine)
@@ -740,7 +914,7 @@ namespace MapNotify_3_28
                     LogMessage($"Deleted mod entry: {rawName} from {fileName}", 5);
                 }
             }
-            if (deleted) { GoodModsDictionary = LoadConfigGoodMod(); BadModsDictionary = LoadConfigBadMod(); }
+            if (deleted) ReloadModDictionaries();
             else if (logError) LogError($"Could not find {rawName} in GoodMods.txt or BadMods.txt", 5);
         }
     }
