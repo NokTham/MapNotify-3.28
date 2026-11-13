@@ -74,6 +74,11 @@ namespace MapNotify_3_28 // Keep the same namespace
         public bool IsValdoMap { get; set; }
 
         private long _lastUpdate;
+        private long _lastUpdateCall;
+
+        // Tooltip line builders are only refreshed when Update() runs, not every frame.
+        private List<List<StyledText>> _prefixSuffixLines;
+        private List<List<StyledText>> _originatorBreakdownLines;
 
         public class MapModStats
         {
@@ -100,11 +105,36 @@ namespace MapNotify_3_28 // Keep the same namespace
         }
 
         /// <summary>
+        /// Rebinds this details object to the item's current slot wrapper. The HUD
+        /// component lives on the Entity, so it survives moves while the stored
+        /// wrapper still points at the previous slot. When the slot changes, tooltip
+        /// parsing must run again against the new wrapper.
+        /// </summary>
+        public void SetItem(NormalInventoryItem item)
+        {
+            if (item == null) return;
+
+            bool slotChanged = Item == null || Item.Address != item.Address;
+            Item = item;
+
+            if (slotChanged)
+                _lastUpdate = 0;
+        }
+
+        /// <summary>
         /// Refreshes all item properties by retrieving data from game components.
         /// </summary>
         public void Update()
         {
             var now = Environment.TickCount64;
+
+            // Update() is only called while the item is hovered (plus once at
+            // creation), so a gap means hovering just started: re-parse the
+            // tooltip-only data immediately instead of waiting for the interval.
+            if (now - _lastUpdateCall > 100)
+                _lastUpdate = 0;
+            _lastUpdateCall = now;
+
             if (now - _lastUpdate < pluginSettings.InventoryCacheInterval.Value)
                 return;
 
@@ -165,6 +195,18 @@ namespace MapNotify_3_28 // Keep the same namespace
             ActiveInterestMods = localInterest;
             InterestShadowedMods = localInterestShadowed;
             ConflictingMods = localConflicting;
+
+            // Build the expensive tooltip lines once per update instead of every frame.
+            if (pluginSettings.ShowPrefixSuffixStats.Value)
+            {
+                _prefixSuffixLines = BuildPrefixSuffixLines();
+                _originatorBreakdownLines = BuildOriginatorBreakdownLines();
+            }
+            else
+            {
+                _prefixSuffixLines = null;
+                _originatorBreakdownLines = null;
+            }
         }
 
         private void ProcessLogbookDetails(ExpeditionSaga expeditionSaga, List<StyledText> goodList, List<StyledText> badList,
@@ -215,8 +257,20 @@ namespace MapNotify_3_28 // Keep the same namespace
         {
             if (string.IsNullOrEmpty(rawName)) return;
 
-            // Using the helper method to avoid redundant dictionary iterations
-            var (matchedKey, match, isGood) = MatchModWithKey(rawName);
+            // Normalize once, then reuse the key for the Good/Bad/Interest lookups.
+            var normalizedInput = BaseModExtractor.GetBaseMod(rawName);
+
+            StyledText match = null;
+            bool isGood = false;
+            if (GoodModsDictionary != null && GoodModsDictionary.TryGetValue(normalizedInput, out var goodMatch))
+            {
+                match = goodMatch;
+                isGood = true;
+            }
+            else if (BadModsDictionary != null && BadModsDictionary.TryGetValue(normalizedInput, out var badMatch))
+            {
+                match = badMatch;
+            }
 
             if (match != null && isGood)
             {
@@ -232,11 +286,13 @@ namespace MapNotify_3_28 // Keep the same namespace
             }
 
             // Interest is independent of Good/Bad: a mod may be both.
-            var interestMatch = MatchInterest(rawName);
+            StyledText interestMatch = null;
+            if (InterestModsDictionary != null)
+                InterestModsDictionary.TryGetValue(normalizedInput, out interestMatch);
+
             if (interestMatch != null)
             {
-                var baseKey = BaseModExtractor.GetBaseMod(rawName);
-                if (interestKeys.Add(baseKey))
+                if (interestKeys.Add(normalizedInput))
                 {
                     interestList.Add(new StyledText
                     {
@@ -259,6 +315,11 @@ namespace MapNotify_3_28 // Keep the same namespace
         /// Highlights the higher value between Prefix and Suffix in green.
         /// </summary>
         public List<List<StyledText>> GetPrefixSuffixLines()
+        {
+            return _prefixSuffixLines ??= BuildPrefixSuffixLines();
+        }
+
+        private List<List<StyledText>> BuildPrefixSuffixLines()
         {
             var lines = new List<List<StyledText>>();
 
@@ -284,23 +345,23 @@ namespace MapNotify_3_28 // Keep the same namespace
             bool showRarity = pluginSettings.ShowRarityPercent.Value && Rarity != 0;
 
             var tLine = new List<StyledText> { new StyledText { Text = string.Empty, Color = white, EscapedText = string.Empty } };
-            if (showQuant) tLine.Add(new StyledText { Text = $"{Quantity}% IIQ", Color = qCol, EscapedText = $"{Quantity}%% IIQ" });
+            if (showQuant) tLine.Add(new StyledText { Text = $"{Quantity}% AD", Color = qCol, EscapedText = $"{Quantity}%% AD" });
             if (showPack) tLine.Add(new StyledText { Text = $"{PackSize}% PS", Color = pCol, EscapedText = $"{PackSize}%% PS" });
             if (showRarity) tLine.Add(new StyledText { Text = $"{Rarity}% IIR", Color = rCol, EscapedText = $"{Rarity}%% IIR" });
             if (tLine.Count > 1) lines.Add(tLine);
 
             if (pluginSettings.ShowPrefixSuffixStats.Value)
             {
-                // P: % IIQ % PS % IIR
+                // P: % AD % PS % IIR
                 var pLine = new List<StyledText> { new StyledText { Text = "P: ", Color = white, EscapedText = "P: " } };
-                if (showQuant) pLine.Add(new StyledText { Text = $"{PrefixStats.Quantity}% IIQ", Color = PrefixStats.Quantity > SuffixStats.Quantity ? green : white, EscapedText = $"{PrefixStats.Quantity}%% IIQ" });
+                if (showQuant) pLine.Add(new StyledText { Text = $"{PrefixStats.Quantity}% AD", Color = PrefixStats.Quantity > SuffixStats.Quantity ? green : white, EscapedText = $"{PrefixStats.Quantity}%% AD" });
                 if (showPack) pLine.Add(new StyledText { Text = $"{PrefixStats.PackSize}% PS", Color = PrefixStats.PackSize > SuffixStats.PackSize ? green : white, EscapedText = $"{PrefixStats.PackSize}%% PS" });
                 if (showRarity) pLine.Add(new StyledText { Text = $"{PrefixStats.Rarity}% IIR", Color = PrefixStats.Rarity > SuffixStats.Rarity ? green : white, EscapedText = $"{PrefixStats.Rarity}%% IIR" });
                 if (pLine.Count > 1) lines.Add(pLine);
 
-                // S: % IIQ % PS % IIR
+                // S: % AD % PS % IIR
                 var sLine = new List<StyledText> { new StyledText { Text = "S: ", Color = white, EscapedText = "S: " } };
-                if (showQuant) sLine.Add(new StyledText { Text = $"{SuffixStats.Quantity}% IIQ", Color = SuffixStats.Quantity > PrefixStats.Quantity ? green : white, EscapedText = $"{SuffixStats.Quantity}%% IIQ" });
+                if (showQuant) sLine.Add(new StyledText { Text = $"{SuffixStats.Quantity}% AD", Color = SuffixStats.Quantity > PrefixStats.Quantity ? green : white, EscapedText = $"{SuffixStats.Quantity}%% AD" });
                 if (showPack) sLine.Add(new StyledText { Text = $"{SuffixStats.PackSize}% PS", Color = SuffixStats.PackSize > PrefixStats.PackSize ? green : white, EscapedText = $"{SuffixStats.PackSize}%% PS" });
                 if (showRarity) sLine.Add(new StyledText { Text = $"{SuffixStats.Rarity}% IIR", Color = SuffixStats.Rarity > PrefixStats.Rarity ? green : white, EscapedText = $"{SuffixStats.Rarity}%% IIR" });
                 if (sLine.Count > 1) lines.Add(sLine);
@@ -313,6 +374,11 @@ namespace MapNotify_3_28 // Keep the same namespace
         /// Generates the Originator (Nightmare) stat breakdown lines.
         /// </summary>
         public List<List<StyledText>> GetOriginatorBreakdownLines()
+        {
+            return _originatorBreakdownLines ??= BuildOriginatorBreakdownLines();
+        }
+
+        private List<List<StyledText>> BuildOriginatorBreakdownLines()
         {
             var lines = new List<List<StyledText>>();
             var white = new nuVector4(1f, 1f, 1f, 1f);
@@ -375,11 +441,17 @@ namespace MapNotify_3_28 // Keep the same namespace
             if (modsComponent?.AlternateQualityType != null)
             {
                 var qId = modsComponent.AlternateQualityType.Id;
+                // 3.30: Maven's Chisel of Procurement grants +25% Item Rarity at 20% Quality (previously +40%).
                 if (qId == "MapRarityQuality") { ChiselName = "Rarity Chisel"; ChiselValue = 40; }
+                // 3.30: Item Quantity becomes Atlas Drops; verify whether this chisel/id/label is renamed.
                 else if (qId == "MapQuantityQuality") { ChiselName = "Quantity Chisel"; if (quantity == 0) quantity = tooltipData.Quality; ChiselValue = quantity; }
+                // else if (qId == "MapAtlasDropsQuality") { ChiselName = "Atlas Drops Chisel"; if (quantity == 0) quantity = tooltipData.Quality; ChiselValue = quantity; }
                 else if (qId == "MapPackSizeQuality") { ChiselName = "Pack Size Chisel"; ChiselValue = 10; }
                 else if (qId == "MapDivinationCardQuality") { ChiselName = "Divination Chisel"; ChiselValue = 50; }
+                // 3.30: Maven's Chisel of Scarabs is renamed to Maven's Chisel of Threads.
+                // Verify whether the alternate-quality id also changes from MapScarabQuality.
                 else if (qId == "MapScarabQuality") { ChiselName = "Scarab Chisel"; ChiselValue = 50; }
+                // else if (qId == "MapThreadQuality") { ChiselName = "Thread Chisel"; ChiselValue = 50; }
                 else if (qId == "MapCurrencyQuality") { ChiselName = "Currency Chisel"; ChiselValue = 50; }
             }
             else if (quantity == 0) quantity = tooltipData.Quality;
@@ -397,12 +469,17 @@ namespace MapNotify_3_28 // Keep the same namespace
             ModCount = itemMods?.Count ?? 0;
 
             // Count only map mods: blacklisted entries and enchantments are not part of the count.
+            // 3.30: Delirium Orbs now add an explicit map modifier instead of an enchantment.
+            // Patch notes describe one Delirium modifier whose Delirious percentage stacks
+            // to 100% (not one modifier per orb). It is intended to count toward ModCount;
+            // the tooltip should also show its Delirious % and reward type so players can
+            // distinguish "8 mods" from "7 mods + Delirium".
             if (itemMods != null)
             {
                 foreach (var mod in itemMods)
                 {
                     if (string.IsNullOrEmpty(mod.RawName)) continue;
-                    if (Constants.ModNameBlacklist.Any(black => mod.RawName.Contains(black))) { ModCount--; continue; }
+                    if (Constants.IsModBlacklisted(mod.RawName)) { ModCount--; continue; }
 
                     var type = mod.ModRecord?.AffixType.ToString() ?? "";
                     if (type.Contains("Enchant", StringComparison.OrdinalIgnoreCase) ||
@@ -422,7 +499,7 @@ namespace MapNotify_3_28 // Keep the same namespace
                         // Check for Originator/Nightmare flags before hitting the blacklist
                         if (!IsOriginatorMap && (mod.RawName == "IsUberMap" || mod.RawName.Contains("MapZanaInfluence"))) IsOriginatorMap = true;
 
-                        if (Constants.ModNameBlacklist.Any(black => mod.RawName.Contains(black))) continue;
+                        if (Constants.IsModBlacklisted(mod.RawName)) continue;
 
                         var type = mod.ModRecord?.AffixType.ToString() ?? "";
                         bool isPrefix = type.Contains("Prefix");
@@ -448,12 +525,18 @@ namespace MapNotify_3_28 // Keep the same namespace
 
             void Apply(MapModStats target)
             {
-                if (key.Contains("quantity", StringComparison.OrdinalIgnoreCase)) target.Quantity += val;
-                else if (key.Contains("rarity", StringComparison.OrdinalIgnoreCase)) target.Rarity += val;
-                else if (key.Contains("pack_size", StringComparison.OrdinalIgnoreCase)) target.PackSize += val;
-                else if (key.Contains("scarab_drop_chance", StringComparison.OrdinalIgnoreCase)) { target.MoreScarabs += val; IsOriginatorMap = true; }
-                else if (key.Contains("currency_drop_chance", StringComparison.OrdinalIgnoreCase)) { target.MoreCurrency += val; IsOriginatorMap = true; }
-                else if (key.Contains("map_item_drop_chance", StringComparison.OrdinalIgnoreCase)) { target.MoreMaps += val; IsOriginatorMap = true; }
+                switch (MapYield.ClassifyStatKey(key))
+                {
+                    // Atlas Drops is a percentage scaling stat (map_drop_scaling_+%).
+                    // The field is still named Quantity until the 3.30 model rename,
+                    // so keep the legacy display behavior meanwhile.
+                    case MapYield.Stat.AtlasDrops: target.Quantity += val; break;
+                    case MapYield.Stat.ItemRarity: target.Rarity += val; break;
+                    case MapYield.Stat.PackSize: target.PackSize += val; break;
+                    case MapYield.Stat.MoreScarabs: target.MoreScarabs += val; IsOriginatorMap = true; break;
+                    case MapYield.Stat.MoreCurrency: target.MoreCurrency += val; IsOriginatorMap = true; break;
+                    case MapYield.Stat.MoreMaps: target.MoreMaps += val; IsOriginatorMap = true; break;
+                }
             }
 
             // Always apply to the totals

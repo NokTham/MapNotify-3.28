@@ -8,6 +8,14 @@ namespace MapNotify_3_28
 {
     public partial class MapNotify_3_28
     {
+        private static readonly Regex HtmlTagRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
+        private static readonly Regex DigitsRegex = new Regex(@"\d+", RegexOptions.Compiled);
+        private static readonly Regex RequiresRegex = new Regex(
+            @"Requires\s+(?<job>.+?)\s*\(.*?(?<lvl>\d+)\)",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase
+        );
+        private static readonly char[] DigitChars = "0123456789".ToCharArray();
+
         private List<string> GetModDescriptionsFromTooltip(Element tooltip)
         {
             var descriptions = new List<string>();
@@ -80,8 +88,8 @@ namespace MapNotify_3_28
                 if (!string.IsNullOrEmpty(rawText))
                 {
                     // Strip out tag markup (<...>) and brackets ({...})
-                    var cleanText = Regex
-                        .Replace(rawText, @"<[^>]*>", "")
+                    var cleanText = HtmlTagRegex
+                        .Replace(rawText, "")
                         .Replace("{", "")
                         .Replace("}", "");
 
@@ -90,7 +98,7 @@ namespace MapNotify_3_28
 
                     if (cleanText.Contains("Quality"))
                     {
-                        int start = cleanText.IndexOfAny("0123456789".ToCharArray());
+                        int start = cleanText.IndexOfAny(DigitChars);
                         if (start != -1)
                         {
                             int end = cleanText.IndexOf('%', start);
@@ -109,18 +117,14 @@ namespace MapNotify_3_28
                         int colon = cleanText.IndexOf(':');
                         if (colon != -1)
                         {
-                            var match = Regex.Match(cleanText.Substring(colon), @"\d+");
+                            var match = DigitsRegex.Match(cleanText.Substring(colon));
                             if (match.Success && int.TryParse(match.Value, out var res))
                                 data.Wings = res;
                         }
                     }
                     else if (!passedSummary && cleanText.Contains("Requires "))
                     {
-                        var match = Regex.Match(
-                            cleanText,
-                            @"Requires\s+(?<job>.+?)\s*\(.*?(?<lvl>\d+)\)",
-                            RegexOptions.IgnoreCase
-                        );
+                        var match = RequiresRegex.Match(cleanText);
                         if (match.Success && int.TryParse(match.Groups["lvl"].Value, out var lvl))
                         {
                             var job = match.Groups["job"].Value.Trim();

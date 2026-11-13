@@ -1,5 +1,4 @@
 using System;
-using ImGuiNET;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,6 +15,16 @@ namespace MapNotify_3_28
         private Dictionary<string, nuVector4> _browserInterestColorEdits = new Dictionary<string, nuVector4>();
         private int _browserAffixFilterIndex = 0;
         private int _browserStatusFilterIndex = 0;
+
+        // Filtering the mod database every frame is expensive; cache the result until
+        // the filter, dictionaries, or mod entries change.
+        private List<ModEntry> _browserFilteredCache;
+        private string _browserFilteredFilter;
+        private int _browserFilteredAffix = -1;
+        private int _browserFilteredStatus = -1;
+        private int _browserFilteredDictionaryVersion = -1;
+        private int _browserFilteredModEntriesVersion = -1;
+        private int _browserFilteredEntryCount = -1;
 
         /// <summary>
         /// Renders the ImGui interface for the Map Mod Preview window.
@@ -157,7 +166,7 @@ namespace MapNotify_3_28
 
                     if (opened)
                     {
-                        if (ImGui.BeginChild("CapturedScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Border))
+                        if (ImGui.BeginChild("CapturedScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Borders))
                         {
                             DrawCapturedMods();
                             ImGui.EndChild();
@@ -167,7 +176,7 @@ namespace MapNotify_3_28
 
                     if (ImGui.BeginTabItem("Captured Mods Stats"))
                     {
-                        if (ImGui.BeginChild("CapturedStatsScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Border))
+                        if (ImGui.BeginChild("CapturedStatsScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Borders))
                         {
                             DrawCapturedModsStats();
                             ImGui.EndChild();
@@ -177,7 +186,7 @@ namespace MapNotify_3_28
 
                     if (ImGui.BeginTabItem("Mod Browser"))
                     {
-                        if (ImGui.BeginChild("BrowserScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Border))
+                        if (ImGui.BeginChild("BrowserScrollingRegion", new nuVector2(0, -35), ImGuiChildFlags.Borders))
                         {
                             DrawModBrowser();
                             ImGui.EndChild();
@@ -277,7 +286,7 @@ namespace MapNotify_3_28
             }
 
             // Stat colors (matching the plugin's existing color conventions)
-            var iiqColor = new nuVector4(0.5f, 0.85f, 1f, 1f);       // Cyan
+            var adColor = new nuVector4(0.5f, 0.85f, 1f, 1f);       // Cyan
             var iirColor = new nuVector4(1f, 0.95f, 0.4f, 1f);       // Yellow
             var psColor = new nuVector4(0.4f, 1f, 0.4f, 1f);         // Lime
             var mmColor = new nuVector4(0.5f, 0.85f, 1f, 1f);        // Blue (Maps)
@@ -286,7 +295,7 @@ namespace MapNotify_3_28
             var dimWhite = new nuVector4(0.45f, 0.45f, 0.45f, 1f);
 
             // Column offsets for aligned stat display (relative to indent start)
-            // Layout: [value IIQ]  [value PS]   [value IIR]
+            // Layout: [value AD]  [value PS]   [value IIR]
             //         [value MM]   [value MS]   [value MC]
             const float col1 = 0f;
             const float col2 = 75f;
@@ -303,15 +312,15 @@ namespace MapNotify_3_28
                     ImGui.TextColored(dimWhite, $"-- {label}");
             }
 
-            // Helper: draw two aligned lines of stats (IIQ/PS/IIR then MM/MS/MC)
-            void DrawStatsBlock(int iiq, int ps, int iir, int mm, int ms, int mc, float indentAmount)
+            // Helper: draw two aligned lines of stats (AD/PS/IIR then MM/MS/MC)
+            void DrawStatsBlock(int ad, int ps, int iir, int mm, int ms, int mc, float indentAmount)
             {
                 var baseX = ImGui.GetCursorPosX() + indentAmount;
 
-                // Line 1: IIQ  PS  IIR
+                // Line 1: AD  PS  IIR
                 ImGui.SetCursorPosX(baseX + col1);
-                if (iiq != 0) ImGui.TextColored(iiqColor, $"{iiq}%% IIQ");
-                else ImGui.TextColored(dimWhite, "-- IIQ");
+                if (ad != 0) ImGui.TextColored(adColor, $"{ad}%% AD");
+                else ImGui.TextColored(dimWhite, "-- AD");
                 DrawStatCell(col2, baseX, ps, "PS", psColor);
                 DrawStatCell(col3, baseX, iir, "IIR", iirColor);
 
@@ -324,10 +333,10 @@ namespace MapNotify_3_28
             }
 
             // Calculate totals
-            int totalIIQ = 0, totalIIR = 0, totalPS = 0, totalMM = 0, totalMS = 0, totalMC = 0;
+            int totalAD = 0, totalIIR = 0, totalPS = 0, totalMM = 0, totalMS = 0, totalMC = 0;
             foreach (var mod in _capturedMods)
             {
-                totalIIQ += mod.Quantity;
+                totalAD += mod.Quantity;
                 totalIIR += mod.Rarity;
                 totalPS += mod.PackSize;
                 totalMM += mod.MoreMaps;
@@ -338,7 +347,7 @@ namespace MapNotify_3_28
             // Draw totals header
             ImGui.TextColored(new nuVector4(1f, 0.85f, 0.3f, 1f), "--- Totals ---");
             ImGui.Separator();
-            DrawStatsBlock(totalIIQ, totalPS, totalIIR, totalMM, totalMS, totalMC, 0f);
+            DrawStatsBlock(totalAD, totalPS, totalIIR, totalMM, totalMS, totalMC, 0f);
 
             ImGui.Dummy(new nuVector2(0, 6));
             ImGui.TextColored(new nuVector4(1f, 0.85f, 0.3f, 1f), "--- Per-Mod Breakdown ---");
@@ -485,32 +494,50 @@ namespace MapNotify_3_28
             string[] statusOptions = { "All", "Configured", "Unconfigured" };
             ImGui.Combo("##browserStatus", ref _browserStatusFilterIndex, statusOptions, statusOptions.Length);
 
-            var filtered = _modEntries
-                .Where(entry => string.IsNullOrEmpty(_modFilter) ||
-                                entry.GroupKey.Contains(_modFilter, StringComparison.OrdinalIgnoreCase) ||
-                                (entry.Descriptions != null && entry.Descriptions.Any(d => d.Contains(_modFilter, StringComparison.OrdinalIgnoreCase))) ||
-                                (entry.BaseMods != null && entry.BaseMods.Any(bm => bm.Contains(_modFilter, StringComparison.OrdinalIgnoreCase))))
-                .Where(entry =>
-                {
-                    if (_browserAffixFilterIndex == 1 && entry.Affix != "Prefix") return false;
-                    if (_browserAffixFilterIndex == 2 && entry.Affix != "Suffix") return false;
-                    if (_browserAffixFilterIndex == 3 && entry.Affix != "Unique") return false;
-
-                    if (_browserStatusFilterIndex != 0)
+            if (_browserFilteredCache == null
+                || _browserFilteredFilter != _modFilter
+                || _browserFilteredAffix != _browserAffixFilterIndex
+                || _browserFilteredStatus != _browserStatusFilterIndex
+                || _browserFilteredDictionaryVersion != ModDictionaryVersion
+                || _browserFilteredModEntriesVersion != _modEntriesVersion
+                || _browserFilteredEntryCount != _modEntries.Count)
+            {
+                _browserFilteredCache = _modEntries
+                    .Where(entry => string.IsNullOrEmpty(_modFilter) ||
+                                    entry.GroupKey.Contains(_modFilter, StringComparison.OrdinalIgnoreCase) ||
+                                    (entry.Descriptions != null && entry.Descriptions.Any(d => d.Contains(_modFilter, StringComparison.OrdinalIgnoreCase))) ||
+                                    (entry.BaseMods != null && entry.BaseMods.Any(bm => bm.Contains(_modFilter, StringComparison.OrdinalIgnoreCase))))
+                    .Where(entry =>
                     {
-                        bool isConfigured = entry.BaseMods != null && entry.BaseMods.Any(bm =>
+                        if (_browserAffixFilterIndex == 1 && entry.Affix != "Prefix") return false;
+                        if (_browserAffixFilterIndex == 2 && entry.Affix != "Suffix") return false;
+                        if (_browserAffixFilterIndex == 3 && entry.Affix != "Unique") return false;
+
+                        if (_browserStatusFilterIndex != 0)
                         {
-                            var (match, _) = MatchMod(bm);
-                            return match != null || MatchInterest(bm) != null;
-                        });
+                            bool isConfigured = entry.BaseMods != null && entry.BaseMods.Any(bm =>
+                            {
+                                var (match, _) = MatchMod(bm);
+                                return match != null || MatchInterest(bm) != null;
+                            });
 
-                        if (_browserStatusFilterIndex == 1 && !isConfigured) return false;
-                        if (_browserStatusFilterIndex == 2 && isConfigured) return false;
-                    }
+                            if (_browserStatusFilterIndex == 1 && !isConfigured) return false;
+                            if (_browserStatusFilterIndex == 2 && isConfigured) return false;
+                        }
 
-                    return true;
-                })
-                .ToList();
+                        return true;
+                    })
+                    .ToList();
+
+                _browserFilteredFilter = _modFilter;
+                _browserFilteredAffix = _browserAffixFilterIndex;
+                _browserFilteredStatus = _browserStatusFilterIndex;
+                _browserFilteredDictionaryVersion = ModDictionaryVersion;
+                _browserFilteredModEntriesVersion = _modEntriesVersion;
+                _browserFilteredEntryCount = _modEntries.Count;
+            }
+
+            var filtered = _browserFilteredCache;
 
             ImGui.Text($"Showing {filtered.Count} mods ({(_modEntriesLoadedFromMemory ? "Game Memory" : "mods.json")}).");
             ImGui.SameLine();

@@ -1,6 +1,5 @@
 using ExileCore;
 using ExileCore.Shared.Nodes;
-using ImGuiNET;
 using System.Collections.Generic;
 using nuVector4 = System.Numerics.Vector4;
 using nuVector2 = System.Numerics.Vector2;

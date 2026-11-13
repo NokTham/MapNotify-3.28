@@ -42,6 +42,7 @@ public partial class MapNotify_3_28
     private System.Reflection.PropertyInfo _elemProp;
     private System.Reflection.FieldInfo _flagsField;
     private static Func<object, ulong> _getFlagsDelegate;
+    private static Func<object, object> _getElemDelegate;
 
     /// <summary>
     /// Initializes the caches required for Atlas highlighting, including completion status 
@@ -135,7 +136,17 @@ public partial class MapNotify_3_28
             if (firstChild != null)
             {
                 _elemProp = firstChild.GetType().GetProperty("Elem");
-                var elem = _elemProp?.GetValue(firstChild);
+
+                if (_elemProp != null)
+                {
+                    // Cache the Elem property access instead of using reflection per node.
+                    var elemParam = Expression.Parameter(typeof(object), "obj");
+                    var elemCast = Expression.Convert(elemParam, _elemProp.DeclaringType);
+                    var elemAccess = Expression.Convert(Expression.Property(elemCast, _elemProp), typeof(object));
+                    _getElemDelegate = Expression.Lambda<Func<object, object>>(elemAccess, elemParam).Compile();
+                }
+
+                var elem = _getElemDelegate?.Invoke(firstChild) ?? _elemProp?.GetValue(firstChild);
                 _flagsField = elem?.GetType().GetField("Flags");
 
                 // Optimize property and field access via compiled expressions
@@ -175,7 +186,7 @@ public partial class MapNotify_3_28
 
             if (_elemProp != null && _flagsField != null)
             {
-                var elem = _elemProp.GetValue(element);
+                var elem = _getElemDelegate != null ? _getElemDelegate(element) : _elemProp.GetValue(element);
                 if (elem == null) continue;
                 if (_getFlagsDelegate != null)
                 {
@@ -190,15 +201,17 @@ public partial class MapNotify_3_28
             bool isCompleted = false;
             bool isBonusCompleted = false;
             bool isWitnessedByMemory = false;
+            AtlasNode resolvedNode = null;
 
             if (_discoveredAtlasOffset != -1)
             {
                 atlasNodePtr = gameController.IngameState.M.Read<long>(element.Address + _discoveredAtlasOffset);
                 if (atlasNodePtr != 0)
                 {
-                    var node = gameController.Game.GetObject<AtlasNode>(atlasNodePtr);
-                    if (node == null || string.IsNullOrEmpty(node.Id))
+                    resolvedNode = gameController.Game.GetObject<AtlasNode>(atlasNodePtr);
+                    if (resolvedNode == null || string.IsNullOrEmpty(resolvedNode.Id))
                     {
+                        resolvedNode = null;
                         atlasNodePtr = 0;
                         _discoveredAtlasOffset = -1;
                     }
@@ -242,7 +255,7 @@ public partial class MapNotify_3_28
 
             if (atlasNodePtr != 0)
             {
-                var node = gameController.Game.GetObject<AtlasNode>(atlasNodePtr);
+                var node = resolvedNode ?? gameController.Game.GetObject<AtlasNode>(atlasNodePtr);
                 areaName = node?.Area?.Name;
                 nodeId = node?.Id;
 
@@ -253,13 +266,17 @@ public partial class MapNotify_3_28
                 isWitnessedByMemory = !string.IsNullOrEmpty(areaName) && witnessedNames.Contains(areaName);
             }
 
+            string mappedId = null;
+            if (!string.IsNullOrEmpty(uiMapName))
+                SpecialNodeMapping.TryGetValue(uiMapName, out mappedId);
+
             if (!string.IsNullOrEmpty(uiMapName))
             {
                 if (completedNames.Contains(uiMapName)) isCompleted = true;
                 if (bonusNames.Contains(uiMapName)) isBonusCompleted = true;
                 if (witnessedNames.Contains(uiMapName)) isWitnessedByMemory = true;
 
-                if (SpecialNodeMapping.TryGetValue(uiMapName, out var mappedId))
+                if (mappedId != null)
                 {
                     if (completedNames.Contains(mappedId)) isCompleted = true;
                     if (bonusNames.Contains(mappedId)) isBonusCompleted = true;
@@ -270,15 +287,15 @@ public partial class MapNotify_3_28
             string checkName = uiMapName ?? areaName;
             bool isWhitelisted = (!string.IsNullOrEmpty(checkName) && ExpectedNodes.Contains(checkName)) ||
                                  (!string.IsNullOrEmpty(nodeId) && ExpectedNodes.Contains(nodeId));
-            if (!isWhitelisted && !string.IsNullOrEmpty(uiMapName) && SpecialNodeMapping.TryGetValue(uiMapName, out var sId))
-                isWhitelisted = ExpectedNodes.Contains(sId);
+            if (!isWhitelisted && mappedId != null)
+                isWhitelisted = ExpectedNodes.Contains(mappedId);
 
             if (!isWhitelisted) continue;
 
             bool isBonusPossible = (!string.IsNullOrEmpty(checkName) && ExpectedBonusNodes.Contains(checkName)) ||
                                    (!string.IsNullOrEmpty(nodeId) && ExpectedBonusNodes.Contains(nodeId));
-            if (!isBonusPossible && !string.IsNullOrEmpty(uiMapName) && SpecialNodeMapping.TryGetValue(uiMapName, out var bId))
-                isBonusPossible = ExpectedBonusNodes.Contains(bId);
+            if (!isBonusPossible && mappedId != null)
+                isBonusPossible = ExpectedBonusNodes.Contains(mappedId);
 
             var center = element.GetClientRect().Center.ToVector2Num();
             if (showAtlas && !isCompleted)

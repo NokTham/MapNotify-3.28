@@ -12,7 +12,6 @@ using ExileCore.PoEMemory.FilesInMemory;
 using ExileCore.Shared.Cache;
 using ExileCore.Shared.Enums;
 using ExileCore.Shared.Helpers;
-using ImGuiNET;
 using SharpDX;
 using nuVector2 = System.Numerics.Vector2;
 using System.Text.RegularExpressions;
@@ -40,9 +39,16 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         "F08C5AFF"
     };
 
+    private static readonly Regex WhitespaceRegex = new Regex(@"\s+", RegexOptions.Compiled);
+    private static readonly Regex NumericRangeRegex = new Regex(@"\(\d+-\d+\)", RegexOptions.Compiled);
+
+    private static readonly nuVector4[] InterestPalette = InterestPaletteHex
+        .Select(h => SharpToNu(HexToSDXVector4(h)))
+        .ToArray();
+
     public static nuVector4 GetNextInterestColor()
     {
-        var palette = InterestPaletteHex.Select(h => SharpToNu(HexToSDXVector4(h))).ToList();
+        var palette = InterestPalette;
         if (InterestModsDictionary != null && InterestModsDictionary.Count > 0)
         {
             var usedColors = InterestModsDictionary.Values
@@ -55,13 +61,31 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                     return SharpToNu(HexToSDXVector4(hex));
             }
 
-            return palette[InterestModsDictionary.Count % palette.Count];
+            return palette[InterestModsDictionary.Count % palette.Length];
         }
 
         return palette[0];
     }
     public static HashSet<string> ExpectedNodes = new HashSet<string>();
     public static HashSet<string> ExpectedBonusNodes = new HashSet<string>();
+
+    // Bumped when Good/Bad/Interest dictionaries are reloaded so UI caches can invalidate.
+    public static int ModDictionaryVersion;
+
+    private int _modEntriesVersion;
+    private Element _heistLockerElement;
+    private Element _expeditionLockerElement;
+    private long _lastHeistLockerProbe;
+    private long _lastExpeditionLockerProbe;
+    private long _lastWindowAreaUpdate;
+    private long _lastLiveSlotRefreshMs;
+    private long _liveSlotRefreshUntilMs;
+    private bool _leftMouseWasDown;
+
+    private static readonly int[] ExpeditionLockerIndices =
+    {
+        Constants.UIIndices.ExpeditionLockerDefault, 102, 103, 104
+    };
     private CachedValue<List<NormalInventoryItem>> _inventoryItems;
     private CachedValue<(int stashIndex, List<NormalInventoryItem>)> _stashItems;
     private CachedValue<(int stashIndex, List<NormalInventoryItem>)> _mapStashItems;
@@ -165,34 +189,9 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             var mapStatDesc = GameController.Files?.MapStatDescriptions;
             var statDesc = GameController.Files?.StatDescriptions;
 
-            bool IsYieldModKey(string key)
-            {
-                if (string.IsNullOrEmpty(key)) return false;
-                return key.StartsWith("MapItemDropChance", StringComparison.OrdinalIgnoreCase) ||
-                       key.StartsWith("MapItemQuantity", StringComparison.OrdinalIgnoreCase) ||
-                       key.StartsWith("MapItemRarity", StringComparison.OrdinalIgnoreCase) ||
-                       key.StartsWith("MapPackSize", StringComparison.OrdinalIgnoreCase) ||
-                       key.StartsWith("MapMonsterPackSize", StringComparison.OrdinalIgnoreCase) ||
-                       key.StartsWith("MapScarabDropChance", StringComparison.OrdinalIgnoreCase) ||
-                       key.StartsWith("MapCurrencyDropChance", StringComparison.OrdinalIgnoreCase) ||
-                       key.StartsWith("MapMapDropChance", StringComparison.OrdinalIgnoreCase) ||
-                       key.StartsWith("MapTotalItemQuantity", StringComparison.OrdinalIgnoreCase) ||
-                       key.StartsWith("MapTotalItemRarity", StringComparison.OrdinalIgnoreCase) ||
-                       key.StartsWith("MapTotalPackSize", StringComparison.OrdinalIgnoreCase) ||
-                       key.StartsWith("MapTierDropChance", StringComparison.OrdinalIgnoreCase) ||
-                       key.StartsWith("MapOriginator", StringComparison.OrdinalIgnoreCase);
-            }
+            bool IsYieldModKey(string key) => MapYield.IsYieldModName(key);
 
-            bool IsYieldStatLine(string line)
-            {
-                if (string.IsNullOrWhiteSpace(line)) return false;
-                if (line.Contains("quantity of items", StringComparison.OrdinalIgnoreCase)) return true;
-                if (line.Contains("rarity of items", StringComparison.OrdinalIgnoreCase)) return true;
-                if (line.Contains("pack size", StringComparison.OrdinalIgnoreCase)) return true;
-                if (Regex.IsMatch(line, @"\bmore\s+(scarabs?|currency(\s+items?)?|maps?)\b", RegexOptions.IgnoreCase)) return true;
-                if (Regex.IsMatch(line, @"\b(increased|more)\s+(map|scarab|currency)\s+drop", RegexOptions.IgnoreCase)) return true;
-                return false;
-            }
+            bool IsYieldStatLine(string line) => MapYield.IsYieldDescription(line);
 
             // Load known mappings from mods.json if available
             var knownLookup = new Dictionary<string, (string GroupKey, List<string> Descriptions, string Type)>(StringComparer.OrdinalIgnoreCase);
@@ -241,7 +240,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                     if (IsYieldModKey(m.Key)) return false;
 
                     // Blacklist check
-                    if (Constants.ModNameBlacklist.Any(black => m.Key.Contains(black, StringComparison.OrdinalIgnoreCase)))
+                    if (Constants.IsModBlacklisted(m.Key))
                         return false;
 
                     // 1. Strict AffixType filter - only true rollable affixes
@@ -448,6 +447,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 .OrderBy(e => e.Type).ThenBy(e => e.Affix).ThenBy(e => e.GroupKey).ToList();
 
             _modEntries = entries;
+            _modEntriesVersion++;
             _modEntriesLoadedFromMemory = true;
             LogMessage($"MapNotify: Successfully loaded {_modEntries.Count} mod groups ({relevantMods.Count} raw mods) from game memory.", 5);
             return true;
@@ -490,6 +490,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                         BaseMods = kvp.Value.BaseMods,
                         Type = kvp.Value.Type
                     }).ToList();
+                    _modEntriesVersion++;
 
                     LogMessage($"MapNotify: Successfully loaded {_modEntries.Count} mods from database at {path}.", 5);
                 }
@@ -584,7 +585,12 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     /// </summary>
     public override void Render()
     {
-        windowArea = GameController.Window.GetWindowRectangle();
+        var now = Environment.TickCount64;
+        if (now - _lastWindowAreaUpdate >= 1000)
+        {
+            windowArea = GameController.Window.GetWindowRectangle();
+            _lastWindowAreaUpdate = now;
+        }
 
         ProcessHotkeys();
 
@@ -596,10 +602,34 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
         var ui = ingameState.IngameUi;
 
-        if (Settings.FilterInventory && ui.InventoryPanel.IsVisible)
-            DrawBordersForItems(_inventoryItems.Value, "Inventory");
+        // Cached slot wrappers keep the position they had when the list was built, so
+        // while an item is being dragged they can still point at the old slot. Keep
+        // the list live while an item is held and for a short window after a click:
+        // the game may update the moved item's slot a frame or two after the drop,
+        // so a single release-time refresh can still read the old position.
+        const long LiveSlotWindowMs = 500;
+        bool leftMouseDown = Input.IsKeyDown(System.Windows.Forms.Keys.LButton);
+        bool leftMouseReleased = _leftMouseWasDown && !leftMouseDown;
+        _leftMouseWasDown = leftMouseDown;
 
-        RenderStash(ui);
+        bool holdingItem = IsHoldingItem();
+        if (holdingItem || leftMouseReleased)
+            _liveSlotRefreshUntilMs = now + LiveSlotWindowMs;
+
+        bool refreshLiveSlots = holdingItem || now <= _liveSlotRefreshUntilMs;
+        if (leftMouseDown && !refreshLiveSlots && now - _lastLiveSlotRefreshMs >= 100)
+        {
+            refreshLiveSlots = true;
+            _lastLiveSlotRefreshMs = now;
+        }
+
+        if (Settings.FilterInventory && ui.InventoryPanel.IsVisible)
+        {
+            if (refreshLiveSlots) _inventoryItems.ForceUpdate();
+            DrawBordersForItems(_inventoryItems.Value, "Inventory");
+        }
+
+        RenderStash(ui, refreshLiveSlots);
         RenderLockers();
         RenderShopsAndTrade(ui);
         RenderMapDevice();
@@ -619,25 +649,187 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         if (modifiersMatch && Settings.CaptureHotkey.PressedOnce()) HandleCaptureHotkey();
     }
 
-    private void RenderStash(IngameUIElements ui)
+    /// <summary>
+    /// True while an item is attached to the cursor. Used to keep the slot list live
+    /// during a move so cached wrappers cannot draw at the previous position.
+    /// </summary>
+    private bool IsHoldingItem()
+    {
+        try
+        {
+            var cursor = ingameState?.IngameUi?.Cursor;
+            if (cursor == null) return false;
+
+            var action = cursor.Action;
+            return action == MouseActionType.HoldItem || action == MouseActionType.HoldItemForSell;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private void RenderStash(IngameUIElements ui, bool refreshLiveSlots)
     {
         var stashUI = ui.StashElement;
-        if (stashUI.IsVisible && stashUI.VisibleStash != null)
+        if (stashUI == null || !stashUI.IsVisible || stashUI.VisibleStash == null)
+            return;
+
+        var isMapStash = stashUI.VisibleStash.InvType == InventoryType.MapStash;
+        var cache = isMapStash ? _mapStashItems : _stashItems;
+        var value = cache.Value;
+
+        // Refresh during a drag, right after a move, or on a tab switch so the
+        // highlight follows the item instead of lingering on the old slot.
+        if (refreshLiveSlots || stashUI.IndexVisibleStash != value.stashIndex)
         {
-            var isMapStash = stashUI.VisibleStash.InvType == InventoryType.MapStash;
-            var cache = isMapStash ? _mapStashItems.Value : _stashItems.Value;
-            if (stashUI.IndexVisibleStash == cache.stashIndex)
-                DrawBordersForItems(cache.Item2, "Stash");
+            cache.ForceUpdate();
+            value = cache.Value;
         }
+
+        if (stashUI.IndexVisibleStash == value.stashIndex)
+            DrawBordersForItems(value.Item2, "Stash");
     }
 
     private void RenderLockers()
     {
-        if (Settings.ShowHeistLockerHighlights.Value)
+        if (Settings.ShowHeistLockerHighlights.Value && GetVisibleHeistLocker() != null)
             DrawBordersForItems(_heistLockerItems.Value, "Heist Locker");
 
-        if (Settings.ShowExpeditionLockerHighlights.Value)
+        if (Settings.ShowExpeditionLockerHighlights.Value && GetVisibleExpeditionLocker() != null)
             DrawBordersForItems(_expeditionLockerItems.Value, "Expedition Locker");
+    }
+
+    /// <summary>
+    /// Cheap visibility probe used to avoid running the locker scanners while the
+    /// lockers are closed.
+    /// </summary>
+    private static bool IsElementVisible(Element element)
+    {
+        if (element == null) return false;
+        try
+        {
+            return element.IsVisible;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private Element GetVisibleHeistLocker()
+    {
+        var ui = ingameState?.IngameUi;
+        if (ui == null) return null;
+
+        if (_heistLockerElement != null)
+        {
+            if (IsElementVisible(_heistLockerElement))
+                return _heistLockerElement;
+            _heistLockerElement = null;
+        }
+
+        // Fast path: the known locker index is checked every frame.
+        if (ui.ChildCount > Constants.UIIndices.HeistLockerDefault)
+        {
+            var element = ui.GetChildAtIndex(Constants.UIIndices.HeistLockerDefault);
+            if (IsElementVisible(element) && element.ChildCount >= 10)
+            {
+                _heistLockerElement = element;
+                return element;
+            }
+        }
+
+        // Slow fallback scan is rate-limited so a closed locker costs almost nothing.
+        var now = Environment.TickCount64;
+        if (now - _lastHeistLockerProbe < 1000)
+            return null;
+        _lastHeistLockerProbe = now;
+
+        for (int i = 0; i < ui.ChildCount; i++)
+        {
+            var child = ui.GetChildAtIndex(i);
+            if (IsElementVisible(child) && child.ChildCount is >= 24 and <= 45)
+            {
+                _heistLockerElement = child;
+                return child;
+            }
+        }
+
+        return null;
+    }
+
+    private Element GetVisibleExpeditionLocker()
+    {
+        var ui = ingameState?.IngameUi;
+        if (ui == null) return null;
+
+        if (_expeditionLockerElement != null)
+        {
+            if (IsElementVisible(_expeditionLockerElement))
+                return _expeditionLockerElement;
+            _expeditionLockerElement = null;
+        }
+
+        // Fast path: check the known indices every frame.
+        for (int i = 0; i < ExpeditionLockerIndices.Length; i++)
+        {
+            var index = ExpeditionLockerIndices[i];
+            if (ui.ChildCount <= index) continue;
+
+            var element = ui.GetChildAtIndex(index);
+            if (IsElementVisible(element))
+            {
+                _expeditionLockerElement = element;
+                return element;
+            }
+        }
+
+        // Slow fallback scan is rate-limited so a closed locker costs almost nothing.
+        var now = Environment.TickCount64;
+        if (now - _lastExpeditionLockerProbe < 1000)
+            return null;
+        _lastExpeditionLockerProbe = now;
+
+        for (int i = 0; i < ui.ChildCount; i++)
+        {
+            var child = ui.GetChildAtIndex(i);
+            if (IsElementVisible(child) && child.ChildCount is >= 10 and <= 35)
+            {
+                _expeditionLockerElement = child;
+                return child;
+            }
+        }
+
+        return null;
+    }
+
+    private bool IsMapDeviceOpen()
+    {
+        var ui = ingameState?.IngameUi;
+        if (ui == null || ui.ChildCount <= Constants.UIIndices.MapDeviceRoot)
+            return false;
+
+        var root = ui.GetChildAtIndex(Constants.UIIndices.MapDeviceRoot);
+        return IsElementVisible(root);
+    }
+
+    private bool IsAtlasPanelVisible()
+    {
+        var ui = ingameState?.IngameUi;
+        if (ui == null) return false;
+
+        var atlas = ui.Atlas;
+        if (IsElementVisible(atlas))
+            return true;
+
+        if (ui.ChildCount > Constants.UIIndices.AtlasPanel)
+        {
+            var panel = ui.GetChildAtIndex(Constants.UIIndices.AtlasPanel);
+            return IsElementVisible(panel);
+        }
+
+        return false;
     }
 
     private void RenderShopsAndTrade(IngameUIElements ui)
@@ -659,7 +851,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
     private void RenderMapDevice()
     {
-        if (Settings.ShowForInvitations.Value || Settings.FilterTrade.Value)
+        if ((Settings.ShowForInvitations.Value || Settings.FilterTrade.Value) && IsMapDeviceOpen())
         {
             var deviceItems = _mapDeviceItems.Value;
             foreach (var item in deviceItems)
@@ -672,11 +864,19 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
                 if (isInvitation && !Settings.ShowForInvitations.Value) continue;
                 if (!isInvitation && !Settings.FilterTrade.Value) continue;
-                DrawBordersForItems(new[] { item }, "Map Device");
+
+                try
+                {
+                    DrawMapBorders(item, item.Item);
+                }
+                catch (Exception ex)
+                {
+                    LogError($"Error drawing Map Device borders: {ex.Message}", 10);
+                }
             }
         }
 
-        if (Settings.ShowMapDeviceStorageHighlights.Value)
+        if (Settings.ShowMapDeviceStorageHighlights.Value && IsAtlasPanelVisible())
             DrawBordersForItems(_mapDeviceStorageItems.Value, "Map Device Storage");
     }
 
@@ -758,8 +958,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                         m.ModRecord.AffixType.ToString().Contains("Enchant") ||
                         m.RawName.Contains("Enchant"))
             .Where(m => !string.IsNullOrEmpty(m.Name))
-            .Where(m => !Constants.ModNameBlacklist.Any(black => m.RawName.Contains(black)))
-            .GroupBy(m => Regex.Replace(m.RawName, @"\s+", ""), StringComparer.OrdinalIgnoreCase)
+            .Where(m => !Constants.IsModBlacklisted(m.RawName))
+            .GroupBy(m => WhitespaceRegex.Replace(m.RawName, ""), StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
             .OrderBy(m =>
             {
@@ -785,8 +985,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 for (int k = 0; k < availableDescriptions.Count; k++)
                 {
                     var fragments = cleanModName.Split('#', StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).Where(f => f.Length > 1).ToList();
-                    var uiTextNoRanges = Regex.Replace(availableDescriptions[k], @"\(\d+-\d+\)", "").Trim();
-                    uiTextNoRanges = Regex.Replace(uiTextNoRanges, @"\s+", " ");
+                    var uiTextNoRanges = NumericRangeRegex.Replace(availableDescriptions[k], "").Trim();
+                    uiTextNoRanges = WhitespaceRegex.Replace(uiTextNoRanges, " ");
 
                     if (fragments.Count > 0 && fragments.All(f => uiTextNoRanges.Contains(f, StringComparison.OrdinalIgnoreCase)) ||
                         (fragments.Count == 0 && uiTextNoRanges.Contains(cleanModName, StringComparison.OrdinalIgnoreCase)))
@@ -816,7 +1016,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             var (existingEntry, _) = MatchMod(mod.RawName);
 
             // Extract per-mod stat contributions
-            int modIIQ = 0, modIIR = 0, modPS = 0, modMM = 0, modMS = 0, modMC = 0;
+            int modAD = 0, modIIR = 0, modPS = 0, modMM = 0, modMS = 0, modMC = 0;
             var stats = mod.ModRecord?.StatNames;
             var values = mod.Values;
             if (stats != null && values != null)
@@ -826,12 +1026,15 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                     var key = stats[i].Key;
                     if (string.IsNullOrEmpty(key)) continue;
                     var val = values[i];
-                    if (key.Contains("quantity", StringComparison.OrdinalIgnoreCase)) modIIQ += val;
-                    else if (key.Contains("rarity", StringComparison.OrdinalIgnoreCase)) modIIR += val;
-                    else if (key.Contains("pack_size", StringComparison.OrdinalIgnoreCase)) modPS += val;
-                    else if (key.Contains("scarab_drop_chance", StringComparison.OrdinalIgnoreCase)) modMS += val;
-                    else if (key.Contains("currency_drop_chance", StringComparison.OrdinalIgnoreCase)) modMC += val;
-                    else if (key.Contains("map_item_drop_chance", StringComparison.OrdinalIgnoreCase)) modMM += val;
+                    switch (MapYield.ClassifyStatKey(key))
+                    {
+                        case MapYield.Stat.AtlasDrops: modAD += val; break;
+                        case MapYield.Stat.ItemRarity: modIIR += val; break;
+                        case MapYield.Stat.PackSize: modPS += val; break;
+                        case MapYield.Stat.MoreScarabs: modMS += val; break;
+                        case MapYield.Stat.MoreCurrency: modMC += val; break;
+                        case MapYield.Stat.MoreMaps: modMM += val; break;
+                    }
                 }
             }
 
@@ -851,7 +1054,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 IsBricking = existingEntry?.Bricking ?? false,
                 IsOfInterest = interestEntry != null,
                 InterestColor = interestEntry?.Color ?? GetNextInterestColor(),
-                Quantity = modIIQ,
+                Quantity = modAD,
                 Rarity = modIIR,
                 PackSize = modPS,
                 MoreMaps = modMM,

@@ -6,7 +6,6 @@ using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.Elements.InventoryElements;
 using ExileCore.Shared.Helpers;
 using ExileCore.Shared.Nodes;
-using ImGuiNET;
 using SharpDX;
 using nuVector2 = System.Numerics.Vector2;
 using nuVector4 = System.Numerics.Vector4;
@@ -284,7 +283,7 @@ namespace MapNotify_3_28
                     Settings.ShowModCount.Value
                 );
                 Settings.ShowQuantityPercent.Value = Checkbox(
-                    "Show Item Quantity %",
+                    "Show Atlas Drops %",
                     Settings.ShowQuantityPercent.Value
                 );
                 ImGui.SameLine(0f, 25f);
@@ -298,7 +297,7 @@ namespace MapNotify_3_28
                     Settings.ShowRarityPercent.Value
                 );
                 Settings.ColorQuantityPercent.Value = Checkbox(
-                    "Warn Below Quantity Percentage",
+                    "Warn Below Atlas Drops Percentage",
                     Settings.ColorQuantityPercent.Value
                 );
                 Settings.ColorQuantity.Value = IntSlider(
@@ -308,7 +307,7 @@ namespace MapNotify_3_28
                 );
                 ImGui.SameLine(0f, 10f);
                 HelpMarker(
-                    "The colour of the quantity text will be red below this amount and green above it."
+                    "The colour of the Atlas Drops text will be red below this amount and green above it."
                 );
                 Settings.ColorPackSizePercent.Value = Checkbox(
                     "Warn Below Pack Size Percentage",
@@ -489,12 +488,6 @@ namespace MapNotify_3_28
                     400f
                 );
 
-                Settings.BorderThickness.Value = IntSlider(
-                    "Tooltip Border Thickness##BorderThickness",
-                    Settings.BorderThickness,
-                    400f
-                );
-
                 ImGui.Dummy(new nuVector2(0, 2));
                 nuVector4 mapBorderGood = SharpToNu(Settings.MapBorderGood.Value.ToVector4());
                 if (
@@ -595,6 +588,10 @@ namespace MapNotify_3_28
                     "Border Thickness for Bricked Maps##BorderThickness Maps",
                     Settings.BorderThicknessMap,
                     400f
+                );
+                ImGui.SameLine();
+                HelpMarker(
+                    "Applies to both the bricked highlight on the map slot and the bricked border around the tooltip."
                 );
 
                 Settings.UseCircleHighlight.Value = Checkbox(

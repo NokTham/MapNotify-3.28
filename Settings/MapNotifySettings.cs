@@ -75,7 +75,6 @@ namespace MapNotify_3_28
 
         // Borders and Highlight Colours
         public RangeNode<int> AreaFill { get; set; } = new(92, 0, 100);
-        public RangeNode<int> BorderThickness { get; set; } = new(1, 1, 6);
         public RangeNode<int> SimpleOutlinesThickness { get; set; } = new(2, 1, 6);
         public RangeNode<int> SimpleOutlinesBrickedSize { get; set; } = new(60, 10, 100);
         public ToggleNode UseSimpleOutlines { get; set; } = new(false);

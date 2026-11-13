@@ -125,6 +125,7 @@ namespace MapNotify_3_28
             GoodModsDictionary = LoadConfigGoodMod();
             BadModsDictionary = LoadConfigBadMod();
             InterestModsDictionary = LoadConfigInterestMod();
+            ModDictionaryVersion++;
         }
 
 

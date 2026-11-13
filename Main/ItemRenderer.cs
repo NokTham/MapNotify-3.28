@@ -4,7 +4,6 @@ using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.Elements.InventoryElements;
 using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared.Helpers;
-using ImGuiNET;
 using SharpDX;
 using nuVector2 = System.Numerics.Vector2;
 using nuVector4 = System.Numerics.Vector4;
@@ -13,6 +12,10 @@ namespace MapNotify_3_28
 {
     public partial class MapNotify_3_28
     {
+        // Size of the last drawn tooltip, used to clamp its position before the
+        // window is begun (the current-frame size is not available until then).
+        private nuVector2 _lastTooltipSize;
+
         /// <summary>
         /// Renders the custom ImGui tooltip overlay for a specific item.
         /// Handles positioning logic, including offsets for other popular plugins (NinjaPricer, etc.).
@@ -31,6 +34,10 @@ namespace MapNotify_3_28
                 }
                 if (ItemDetails == null)
                     return;
+
+                // The HUD component is stored on the Entity, so rebind it to the slot
+                // wrapper currently under the cursor before refreshing the tooltip.
+                ItemDetails.SetItem(Item);
 
                 // Refresh item details to ensure the tooltip reflects any changes made in the Mod Preview window or config files.
                 ItemDetails.Update();
@@ -58,7 +65,30 @@ namespace MapNotify_3_28
                     if (Settings.PadForAltPricer.Value && ItemDetails.NeedsPadding)
                         boxOrigin += new nuVector2(0, 30);
 
-                    var windowId = ItemDetails.WindowID;
+                    // A fixed window ID is essential: ImGui reuses this window across
+                    // items and frames, so switching from one item to the next only
+                    // swaps the contents. A per-item ID creates a new window every
+                    // time, and ImGui hides new windows for one frame to measure
+                    // them, which shows up as flicker when crossing items.
+                    const string windowId = "##MapNotifyTooltip";
+
+                    // Clamp using the previous frame's size, then position the window
+                    // before Begin. Moving the window after its content is submitted
+                    // leaves everything derived from item rects (notably the bricked
+                    // border) at the previous frame's position, so it trails the
+                    // tooltip while the cursor moves.
+                    var finalPos = boxOrigin;
+                    if (
+                        _lastTooltipSize.X > 0
+                        && finalPos.X + _lastTooltipSize.X > windowArea.Width
+                    )
+                        finalPos.X = windowArea.Width - _lastTooltipSize.X - 10;
+                    if (
+                        _lastTooltipSize.Y > 0
+                        && finalPos.Y + _lastTooltipSize.Y > windowArea.Height
+                    )
+                        finalPos.Y = windowArea.Height - _lastTooltipSize.Y - 10;
+                    ImGui.SetNextWindowPos(finalPos, ImGuiCond.Always);
 
                     var _opened = true;
                     pushedColors += 1;
@@ -75,44 +105,50 @@ namespace MapNotify_3_28
                                 | ImGuiWindowFlags.NoSavedSettings
                                 | ImGuiWindowFlags.NoTitleBar
                                 | ImGuiWindowFlags.NoNavInputs
+                                // Draw above regular windows, like the built-in
+                                // tooltip windows used by other plugins.
+                                | ImGuiWindowFlags.Tooltip
                         )
                     )
                     {
+                        // On the frame a tooltip (re)appears ImGui hides it while
+                        // measuring its content and resets its size, so skip the
+                        // frame-derived state until it is actually rendered.
+                        var appearing = ImGui.IsWindowAppearing();
+
                         ImGui.BeginGroup();
                         DrawTooltipContent(ItemDetails, entity);
                         ImGui.EndGroup();
 
-                        // Border Logic
-                        if (ItemDetails.Bricked)
+                        if (!appearing)
+                            _lastTooltipSize = ImGui.GetWindowSize();
+
+                        // Border Logic. The group's item rect is resolved for this
+                        // frame (the window is positioned before Begin), so it tracks
+                        // the tooltip body exactly. The window size itself is still
+                        // the minimum 16x16 on the very first frame of a tooltip.
+                        // The group rect is inset by the window padding, while the
+                        // grey background is the full window rect, so expand back out
+                        // or the border ends up smaller than the tooltip background.
+                        if (ItemDetails.Bricked && !appearing)
                         {
-                            var min = ImGui.GetItemRectMin();
-                            min.X -= 8;
-                            min.Y -= 8;
-                            var max = ImGui.GetItemRectMax();
-                            max.X += 8;
-                            max.Y += 8;
+                            var padding = ImGui.GetStyle().WindowPadding;
+                            var min = ImGui.GetItemRectMin() - padding;
+                            var max = ImGui.GetItemRectMax() + padding;
                             var brickColor = ColorToUint(
                                 SharpToNu(Settings.Bricked.Value.ToVector4())
                             );
                             var drawList = ImGui.GetForegroundDrawList();
-                            for (int i = 0; i < Settings.BorderThickness.Value; i++)
+                            for (int i = 0; i < Settings.BorderThicknessMap.Value; i++)
                                 drawList.AddRect(
                                     new nuVector2(min.X - i, min.Y - i),
                                     new nuVector2(max.X + i, max.Y + i),
                                     brickColor,
                                     0f,
-                                    0,
-                                    1.0f
+                                    1.0f,
+                                    ImDrawFlags.None
                                 );
                         }
-
-                        var size = ImGui.GetWindowSize();
-                        var finalPos = boxOrigin;
-                        if (finalPos.X + size.X > windowArea.Width)
-                            finalPos.X = windowArea.Width - size.X - 10;
-                        if (finalPos.Y + size.Y > windowArea.Height)
-                            finalPos.Y = windowArea.Height - size.Y - 10;
-                        ImGui.SetWindowPos(finalPos, ImGuiCond.Always);
                     }
                     ImGui.End();
                     ImGui.PopStyleColor(pushedColors);
@@ -157,8 +193,10 @@ namespace MapNotify_3_28
 
         private void DrawStatsBlock(ItemDetails details)
         {
-            var prefixSuffixLines = details.GetPrefixSuffixLines();
-            if (Settings.ShowPrefixSuffixStats.Value && prefixSuffixLines.Count > 0)
+            var prefixSuffixLines = Settings.ShowPrefixSuffixStats.Value
+                ? details.GetPrefixSuffixLines()
+                : null;
+            if (prefixSuffixLines != null && prefixSuffixLines.Count > 0)
             {
                 for (int lineIdx = 0; lineIdx < prefixSuffixLines.Count; lineIdx++)
                 {
@@ -196,7 +234,7 @@ namespace MapNotify_3_28
                     var col = Settings.ColorQuantityPercent.Value
                         ? (details.Quantity < Settings.ColorQuantity.Value ? red : green)
                         : white;
-                    ImGui.TextColored(col, $"{details.Quantity}%% IIQ");
+                    ImGui.TextColored(col, $"{details.Quantity}%% AD");
                     drawn = true;
                 }
                 if (Settings.ShowPackSizePercent.Value && details.PackSize != 0)
@@ -357,45 +395,45 @@ namespace MapNotify_3_28
             bool IsShadowed(StyledText styled) =>
                 showInterest && details.InterestShadowedMods.Contains(styled);
 
-            var conflictLines = showGoodBad
-                ? details.ConflictingMods
-                : new List<StyledText>();
-            var goodLines = showGoodBad
-                ? details
-                    .ActiveGoodMods.Where(s => !IsShownInLogbook(s) && !IsShadowed(s))
-                    .ToList()
-                : new List<StyledText>();
-            var interestLines = showInterest
-                ? details.ActiveInterestMods.ToList()
-                : new List<StyledText>();
-            var badLines = showGoodBad
-                ? details
-                    .ActiveBadMods.Where(s => !IsShownInLogbook(s) && !IsShadowed(s))
-                    .ToList()
-                : new List<StyledText>();
-
             bool drawnAny = false;
 
-            void DrawGroup(List<StyledText> lines, bool addBrickPrefix)
+            void DrawGroup(List<StyledText> lines, bool addBrickPrefix, bool applyLogbookFilter)
             {
-                if (lines.Count == 0)
-                    return;
-                if (drawnAny)
-                    ImGui.Dummy(new nuVector2(0, 5));
-                foreach (var styled in lines)
+                bool started = false;
+                for (int i = 0; i < lines.Count; i++)
                 {
+                    var styled = lines[i];
+                    if (applyLogbookFilter && (IsShownInLogbook(styled) || IsShadowed(styled)))
+                        continue;
+
+                    if (!started)
+                    {
+                        if (drawnAny)
+                            ImGui.Dummy(new nuVector2(0, 5));
+                        started = true;
+                    }
+
                     var text = addBrickPrefix
                         ? $"{(styled.Bricking ? "[B] " : "")}{styled.EscapedText}"
                         : styled.EscapedText;
                     ImGui.TextColored(styled.Color, text);
                 }
-                drawnAny = true;
+
+                if (started)
+                    drawnAny = true;
             }
 
-            DrawGroup(conflictLines, false);
-            DrawGroup(goodLines, false);
-            DrawGroup(interestLines, true);
-            DrawGroup(badLines, true);
+            if (showGoodBad)
+            {
+                DrawGroup(details.ConflictingMods, false, false);
+                DrawGroup(details.ActiveGoodMods, false, true);
+            }
+
+            if (showInterest)
+                DrawGroup(details.ActiveInterestMods, true, false);
+
+            if (showGoodBad)
+                DrawGroup(details.ActiveBadMods, true, true);
         }
 
         /// <summary>
@@ -458,8 +496,8 @@ namespace MapNotify_3_28
                 drawList.PathArcTo(center, ringR, rad1, rad2, segs);
                 drawList.PathStroke(
                     ColorToUint(outlineColor),
-                    ImDrawFlags.None,
-                    thick + 2f * outlineThickness
+                    thick + 2f * outlineThickness,
+                    ImDrawFlags.None
                 );
             }
 
@@ -473,7 +511,7 @@ namespace MapNotify_3_28
                 int segs = System.Math.Max(6, (int)((rad2 - rad1) / (2f * pi) * 48f));
 
                 drawList.PathArcTo(center, ringR, rad1, rad2, segs);
-                drawList.PathStroke(ColorToUint(styled.Color), ImDrawFlags.None, thick);
+                drawList.PathStroke(ColorToUint(styled.Color), thick, ImDrawFlags.None);
             }
         }
 
@@ -536,18 +574,23 @@ namespace MapNotify_3_28
             RectangleF? rectOverride = null
         )
         {
-            var rect = rectOverride ?? item.GetClientRect();
-            double fillPercent = Settings.AreaFill; // 0 = nothing, 100 = full item area
-            double shrinkPerSide = (100.0 - fillPercent) / 200.0;
-            var deflateWidth = (int)(rect.Width * shrinkPerSide);
-            var deflateHeight = (int)(rect.Height * shrinkPerSide);
-            rect.Inflate(-deflateWidth, -deflateHeight);
             var itemDetails = entity.GetHudComponent<ItemDetails>();
             if (itemDetails == null)
             {
                 itemDetails = new ItemDetails(item, entity);
                 entity.SetHudComponent(itemDetails);
             }
+
+            // Keep the details object pointed at the item's current slot, otherwise
+            // hover detection and tooltip parsing keep using the old slot element.
+            itemDetails.SetItem(item);
+
+            var rect = rectOverride ?? item.GetClientRect();
+            double fillPercent = Settings.AreaFill; // 0 = nothing, 100 = full item area
+            double shrinkPerSide = (100.0 - fillPercent) / 200.0;
+            var deflateWidth = (int)(rect.Width * shrinkPerSide);
+            var deflateHeight = (int)(rect.Height * shrinkPerSide);
+            rect.Inflate(-deflateWidth, -deflateHeight);
 
             // Bricked highlight (High priority frame)
             if (Settings.BoxForBricked && itemDetails.Bricked)

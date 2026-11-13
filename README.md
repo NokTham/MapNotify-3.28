@@ -33,7 +33,7 @@ MapNotify-3.28 is a plugin for Exile API designed to highlight map modifiers and
 *   **Mods of Interest:** Mark any map mod or enchantment with its own color, independent of the Good/Bad lists, and show a colored arc per interest mod on the map icon.
 
 ### Tooltip Overlays
-*   **Stat Breakdown:** Displays Item Quantity (IIQ), Item Rarity (IIR), and Pack Size (PS).
+*   **Stat Breakdown:** Displays Atlas Drops (AD), Item Rarity (IIR), and Pack Size (PS).
 *   **Prefix/Suffix Breakdown:** Shows the contribution of prefixes and suffixes to map stats.
 *   **Heist Info:** Displays Area Level and required Job levels for Contracts and Blueprints.
 *   **Logbook Info:** Displays Faction information and implicit modifiers.

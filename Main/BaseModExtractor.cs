@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 
 namespace MapNotify_3_28
@@ -11,11 +12,21 @@ namespace MapNotify_3_28
         private static readonly Regex CamelCaseSplitRegex = new Regex(@"([A-Z])", RegexOptions.Compiled);
         private static readonly Regex ExtraSpacesRegex = new Regex(@"\s+", RegexOptions.Compiled);
 
+        // Mod IDs are a finite, heavily reused set. Normalization runs on every item
+        // update, so memoize it instead of repeating three regex passes each time.
+        private static readonly ConcurrentDictionary<string, string> NormalizationCache =
+            new ConcurrentDictionary<string, string>(StringComparer.Ordinal);
+
         public static string GetBaseMod(string modId)
         {
             if (string.IsNullOrEmpty(modId))
                 return modId;
 
+            return NormalizationCache.GetOrAdd(modId, static id => NormalizeBaseMod(id));
+        }
+
+        private static string NormalizeBaseMod(string modId)
+        {
             var normalized = SuffixRegex.Replace(TierNumberRegex.Replace(UberPrefixRegex.Replace(modId, "Map"), ""), "");
             
             // Consistently remove the "Map" prefix to allow matching against config entries that omit it
