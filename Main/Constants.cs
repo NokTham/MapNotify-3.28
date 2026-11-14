@@ -28,6 +28,9 @@ namespace MapNotify_3_28
 
         public static readonly string[] ModNameBlacklist =
         {
+              // Legacy pre-3.30 Delirium enchantment. The 3.30 explicit Delirium affix
+            // has RawName "MapDeliriumOrb" (group "MapContainsDelirium"), which does
+            // not match this entry, so it still counts toward ModCount.
             "AfflictionMapDeliriumStacks",
             "AfflictionMapReward",
             "InfectedMap",

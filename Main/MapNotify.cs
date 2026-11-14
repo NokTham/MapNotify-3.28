@@ -847,18 +847,16 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
     private void RenderShopsAndTrade(IngameUIElements ui)
     {
-        if (Settings.FilterShops && ui.OfflineMerchantPanel.IsVisible)
+        if (Settings.FilterShops && ui.OfflineMerchantPanel?.IsVisible == true)
             DrawBordersForItems(_merchantItems.Value, "Merchant");
 
-        bool isShopVisible =
-            ui.PurchaseWindow?.IsVisible == true
-            || ui.PurchaseWindowHideout?.IsVisible == true
-            || ui.HaggleWindow?.IsVisible == true;
+        // PurchaseWindow covers the town and hideout vendor windows; the obsolete
+        // PurchaseWindowHideout alias is the same element and is no longer needed.
+        bool vendorWindowVisible =
+            ui.PurchaseWindow?.IsVisible == true || ui.HaggleWindow?.IsVisible == true;
+        bool tradeWindowVisible = ui.TradeWindow?.IsVisible == true;
 
-        var tradeWindow = ui.TradeWindow;
-        bool isTradeWindowVisible = tradeWindow != null && tradeWindow.IsVisible;
-
-        if (Settings.FilterTrade && (isShopVisible || isTradeWindowVisible))
+        if ((Settings.FilterShops && vendorWindowVisible) || (Settings.FilterTrade && tradeWindowVisible))
             DrawBordersForItems(_purchaseWindowItems.Value, "Shop/Trade");
     }
 
@@ -914,10 +912,16 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     private void DrawBordersForItems(IEnumerable<NormalInventoryItem> items, string sourceName, HashSet<long> drawnEntities = null)
     {
         if (items == null) return;
+
+        int total = 0, visible = 0, drawn = 0;
         foreach (var item in items)
         {
+            total++;
             if (item?.Item == null || !item.IsVisible) continue;
+            visible++;
             if (drawnEntities != null && !drawnEntities.Add(item.Item.Address)) continue;
+
+            drawn++;
             try
             {
                 DrawMapBorders(item, item.Item);
@@ -927,6 +931,11 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 LogError($"Error drawing {sourceName} borders: {ex.Message}", 10);
             }
         }
+
+        if (SourceDiagnosticsDue())
+            LogSourceDiagnostics(
+                $"{sourceName} draw total={total} visible={visible} drawn={drawn}"
+            );
     }
 
     /// <summary>

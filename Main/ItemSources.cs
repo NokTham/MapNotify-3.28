@@ -12,6 +12,28 @@ namespace MapNotify_3_28
 {
     public partial class MapNotify_3_28
     {
+        // Diagnostics for item discovery. Only written to the verbose log, at most
+        // once per second, and only when the message changes, so a missing highlight
+        // can be traced to discovery vs. drawing without attaching a debugger.
+        private long _lastSourceDiagMs;
+        private string _lastSourceDiagMessage;
+
+        private bool SourceDiagnosticsDue()
+        {
+            return Environment.TickCount64 - _lastSourceDiagMs >= 1000;
+        }
+
+        private void LogSourceDiagnostics(string message)
+        {
+            var now = Environment.TickCount64;
+            if (now - _lastSourceDiagMs < 1000) return;
+            if (message == _lastSourceDiagMessage) return;
+
+            _lastSourceDiagMs = now;
+            _lastSourceDiagMessage = message;
+            LogMessage($"MapNotify: {message}", 5);
+        }
+
         private bool ItemIsMap(Entity entity)
         {
             if (entity == null || entity.Address == 0) return false;
@@ -47,7 +69,23 @@ namespace MapNotify_3_28
         {
             if (Settings.FilterInventory.Value && ingameState?.IngameUi?.InventoryPanel?.IsVisible == true)
             {
-                return GetItemsFromCollection(ingameState.IngameUi.InventoryPanel[InventoryIndex.PlayerInventory]?.VisibleInventoryItems);
+                var inventoryPanel = ingameState.IngameUi.InventoryPanel;
+                var collection = inventoryPanel[InventoryIndex.PlayerInventory]?.VisibleInventoryItems;
+                var result = GetItemsFromCollection(collection);
+                int directCount = result.Count;
+
+                // 3.30: VisibleInventoryItems can come back empty while the panel is
+                // open. Fall back to walking the UI tree, like the stash and locker
+                // scans already do, so inventory highlights keep working.
+                if (result.Count == 0)
+                    FindMapsInElement(inventoryPanel, result);
+
+                if (SourceDiagnosticsDue())
+                    LogSourceDiagnostics(
+                        $"inventory panelVisible={inventoryPanel.IsVisible} collection={(collection == null ? -1 : collection.Count)} direct={directCount} maps={result.Count}"
+                    );
+
+                return result;
             }
             return new List<NormalInventoryItem>();
         }
@@ -180,9 +218,20 @@ namespace MapNotify_3_28
             if (!Settings.FilterShops.Value) return new List<NormalInventoryItem>();
 
             var merchantPanel = ingameState?.IngameUi?.OfflineMerchantPanel;
-            return (merchantPanel != null && merchantPanel.IsVisible)
-                ? GetItemsFromCollection(merchantPanel.VisibleStash?.VisibleInventoryItems)
-                : new List<NormalInventoryItem>();
+            if (merchantPanel == null || !merchantPanel.IsVisible)
+                return new List<NormalInventoryItem>();
+
+            var result = GetItemsFromCollection(merchantPanel.VisibleStash?.VisibleInventoryItems);
+            int directCount = result.Count;
+
+            // 3.30: same empty-collection fallback as the inventory scan.
+            if (result.Count == 0)
+                FindMapsInElement(merchantPanel, result);
+
+            if (SourceDiagnosticsDue())
+                LogSourceDiagnostics($"merchant direct={directCount} maps={result.Count}");
+
+            return result;
         }
 
         private List<NormalInventoryItem> GetHeistLockerItems()
@@ -325,41 +374,65 @@ namespace MapNotify_3_28
         {
             var ui = ingameState?.IngameUi;
             if (ui == null) return new List<NormalInventoryItem>();
-            if (!Settings.FilterTrade.Value) return new List<NormalInventoryItem>();
+            if (!Settings.FilterShops.Value && !Settings.FilterTrade.Value)
+                return new List<NormalInventoryItem>();
 
-            Element window = ui.PurchaseWindow?.IsVisible == true ? ui.PurchaseWindow :
-                             ui.PurchaseWindowHideout?.IsVisible == true ? ui.PurchaseWindowHideout :
-                             ui.HaggleWindow?.IsVisible == true ? ui.HaggleWindow : null;
-
+            // Player trade is its own window; the vendor windows below are gated on
+            // either toggle so enabling only one of them keeps working.
             var tradeWindow = ui.TradeWindow;
-            if (window == null && tradeWindow.IsVisible) window = tradeWindow;
-            if (window == null) return new List<NormalInventoryItem>();
-
-            if (window is TradeWindow trade)
+            if (Settings.FilterTrade.Value && tradeWindow?.IsVisible == true)
             {
-                var result = GetItemsFromCollection(trade.YourOffer);
-                result.AddRange(GetItemsFromCollection(trade.OtherOffer));
-                return result;
+                var tradeResult = GetItemsFromCollection(tradeWindow.YourOffer);
+                tradeResult.AddRange(GetItemsFromCollection(tradeWindow.OtherOffer));
+                if (tradeResult.Count == 0)
+                    FindMapsInElement(tradeWindow, tradeResult);
+                return tradeResult;
             }
-            else
+
+            // Typed accessors instead of fixed child indices: the vendor layout moved
+            // between patches and the old children[8]->children[1] path silently
+            // returned nothing. PurchaseWindow also covers the hideout variant
+            // (PurchaseWindowHideout is just an obsolete alias for it).
+            Element window = null;
+            var result = new List<NormalInventoryItem>();
+            try
             {
-                var result = new List<NormalInventoryItem>();
-                try
+                var purchaseWindow = ui.PurchaseWindow;
+                if (purchaseWindow?.IsVisible == true)
                 {
-                    var children = window.Children;
-                    var child8 = children.Count > 8 ? children[8] : null;
-                    var tabChildren = child8?.Children;
-                    var currentTabContainer = tabChildren != null && tabChildren.Count > 1 ? tabChildren[1] : null;
-                    if (currentTabContainer != null)
+                    window = purchaseWindow;
+                    result = GetItemsFromCollection(
+                        purchaseWindow.TabContainer?.VisibleStash?.VisibleInventoryItems
+                    );
+                }
+                else
+                {
+                    var haggleWindow = ui.HaggleWindow;
+                    if (haggleWindow?.IsVisible == true)
                     {
-                        foreach (var tab in currentTabContainer.Children)
-                            if (tab.IsVisible && tab.ChildCount > 0)
-                                FindMapsInElement(tab.GetChildAtIndex(0), result);
+                        window = haggleWindow;
+                        var haggleItems = haggleWindow.InventoryItems;
+                        result = GetItemsFromCollection(haggleItems);
                     }
                 }
-                catch { }
-                return result;
             }
+            catch
+            {
+                // Best-effort typed accessors; the traversal below is the source of truth.
+            }
+
+            if (window == null) return result;
+
+            // Fallback: walk the whole window when the typed accessors produced nothing.
+            if (result.Count == 0)
+                FindMapsInElement(window, result);
+
+            if (SourceDiagnosticsDue())
+                LogSourceDiagnostics(
+                    $"shop window={window.GetType().Name} maps={result.Count}"
+                );
+
+            return result;
         }
     }
 }

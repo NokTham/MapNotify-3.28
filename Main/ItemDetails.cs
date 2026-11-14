@@ -444,9 +444,10 @@ namespace MapNotify_3_28 // Keep the same namespace
         private void ProcessQuality(Quality qualityComponent, Mods modsComponent, TooltipData tooltipData)
         {
             ChiselName = string.Empty; ChiselValue = 0;
+
             int quality = qualityComponent?.ItemQuality ?? 0;
-            int quantity = (modsComponent?.AlternateQualityType?.Id != "MapRarityQuality") ? quality : 0;
-            int rarity = (modsComponent?.AlternateQualityType?.Id == "MapRarityQuality") ? quality : 0;
+            int rarity = 0;
+            int packSize = 0;
 
             if (modsComponent?.AlternateQualityType != null)
             {
@@ -457,14 +458,25 @@ namespace MapNotify_3_28 // Keep the same namespace
                 //   Divination Chisel              +50%
                 //   Currency Chisel                +50%
                 //   Pack Size Chisel               +10%
-                // The plain Cartographer's Chisel is legacy (no longer drops, still usable)
-                // and keeps its existing behaviour via the MapQuantityQuality branch.
-                if (qId == "MapRarityQuality") { ChiselName = "Rarity Chisel"; ChiselValue = 25; }
-                // 3.30: Item Quantity becomes Atlas Drops; raw-name prefix still to be
-                // confirmed, so the alternate-quality id may or may not be renamed.
-                else if (qId == "MapQuantityQuality") { ChiselName = "Quantity Chisel"; if (quantity == 0) quantity = tooltipData.Quality; ChiselValue = quantity; }
-                // else if (qId == "MapAtlasDropsQuality") { ChiselName = "Atlas Drops Chisel"; if (quantity == 0) quantity = tooltipData.Quality; ChiselValue = quantity; }
-                else if (qId == "MapPackSizeQuality") { ChiselName = "Pack Size Chisel"; ChiselValue = 10; }
+                if (qId == "MapRarityQuality")
+                {
+                    ChiselName = "Rarity Chisel"; ChiselValue = 25;
+                    rarity = ChiselValue;
+                }
+                // The plain Cartographer's Chisel is legacy (no longer drops, still usable).
+                // Its quality is Item Quantity, which is NOT Atlas Drops in 3.30: show the
+                // chisel label, but never add the quality value to the AD total.
+                else if (qId == "MapQuantityQuality")
+                {
+                    int chiselQuality = quality != 0 ? quality : tooltipData.Quality;
+                    ChiselName = "Quantity Chisel"; ChiselValue = chiselQuality;
+                }
+                // else if (qId == "MapAtlasDropsQuality") { ChiselName = "Atlas Drops Chisel"; ... }
+                else if (qId == "MapPackSizeQuality")
+                {
+                    ChiselName = "Pack Size Chisel"; ChiselValue = 10;
+                    packSize = ChiselValue;
+                }
                 else if (qId == "MapDivinationCardQuality") { ChiselName = "Divination Chisel"; ChiselValue = 50; }
                 // 3.30: Maven's Chisel of Scarabs is now Maven's Chisel of Threads and
                 // increases Thread quantity. The item metadata is unchanged
@@ -473,8 +485,13 @@ namespace MapNotify_3_28 // Keep the same namespace
                 else if (qId == "MapScarabQuality") { ChiselName = "Thread Chisel"; ChiselValue = 50; }
                 else if (qId == "MapCurrencyQuality") { ChiselName = "Currency Chisel"; ChiselValue = 50; }
             }
-            else if (quantity == 0) quantity = tooltipData.Quality;
-            Quantity = quantity; Rarity = rarity;
+
+            // Quality only contributes to the stat it actually improves. In 3.30 there
+            // is no quality -> Atlas Drops mapping (AD comes from map modifiers only),
+            // so Quantity is reset here and then rebuilt from the mods.
+            Quantity = 0;
+            Rarity = rarity;
+            PackSize = packSize;
         }
 
         private void ProcessMods(Mods modsComponent, string path, List<StyledText> goodList, List<StyledText> badList,
@@ -483,7 +500,7 @@ namespace MapNotify_3_28 // Keep the same namespace
         {
             PrefixStats = new MapModStats();
             SuffixStats = new MapModStats();
-            var totals = new MapModStats { Quantity = Quantity, Rarity = Rarity };
+            var totals = new MapModStats { Quantity = Quantity, Rarity = Rarity, PackSize = PackSize };
 
             var itemMods = modsComponent?.ItemMods;
             ModCount = itemMods?.Count ?? 0;
