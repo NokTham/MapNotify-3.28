@@ -93,6 +93,17 @@ namespace MapNotify_3_28
     /// by Threads, and Maven's Chisel of Scarabs becomes Maven's Chisel of Threads.
     /// Legacy keys are kept alongside the new ones until the league transition is
     /// complete.
+    /// Confirmed 3.30 facts:
+    ///   - Atlas Drops stat key is "map_drop_scaling_+%" (confirmed in game).
+    ///   - "More Threads" (map_scarab_drop_chance_+%) is an Uber/Originator-only mod.
+    ///   - Thread chisel grants +50% Thread quantity at 20% Quality.
+    ///   - Delirium Orbs add a rare-only explicit affix with the unscaleable lines
+    ///     "Players in Area are 100% Delirious" and "Delirium Reward Type: &lt;type&gt;".
+    ///   - 3.30 also adds rare-only (Tier 1) special suffixes, e.g.
+    ///     "Area contains a Mirror of Delirium", "Area contains a Mirage",
+    ///     "Area contains the Viridian Wildwood", the buried Pandemonium/Stalker/Apex
+    ///     Sentinels and the Evocators of Beidat/K'Tash/Ghorr. Raw names/Tier handling
+    ///     still need to be verified in game.
     /// </summary>
     public static class MapYield
     {
@@ -109,13 +120,13 @@ namespace MapNotify_3_28
 
         /// <summary>
         /// Fragments of ModRecord.StatNames keys (snake_case).
-        /// Atlas Drops uses "map_drop_scaling_+%" in 3.30 and is not the same
-        /// mechanic as the legacy Item Quantity stat; the legacy key is kept here
-        /// only while both data sets need to be supported.
+        /// Atlas Drops uses "map_drop_scaling_+%" in 3.30 (confirmed in game) and is
+        /// not the same mechanic as the legacy Item Quantity stat; the legacy key is
+        /// kept here only while both data sets need to be supported.
         /// </summary>
         public static readonly string[] AtlasDropsStatKeys =
         {
-            "map_drop_scaling", // 3.30 Atlas Drops key (map_drop_scaling_+%)
+            "map_drop_scaling", // 3.30 Atlas Drops key (map_drop_scaling_+%) - confirmed
             "map_item_drop_quantity", // legacy pre-3.30 Item Quantity key
             "map_total_item_quantity",
         };
@@ -141,8 +152,9 @@ namespace MapNotify_3_28
 
         /// <summary>
         /// "More Threads" is the 3.30 name for the special-drop slot (Scarabs were
-        /// removed from the game). The underlying stat key was NOT renamed, so it
-        /// still reads "map_scarab_drop_chance_+%".
+        /// removed from the game). It is an Uber-only mod on Originator/Nightmare
+        /// maps (confirmed), which is why it sets IsOriginatorMap. The underlying
+        /// stat key was NOT renamed, so it still reads "map_scarab_drop_chance_+%".
         /// </summary>
         public static readonly string[] MoreThreadsStatKeys =
         {
@@ -162,7 +174,7 @@ namespace MapNotify_3_28
             "MapItemRarity",
             "MapPackSize",
             "MapMonsterPackSize",
-            "MapScarabDropChance", // 3.30 Threads raw name is expected to stay unchanged too
+            "MapScarabDropChance", // Threads stat key kept its old name
             "MapCurrencyDropChance",
             "MapMapDropChance",
             "MapTotalItemQuantity",
@@ -170,7 +182,7 @@ namespace MapNotify_3_28
             "MapTotalPackSize",
             "MapTierDropChance",
             "MapOriginator",
-            "MapDropScaling", // likely 3.30 Atlas Drops raw-name prefix, verify
+            "MapDropScaling", // Atlas Drops raw-name prefix (to be verified in game)
             // "MapAtlasDrops", // possible alternative 3.30 raw-name prefix
         };
 

@@ -451,16 +451,25 @@ namespace MapNotify_3_28 // Keep the same namespace
             if (modsComponent?.AlternateQualityType != null)
             {
                 var qId = modsComponent.AlternateQualityType.Id;
-                // 3.30: Maven's Chisel of Procurement grants +25% Item Rarity at 20% Quality (previously +40%).
-                if (qId == "MapRarityQuality") { ChiselName = "Rarity Chisel"; ChiselValue = 40; }
-                // 3.30: Item Quantity becomes Atlas Drops; verify whether this chisel/id/label is renamed.
+                // 3.30 confirmed values at 20% Quality:
+                //   Maven's Chisel of Procurement  +25% Item Rarity (was +40%)
+                //   Maven's Chisel of Threads      +50% Thread quantity
+                //   Divination Chisel              +50%
+                //   Currency Chisel                +50%
+                //   Pack Size Chisel               +10%
+                // The plain Cartographer's Chisel is legacy (no longer drops, still usable)
+                // and keeps its existing behaviour via the MapQuantityQuality branch.
+                if (qId == "MapRarityQuality") { ChiselName = "Rarity Chisel"; ChiselValue = 25; }
+                // 3.30: Item Quantity becomes Atlas Drops; raw-name prefix still to be
+                // confirmed, so the alternate-quality id may or may not be renamed.
                 else if (qId == "MapQuantityQuality") { ChiselName = "Quantity Chisel"; if (quantity == 0) quantity = tooltipData.Quality; ChiselValue = quantity; }
                 // else if (qId == "MapAtlasDropsQuality") { ChiselName = "Atlas Drops Chisel"; if (quantity == 0) quantity = tooltipData.Quality; ChiselValue = quantity; }
                 else if (qId == "MapPackSizeQuality") { ChiselName = "Pack Size Chisel"; ChiselValue = 10; }
                 else if (qId == "MapDivinationCardQuality") { ChiselName = "Divination Chisel"; ChiselValue = 50; }
                 // 3.30: Maven's Chisel of Scarabs is now Maven's Chisel of Threads and
-                // increases Thread quantity. The statistic key is unchanged, so the
-                // alternate-quality id is expected to remain MapScarabQuality.
+                // increases Thread quantity. The item metadata is unchanged
+                // (Metadata/Items/Currency/CurrencyMapQualityScarabs), so the
+                // alternate-quality id remains MapScarabQuality (confirmed).
                 else if (qId == "MapScarabQuality") { ChiselName = "Thread Chisel"; ChiselValue = 50; }
                 else if (qId == "MapCurrencyQuality") { ChiselName = "Currency Chisel"; ChiselValue = 50; }
             }
@@ -480,11 +489,14 @@ namespace MapNotify_3_28 // Keep the same namespace
             ModCount = itemMods?.Count ?? 0;
 
             // Count only map mods: blacklisted entries and enchantments are not part of the count.
-            // 3.30: Delirium Orbs now add an explicit map modifier instead of an enchantment.
-            // Patch notes describe one Delirium modifier whose Delirious percentage stacks
-            // to 100% (not one modifier per orb). It is intended to count toward ModCount;
-            // the tooltip should also show its Delirious % and reward type so players can
-            // distinguish "8 mods" from "7 mods + Delirium".
+            // 3.30: Delirium Orbs now add a rare-only explicit affix instead of an enchantment,
+            // with two unscaleable lines:
+            //   "Players in Area are 100% Delirious"
+            //   "Delirium Reward Type: <type>"
+            // The Delirious percentage stacks to 100% (not one modifier per orb). It is
+            // intended to count toward ModCount; the tooltip should also show its
+            // Delirious % and reward type so players can distinguish "8 mods" from
+            // "7 mods + Delirium".
             if (itemMods != null)
             {
                 foreach (var mod in itemMods)
