@@ -864,12 +864,19 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
     private void RenderMapDevice()
     {
+        // The Map Device window is also reachable through the Atlas panel
+        // (AtlasPanel -> MapDeviceWindow), so the device scan and the storage scan can both
+        // return the same inserted item. Track what was already drawn so an item never gets
+        // two overlapping highlights.
+        var drawnEntities = new HashSet<long>();
+
         if ((Settings.ShowForInvitations.Value || Settings.FilterTrade.Value) && IsMapDeviceOpen())
         {
             var deviceItems = _mapDeviceItems.Value;
             foreach (var item in deviceItems)
             {
                 if (item?.Item == null || !item.IsVisible) continue;
+                if (!drawnEntities.Add(item.Item.Address)) continue;
 
                 // Separate logic for invitation slot vs regular map pieces in the device
                 var path = item.Item.Path;
@@ -890,7 +897,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         }
 
         if (Settings.ShowMapDeviceStorageHighlights.Value && IsAtlasPanelVisible())
-            DrawBordersForItems(_mapDeviceStorageItems.Value, "Map Device Storage");
+            DrawBordersForItems(_mapDeviceStorageItems.Value, "Map Device Storage", drawnEntities);
     }
 
     private void RenderHoveredItem()
@@ -904,12 +911,13 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         }
     }
 
-    private void DrawBordersForItems(IEnumerable<NormalInventoryItem> items, string sourceName)
+    private void DrawBordersForItems(IEnumerable<NormalInventoryItem> items, string sourceName, HashSet<long> drawnEntities = null)
     {
         if (items == null) return;
         foreach (var item in items)
         {
             if (item?.Item == null || !item.IsVisible) continue;
+            if (drawnEntities != null && !drawnEntities.Add(item.Item.Address)) continue;
             try
             {
                 DrawMapBorders(item, item.Item);

@@ -308,7 +308,10 @@ namespace MapNotify_3_28
                 }
             }
 
-            // Path 2: (Atlas/AtlasPanel)29->7->0->2->0->1
+            // Path 2: (Atlas/AtlasPanel)30->7->(MapDeviceWindow)->0->2->0->1
+            // This is the Map Device window embedded in the Atlas panel, so it overlaps with
+            // GetMapDeviceItems when the typed MapDeviceWindow accessor is available.
+            // RenderMapDevice de-duplicates the two sources by entity address.
             var internalDevice = atlasPanel.GetChildAtIndex(7)?.GetChildAtIndex(0)?.GetChildAtIndex(2)?.GetChildAtIndex(0)?.GetChildAtIndex(1);
             if (internalDevice != null && internalDevice.IsVisible)
             {
