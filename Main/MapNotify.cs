@@ -40,7 +40,6 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     };
 
     private static readonly Regex WhitespaceRegex = new Regex(@"\s+", RegexOptions.Compiled);
-    private static readonly Regex NumericRangeRegex = new Regex(@"\(\d+-\d+\)", RegexOptions.Compiled);
 
     private static readonly nuVector4[] InterestPalette = InterestPaletteHex
         .Select(h => SharpToNu(HexToSDXVector4(h)))
@@ -1003,45 +1002,17 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             })
             .ToList();
 
+        if (availableDescriptions.Count > 0)
+        {
+            LogMessage($"MapNotify: capture tooltip lines={availableDescriptions.Count}: {string.Join(" | ", availableDescriptions.Select(d => TruncateForLog(d, 120)))}", 5);
+        }
+
         foreach (var mod in explicitModsFromItem)
         {
-            string matchedDescription = null;
-            int descIndex = -1;
-            string nameToMatch = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
-
-            if (!string.IsNullOrEmpty(nameToMatch))
-            {
-                var cleanModName = nameToMatch.Replace("{", "").Replace("}", "").Replace("%%", "%").Replace("..", ".").Trim();
-                for (int k = 0; k < availableDescriptions.Count; k++)
-                {
-                    var fragments = cleanModName.Split('#', StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).Where(f => f.Length > 1).ToList();
-                    var uiTextNoRanges = NumericRangeRegex.Replace(availableDescriptions[k], "").Trim();
-                    uiTextNoRanges = WhitespaceRegex.Replace(uiTextNoRanges, " ");
-
-                    if (fragments.Count > 0 && fragments.All(f => uiTextNoRanges.Contains(f, StringComparison.OrdinalIgnoreCase)) ||
-                        (fragments.Count == 0 && uiTextNoRanges.Contains(cleanModName, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        matchedDescription = availableDescriptions[k];
-                        descIndex = k;
-                        break;
-                    }
-                }
-            }
-
-            if (matchedDescription == null && availableDescriptions.Count > 0)
-            {
-                matchedDescription = availableDescriptions[0];
-                descIndex = 0;
-            }
-
-            if (matchedDescription != null && (matchedDescription.Contains("CachedStatDescription") || matchedDescription.Contains("System.Collections.Generic") || matchedDescription.StartsWith("<unknown")))
-            {
-                if (descIndex != -1) availableDescriptions.RemoveAt(descIndex);
-                matchedDescription = null;
-                descIndex = -1;
-            }
-
+            var matchedDescription = FindTooltipDescriptionForMod(mod, availableDescriptions, out var descIndex);
             if (descIndex != -1) availableDescriptions.RemoveAt(descIndex);
+
+            var ownText = GetOwnModText(mod);
 
             var (existingEntry, _) = MatchMod(mod.RawName);
 
@@ -1074,12 +1045,19 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
             var interestEntry = MatchInterest(mod.RawName);
 
+            LogMessage(
+                $"MapNotify: capture mod raw='{mod.RawName}' name='{TruncateForLog(mod.Name)}' " +
+                $"display='{TruncateForLog(mod.DisplayName)}' translation='{TruncateForLog(mod.Translation)}' " +
+                $"affix='{affixType}' matchedLine='{TruncateForLog(matchedDescription)}'",
+                5
+            );
+
             captured.Add(new CapturedMod
             {
                 RawName = mod.RawName.Trim(),
                 AffixType = affixType,
-                DisplayName = existingEntry?.Text ?? interestEntry?.Text ?? (matchedDescription ?? mod.Name),
-                Description = matchedDescription ?? (!string.IsNullOrEmpty(mod.Translation) && !mod.Translation.Contains("<unknown") ? mod.Translation : BaseModExtractor.GetReadableName(mod.RawName)),
+                DisplayName = existingEntry?.Text ?? interestEntry?.Text ?? ownText,
+                Description = matchedDescription ?? ownText,
                 Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
                 IsBricking = existingEntry?.Bricking ?? false,
                 IsOfInterest = interestEntry != null,
@@ -1093,6 +1071,103 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             });
         }
         return captured;
+    }
+
+    /// <summary>
+    /// Finds the tooltip line that belongs to <paramref name="mod"/>. Several ExileAPI text
+    /// flavours are tried because any of them can be missing or still contain the raw mod id
+    /// on a fresh game patch. A line is only accepted on a confident word overlap; there is
+    /// deliberately no positional fallback, since taking the next unused line displayed an
+    /// unrelated modifier for 3.30 maps.
+    /// </summary>
+    private static string FindTooltipDescriptionForMod(ItemMod mod, List<string> availableDescriptions, out int descIndex)
+    {
+        descIndex = -1;
+        if (mod == null || availableDescriptions == null || availableDescriptions.Count == 0) return null;
+
+        var candidates = new List<HashSet<string>>(4);
+        foreach (var source in new[] { mod.DisplayName, mod.Translation, mod.Name, mod.RawName })
+        {
+            if (!ModTextMatcher.IsUsableText(source)) continue;
+            var tokens = ModTextMatcher.Tokenize(source);
+            if (tokens.Count > 0) candidates.Add(tokens);
+        }
+        if (candidates.Count == 0) return null;
+
+        int bestLine = -1;
+        int bestMatched = 0;
+        double bestCoverage = 0;
+
+        for (int k = 0; k < availableDescriptions.Count; k++)
+        {
+            var lineTokens = ModTextMatcher.Tokenize(availableDescriptions[k]);
+            if (lineTokens.Count == 0) continue;
+
+            foreach (var tokens in candidates)
+            {
+                var coverage = ModTextMatcher.MatchCoverage(tokens, lineTokens, out var matched);
+                if (!ModTextMatcher.IsConfident(tokens.Count, matched, coverage)) continue;
+
+                if (matched > bestMatched || (matched == bestMatched && coverage > bestCoverage))
+                {
+                    bestMatched = matched;
+                    bestCoverage = coverage;
+                    bestLine = k;
+                }
+            }
+        }
+
+        if (bestLine < 0) return null;
+
+        descIndex = bestLine;
+        return availableDescriptions[bestLine];
+    }
+
+    /// <summary>
+    /// Best text we can show without borrowing another mod's tooltip line. Prefers the
+    /// game-provided display text, then ExileAPI's translation, and only then a readable
+    /// form of the raw mod id.
+    /// </summary>
+    private static string GetOwnModText(ItemMod mod)
+    {
+        if (mod == null) return string.Empty;
+
+        if (LooksLikeDisplayText(mod.DisplayName, mod.RawName))
+            return CleanDisplayText(mod.DisplayName);
+        if (LooksLikeDisplayText(mod.Translation, mod.RawName))
+            return CleanDisplayText(mod.Translation);
+
+        return BaseModExtractor.GetReadableName(mod.RawName);
+    }
+
+    private static bool LooksLikeDisplayText(string text, string rawName)
+    {
+        if (!ModTextMatcher.IsUsableText(text)) return false;
+
+        var trimmed = text.Trim();
+        if (!string.IsNullOrEmpty(rawName) && string.Equals(trimmed, rawName, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        // A single token is only trusted when it is normal prose ("Corrupted"), not a
+        // CamelCase raw identifier that lost its digits ("MonstersAvoidPoisonBleedBlind").
+        if (trimmed.IndexOf(' ') < 0)
+        {
+            for (int i = 1; i < trimmed.Length; i++)
+            {
+                if (char.IsUpper(trimmed[i]) && char.IsLower(trimmed[i - 1])) return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static string CleanDisplayText(string text) =>
+        text.Replace("{", "").Replace("}", "").Replace("%%", "%").Trim();
+
+    private static string TruncateForLog(string text, int max = 160)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+        return text.Length <= max ? text : text.Substring(0, max) + "...";
     }
 
     /// <summary>
