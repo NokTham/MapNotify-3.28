@@ -52,9 +52,10 @@ namespace MapNotify_3_28
             return new List<NormalInventoryItem>();
         }
 
-        private void FindMapsInElementRecursive(Element element, List<NormalInventoryItem> result, HashSet<long> seenAddresses, int depth)
+        private void FindMapsInElementRecursive(Element element, List<NormalInventoryItem> result, HashSet<long> seenAddresses, int depth, bool requireVisible = true)
         {
-            if (element == null || !element.IsVisible || depth > 13) return;
+            if (element == null || depth > 13) return;
+            if (requireVisible && !element.IsVisible) return;
             try
             {
                 var item = element.AsObject<NormalInventoryItem>();
@@ -70,7 +71,7 @@ namespace MapNotify_3_28
                     for (int i = 0; i < count; i++)
                     {
                         var child = element.GetChildAtIndex(i);
-                        if (child != null) FindMapsInElementRecursive(child, result, seenAddresses, depth + 1);
+                        if (child != null) FindMapsInElementRecursive(child, result, seenAddresses, depth + 1, requireVisible);
                     }
                 }
             }
@@ -121,6 +122,16 @@ namespace MapNotify_3_28
             FindMapsInElementRecursive(element, result, seenAddresses, 0);
         }
 
+        private void AddMapDeviceSlotItems(IEnumerable<NormalInventoryItem> items, List<NormalInventoryItem> result, HashSet<long> seen)
+        {
+            if (items == null) return;
+            foreach (var item in items)
+            {
+                if (item?.Item != null && item.Address != 0 && ItemIsMap(item.Item) && seen.Add(item.Address))
+                    result.Add(item);
+            }
+        }
+
         private List<NormalInventoryItem> GetMapDeviceItems()
         {
             var result = new List<NormalInventoryItem>();
@@ -128,40 +139,39 @@ namespace MapNotify_3_28
             var ui = ingameState?.IngameUi;
             if (ui == null) return result;
 
-            // Reverting to manual path traversal as MapReceptacleWindow is not accessible.
-            // Root is verified at Index 67.
-            if (ui.ChildCount > Constants.UIIndices.MapDeviceRoot)
+            var seen = new HashSet<long>();
+
+            // Preferred: typed accessors, which survive the UI layout reshuffles that keep
+            // invalidating raw child indices. Guarded because they are best-effort only.
+            try
             {
-                var mapDeviceRoot = ui.GetChildAtIndex(Constants.UIIndices.MapDeviceRoot);
-                if (mapDeviceRoot != null && mapDeviceRoot.IsVisible)
+                var window = ui.MapDeviceWindow;
+                if (window != null)
                 {
-                    const int InvitationSlotParentIndex = 8;
-                    const int StandardSlotsParentIndex = 7;
+                    AddMapDeviceSlotItems(window.Items, result, seen);
+                    AddMapDeviceSlotItems(window.MapSlot?.VisibleInventoryItems, result, seen);
 
-                    if (mapDeviceRoot.ChildCount > InvitationSlotParentIndex)
+                    var scarabSlots = window.ScarabSlots;
+                    if (scarabSlots != null)
                     {
-                        var slot8 = mapDeviceRoot.GetChildAtIndex(InvitationSlotParentIndex);
-                        var invitationSlot = slot8 != null && slot8.ChildCount > 1 ? slot8.GetChildAtIndex(1) : null;
-                        var item = invitationSlot?.AsObject<NormalInventoryItem>();
-                        if (item?.Item != null && ItemIsMap(item.Item))
-                            result.Add(item);
-                    }
-
-                    if (mapDeviceRoot.ChildCount > StandardSlotsParentIndex)
-                    {
-                        var piecesPanel = mapDeviceRoot.GetChildAtIndex(StandardSlotsParentIndex);
-                        if (piecesPanel != null && piecesPanel.IsVisible)
-                        {
-                            foreach (var child in piecesPanel.Children)
-                            {
-                                var item = child?.AsObject<NormalInventoryItem>();
-                                if (item?.Item != null && ItemIsMap(item.Item))
-                                    result.Add(item);
-                            }
-                        }
+                        foreach (var slot in scarabSlots)
+                            AddMapDeviceSlotItems(slot?.VisibleInventoryItems, result, seen);
                     }
                 }
             }
+            catch
+            {
+                // Ignore typed-accessor failures; the traversal below is the source of truth.
+            }
+
+            // Source of truth: walk the whole map device root instead of fixed child indices
+            // (the slot layout moved from 67 -> 8/7 to 76 -> 10 -> 1).
+            var mapDeviceRoot = ui.ChildCount > Constants.UIIndices.MapDeviceRoot
+                ? ui.GetChildAtIndex(Constants.UIIndices.MapDeviceRoot)
+                : null;
+            if (mapDeviceRoot != null && mapDeviceRoot.IsVisible)
+                FindMapsInElementRecursive(mapDeviceRoot, result, seen, 0, requireVisible: false);
+
             return result;
         }
 

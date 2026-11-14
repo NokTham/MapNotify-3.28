@@ -41,10 +41,10 @@ namespace MapNotify_3_28
         public int Rarity { get; set; }
         public int PackSize { get; set; }
         public int MoreMaps { get; set; }
-        public int MoreScarabs { get; set; }
+        public int MoreThreads { get; set; }
         public int MoreCurrency { get; set; }
 
-        public bool HasAnyStats => Quantity != 0 || Rarity != 0 || PackSize != 0 || MoreMaps != 0 || MoreScarabs != 0 || MoreCurrency != 0;
+        public bool HasAnyStats => Quantity != 0 || Rarity != 0 || PackSize != 0 || MoreMaps != 0 || MoreThreads != 0 || MoreCurrency != 0;
     }
 
     /// <summary>

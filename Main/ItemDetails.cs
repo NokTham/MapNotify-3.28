@@ -60,7 +60,7 @@ namespace MapNotify_3_28 // Keep the same namespace
         public List<HeistJobLine> HeistJobLines { get; set; } = new List<HeistJobLine>();
 
         // Originator / Nightmare stats
-        public int OriginatorScarabs { get; set; }
+        public int OriginatorThreads { get; set; }
         public int OriginatorCurrency { get; set; }
         public int OriginatorMaps { get; set; }
         public MapModStats PrefixStats { get; set; } = new MapModStats();
@@ -86,7 +86,7 @@ namespace MapNotify_3_28 // Keep the same namespace
             public int Rarity { get; set; }
             public int PackSize { get; set; }
             public int MoreMaps { get; set; }
-            public int MoreScarabs { get; set; }
+            public int MoreThreads { get; set; }
             public int MoreCurrency { get; set; }
         }
 
@@ -146,6 +146,11 @@ namespace MapNotify_3_28 // Keep the same namespace
             var localInterest = new List<StyledText>();
             var localInterestKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var localInterestShadowed = new HashSet<StyledText>();
+
+            // Good/Bad entries are appended once per matching mod occurrence. Logbooks repeat
+            // the same implicit across several areas, so track normalized keys to avoid
+            // rendering the same warning line many times.
+            var localMatchedKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var localConflicting = new List<StyledText>();
 
             string path = Entity.Path ?? string.Empty;
@@ -174,7 +179,7 @@ namespace MapNotify_3_28 // Keep the same namespace
 
             LogbookAreaLevel = IsLogbook ? (expeditionSaga?.AreaLevel ?? (Tier > 0 ? Tier : 0)) : 0;
 
-            if (IsLogbook) ProcessLogbookDetails(expeditionSaga, localGood, localBad, localInterest, localInterestKeys, localInterestShadowed);
+            if (IsLogbook) ProcessLogbookDetails(expeditionSaga, localGood, localBad, localInterest, localInterestKeys, localInterestShadowed, localMatchedKeys);
 
             // Performance and Stability: Only parse tooltips if the item is currently hovered.
             // Tooltip parsing is expensive and prone to 'startIndex' errors when items are in lockers/stashes.
@@ -186,7 +191,7 @@ namespace MapNotify_3_28 // Keep the same namespace
                 ProcessQuality(qualityComponent, modsComponent, tooltipData);
             }
 
-            ProcessMods(modsComponent, path, localGood, localBad, localInterest, localInterestKeys, localInterestShadowed);
+            ProcessMods(modsComponent, path, localGood, localBad, localInterest, localInterestKeys, localInterestShadowed, localMatchedKeys);
             ProcessMapName(mapComponent, baseComponent, modsComponent, path, itemName);
             ProcessItemColor(modsComponent);
 
@@ -210,7 +215,8 @@ namespace MapNotify_3_28 // Keep the same namespace
         }
 
         private void ProcessLogbookDetails(ExpeditionSaga expeditionSaga, List<StyledText> goodList, List<StyledText> badList,
-            List<StyledText> interestList, HashSet<string> interestKeys, HashSet<StyledText> interestShadowed)
+            List<StyledText> interestList, HashSet<string> interestKeys, HashSet<StyledText> interestShadowed,
+            HashSet<string> matchedKeys)
         {
             LogbookAreas.Clear();
             if (expeditionSaga?.Areas == null) return;
@@ -241,7 +247,7 @@ namespace MapNotify_3_28 // Keep the same namespace
                     if (match != null || interestMatch != null)
                     {
                         if (match != null && match.Bricking) Bricked = true;
-                        ProcessModWarnings(mod.RawName, goodList, badList, interestList, interestKeys, interestShadowed);
+                        ProcessModWarnings(mod.RawName, goodList, badList, interestList, interestKeys, interestShadowed, matchedKeys);
                     }
                     logArea.Implicits.Add(styledMod);
                 }
@@ -253,12 +259,16 @@ namespace MapNotify_3_28 // Keep the same namespace
         /// Checks a mod against Good and Bad dictionaries and updates the item's active warning lists.
         /// </summary>
         private void ProcessModWarnings(string rawName, List<StyledText> goodList, List<StyledText> badList,
-            List<StyledText> interestList, HashSet<string> interestKeys, HashSet<StyledText> interestShadowed)
+            List<StyledText> interestList, HashSet<string> interestKeys, HashSet<StyledText> interestShadowed,
+            HashSet<string> matchedKeys)
         {
             if (string.IsNullOrEmpty(rawName)) return;
 
             // Normalize once, then reuse the key for the Good/Bad/Interest lookups.
             var normalizedInput = BaseModExtractor.GetBaseMod(rawName);
+
+            // An empty key would match every config entry, so never look it up.
+            if (string.IsNullOrEmpty(normalizedInput)) return;
 
             StyledText match = null;
             bool isGood = false;
@@ -276,13 +286,13 @@ namespace MapNotify_3_28 // Keep the same namespace
             {
                 if (string.IsNullOrEmpty(match.EscapedText)) match.EscapedText = EscapeImGui(match.Text);
                 if (match.Bricking) Bricked = true;
-                goodList.Add(match);
+                if (matchedKeys.Add(normalizedInput)) goodList.Add(match);
             }
             else if (match != null && !isGood)
             {
                 if (string.IsNullOrEmpty(match.EscapedText)) match.EscapedText = EscapeImGui(match.Text);
                 if (match.Bricking) Bricked = true;
-                badList.Add(match);
+                if (matchedKeys.Add(normalizedInput)) badList.Add(match);
             }
 
             // Interest is independent of Good/Bad: a mod may be both.
@@ -383,7 +393,7 @@ namespace MapNotify_3_28 // Keep the same namespace
             var lines = new List<List<StyledText>>();
             var white = new nuVector4(1f, 1f, 1f, 1f);
             var mapsColor = new nuVector4(0.5f, 0.85f, 1f, 1f);
-            var scarabsColor = new nuVector4(0.85f, 0.45f, 0.85f, 1f);
+            var threadsColor = new nuVector4(0.85f, 0.45f, 0.85f, 1f);
             var currencyColor = new nuVector4(0.0f, 1.0f, 0.0f, 1.0f);
 
             if (IsLogbook || IsHeist || IsMavenMap || IsValdoMap) return lines;
@@ -401,10 +411,10 @@ namespace MapNotify_3_28 // Keep the same namespace
             if (pluginSettings.ShowOriginatorScarabs.Value)
             {
                 lines.Add(new List<StyledText> {
-                        new StyledText { Text = OriginatorScarabs == 0 ? "--" : $"{OriginatorScarabs}%", Color = scarabsColor, EscapedText = OriginatorScarabs == 0 ? "--" : $"{OriginatorScarabs}%%" },
-                        new StyledText { Text = "Scarabs", Color = scarabsColor, EscapedText = "Scarabs" },
-                        new StyledText { Text = PrefixStats.MoreScarabs == 0 ? "P: --" : $"P: {PrefixStats.MoreScarabs}%", Color = white, EscapedText = PrefixStats.MoreScarabs == 0 ? "P: --" : $"P: {PrefixStats.MoreScarabs}%%" },
-                        new StyledText { Text = SuffixStats.MoreScarabs == 0 ? "S: --" : $"S: {SuffixStats.MoreScarabs}%", Color = white, EscapedText = SuffixStats.MoreScarabs == 0 ? "S: --" : $"S: {SuffixStats.MoreScarabs}%%" }
+                        new StyledText { Text = OriginatorThreads == 0 ? "--" : $"{OriginatorThreads}%", Color = threadsColor, EscapedText = OriginatorThreads == 0 ? "--" : $"{OriginatorThreads}%%" },
+                        new StyledText { Text = "Threads", Color = threadsColor, EscapedText = "Threads" },
+                        new StyledText { Text = PrefixStats.MoreThreads == 0 ? "P: --" : $"P: {PrefixStats.MoreThreads}%", Color = white, EscapedText = PrefixStats.MoreThreads == 0 ? "P: --" : $"P: {PrefixStats.MoreThreads}%%" },
+                        new StyledText { Text = SuffixStats.MoreThreads == 0 ? "S: --" : $"S: {SuffixStats.MoreThreads}%", Color = white, EscapedText = SuffixStats.MoreThreads == 0 ? "S: --" : $"S: {SuffixStats.MoreThreads}%%" }
                     });
             }
 
@@ -448,10 +458,10 @@ namespace MapNotify_3_28 // Keep the same namespace
                 // else if (qId == "MapAtlasDropsQuality") { ChiselName = "Atlas Drops Chisel"; if (quantity == 0) quantity = tooltipData.Quality; ChiselValue = quantity; }
                 else if (qId == "MapPackSizeQuality") { ChiselName = "Pack Size Chisel"; ChiselValue = 10; }
                 else if (qId == "MapDivinationCardQuality") { ChiselName = "Divination Chisel"; ChiselValue = 50; }
-                // 3.30: Maven's Chisel of Scarabs is renamed to Maven's Chisel of Threads.
-                // Verify whether the alternate-quality id also changes from MapScarabQuality.
-                else if (qId == "MapScarabQuality") { ChiselName = "Scarab Chisel"; ChiselValue = 50; }
-                // else if (qId == "MapThreadQuality") { ChiselName = "Thread Chisel"; ChiselValue = 50; }
+                // 3.30: Maven's Chisel of Scarabs is now Maven's Chisel of Threads and
+                // increases Thread quantity. The statistic key is unchanged, so the
+                // alternate-quality id is expected to remain MapScarabQuality.
+                else if (qId == "MapScarabQuality") { ChiselName = "Thread Chisel"; ChiselValue = 50; }
                 else if (qId == "MapCurrencyQuality") { ChiselName = "Currency Chisel"; ChiselValue = 50; }
             }
             else if (quantity == 0) quantity = tooltipData.Quality;
@@ -459,7 +469,8 @@ namespace MapNotify_3_28 // Keep the same namespace
         }
 
         private void ProcessMods(Mods modsComponent, string path, List<StyledText> goodList, List<StyledText> badList,
-            List<StyledText> interestList, HashSet<string> interestKeys, HashSet<StyledText> interestShadowed)
+            List<StyledText> interestList, HashSet<string> interestKeys, HashSet<StyledText> interestShadowed,
+            HashSet<string> matchedKeys)
         {
             PrefixStats = new MapModStats();
             SuffixStats = new MapModStats();
@@ -511,12 +522,12 @@ namespace MapNotify_3_28 // Keep the same namespace
                             for (int i = 0; i < stats.Length && i < values.Count; i++)
                                 UpdateStatsFromMod(stats[i].Key, values[i], isPrefix, isSuffix, totals);
                         }
-                        ProcessModWarnings(mod.RawName, goodList, badList, interestList, interestKeys, interestShadowed);
+                        ProcessModWarnings(mod.RawName, goodList, badList, interestList, interestKeys, interestShadowed, matchedKeys);
                     }
                 }
             }
             Quantity = totals.Quantity; PackSize = totals.PackSize; Rarity = totals.Rarity;
-            OriginatorScarabs = totals.MoreScarabs; OriginatorCurrency = totals.MoreCurrency; OriginatorMaps = totals.MoreMaps;
+            OriginatorThreads = totals.MoreThreads; OriginatorCurrency = totals.MoreCurrency; OriginatorMaps = totals.MoreMaps;
         }
 
         private void UpdateStatsFromMod(string key, int val, bool isPrefix, bool isSuffix, MapModStats totals)
@@ -533,7 +544,7 @@ namespace MapNotify_3_28 // Keep the same namespace
                     case MapYield.Stat.AtlasDrops: target.Quantity += val; break;
                     case MapYield.Stat.ItemRarity: target.Rarity += val; break;
                     case MapYield.Stat.PackSize: target.PackSize += val; break;
-                    case MapYield.Stat.MoreScarabs: target.MoreScarabs += val; IsOriginatorMap = true; break;
+                    case MapYield.Stat.MoreThreads: target.MoreThreads += val; IsOriginatorMap = true; break;
                     case MapYield.Stat.MoreCurrency: target.MoreCurrency += val; IsOriginatorMap = true; break;
                     case MapYield.Stat.MoreMaps: target.MoreMaps += val; IsOriginatorMap = true; break;
                 }

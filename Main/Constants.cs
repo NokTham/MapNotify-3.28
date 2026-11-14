@@ -18,12 +18,12 @@ namespace MapNotify_3_28
 
         public static class UIIndices
         {
-            public const int MapDeviceRoot = 76; // Invitations Receptacle
-            public const int HeistLockerDefault = 107;
-            public const int ExpeditionLockerDefault = 110;
+            public const int MapDeviceRoot = 76; // Map Device / Invitations window (fallback; prefer IngameUi.MapDeviceWindow)
+            public const int HeistLockerDefault = 108;
+            public const int ExpeditionLockerDefault = 111;
             public const int PurchaseWindowTabDetails = 8;
             public const int StashMapTabItems = 3;
-            public const int AtlasPanel = 29;
+            public const int AtlasPanel = 30;
         }
 
         public static readonly string[] ModNameBlacklist =
@@ -69,16 +69,19 @@ namespace MapNotify_3_28
             if (string.IsNullOrEmpty(rawName))
                 return false;
 
-            return ModBlacklistCache.GetOrAdd(rawName, static name =>
-            {
-                foreach (var black in ModNameBlacklist)
+            return ModBlacklistCache.GetOrAdd(
+                rawName,
+                static name =>
                 {
-                    if (name.Contains(black, StringComparison.OrdinalIgnoreCase))
-                        return true;
-                }
+                    foreach (var black in ModNameBlacklist)
+                    {
+                        if (name.Contains(black, StringComparison.OrdinalIgnoreCase))
+                            return true;
+                    }
 
-                return false;
-            });
+                    return false;
+                }
+            );
         }
     }
 
@@ -100,7 +103,7 @@ namespace MapNotify_3_28
             ItemRarity,
             PackSize,
             MoreMaps,
-            MoreScarabs, // pre-3.30; becomes MoreThreads in 3.30
+            MoreThreads, // 3.30 name; Scarabs were replaced by Threads
             MoreCurrency,
         }
 
@@ -137,24 +140,16 @@ namespace MapNotify_3_28
         };
 
         /// <summary>
-        /// "More Scarabs" is the pre-3.30 name for the special-drop slot.
-        /// In 3.30 Scarabs are replaced by Threads, so both keys feed the same
-        /// category until the model/UI rename pass. Verify the exact Thread key
-        /// against game data before enabling the placeholder below.
+        /// "More Threads" is the 3.30 name for the special-drop slot (Scarabs were
+        /// removed from the game). The underlying stat key was NOT renamed, so it
+        /// still reads "map_scarab_drop_chance_+%".
         /// </summary>
-        public static readonly string[] MoreScarabsStatKeys =
+        public static readonly string[] MoreThreadsStatKeys =
         {
-            "map_scarab_drop_chance", // legacy pre-3.30
-            // 3.30 patch notes say the Thread chisel increases the "quantity of
-            // Threads found on a Map", so either of these may be the real key.
-            // "map_thread_drop_chance", // expected 3.30 key, verify
-            // "map_thread_quantity",   // expected 3.30 key, verify
+            "map_scarab_drop_chance", // 3.30 Threads key (unchanged name; Scarabs are gone)
         };
 
-        public static readonly string[] MoreCurrencyStatKeys =
-        {
-            "map_currency_drop_chance",
-        };
+        public static readonly string[] MoreCurrencyStatKeys = { "map_currency_drop_chance" };
 
         /// <summary>
         /// Mod RawName prefixes (CamelCase) used to keep yield mods out of the
@@ -167,7 +162,7 @@ namespace MapNotify_3_28
             "MapItemRarity",
             "MapPackSize",
             "MapMonsterPackSize",
-            "MapScarabDropChance", // legacy pre-3.30
+            "MapScarabDropChance", // 3.30 Threads raw name is expected to stay unchanged too
             "MapCurrencyDropChance",
             "MapMapDropChance",
             "MapTotalItemQuantity",
@@ -177,8 +172,6 @@ namespace MapNotify_3_28
             "MapOriginator",
             "MapDropScaling", // likely 3.30 Atlas Drops raw-name prefix, verify
             // "MapAtlasDrops", // possible alternative 3.30 raw-name prefix
-            // "MapThreadDropChance", // expected 3.30 Threads prefix, verify
-            // "MapThreadQuantity",   // expected 3.30 Threads prefix, verify
         };
 
         /// <summary>
@@ -191,9 +184,9 @@ namespace MapNotify_3_28
             "atlas drops",
             "rarity of items",
             "pack size",
-            "thread drop",            // expected 3.30 Threads wording, verify
-            "additional thread",      // expected 3.30 Threads wording, verify
-            "quantity of threads",    // 3.30 patch notes: "quantity of Threads found"
+            "thread drop", // 3.30 Threads wording
+            "additional thread", // 3.30 Threads wording
+            "quantity of threads", // 3.30 patch notes: "quantity of Threads found"
         };
 
         private static readonly Regex MoreDropsRegex = new Regex(
@@ -216,8 +209,8 @@ namespace MapNotify_3_28
 
             // More-specific keys first: "map_item_drop_chance" (More Maps) and
             // "map_item_drop_quantity" (Atlas Drops / legacy quantity) share a prefix.
-            if (ContainsAny(key, MoreScarabsStatKeys))
-                return Stat.MoreScarabs;
+            if (ContainsAny(key, MoreThreadsStatKeys))
+                return Stat.MoreThreads;
             if (ContainsAny(key, MoreCurrencyStatKeys))
                 return Stat.MoreCurrency;
             if (ContainsAny(key, MoreMapsStatKeys))

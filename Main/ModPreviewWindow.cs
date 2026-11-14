@@ -290,13 +290,13 @@ namespace MapNotify_3_28
             var iirColor = new nuVector4(1f, 0.95f, 0.4f, 1f);       // Yellow
             var psColor = new nuVector4(0.4f, 1f, 0.4f, 1f);         // Lime
             var mmColor = new nuVector4(0.5f, 0.85f, 1f, 1f);        // Blue (Maps)
-            var msColor = new nuVector4(0.85f, 0.45f, 0.85f, 1f);    // Purple (Scarabs)
+            var mtColor = new nuVector4(0.85f, 0.45f, 0.85f, 1f);    // Purple (Threads)
             var mcColor = new nuVector4(0.0f, 1.0f, 0.0f, 1.0f);     // Green (Currency)
             var dimWhite = new nuVector4(0.45f, 0.45f, 0.45f, 1f);
 
             // Column offsets for aligned stat display (relative to indent start)
             // Layout: [value AD]  [value PS]   [value IIR]
-            //         [value MM]   [value MS]   [value MC]
+            //         [value MM]   [value MT]   [value MC]
             const float col1 = 0f;
             const float col2 = 75f;
             const float col3 = 150f;
@@ -312,8 +312,8 @@ namespace MapNotify_3_28
                     ImGui.TextColored(dimWhite, $"-- {label}");
             }
 
-            // Helper: draw two aligned lines of stats (AD/PS/IIR then MM/MS/MC)
-            void DrawStatsBlock(int ad, int ps, int iir, int mm, int ms, int mc, float indentAmount)
+            // Helper: draw two aligned lines of stats (AD/PS/IIR then MM/MT/MC)
+            void DrawStatsBlock(int ad, int ps, int iir, int mm, int mt, int mc, float indentAmount)
             {
                 var baseX = ImGui.GetCursorPosX() + indentAmount;
 
@@ -324,30 +324,30 @@ namespace MapNotify_3_28
                 DrawStatCell(col2, baseX, ps, "PS", psColor);
                 DrawStatCell(col3, baseX, iir, "IIR", iirColor);
 
-                // Line 2: MM  MS  MC
+                // Line 2: MM  MT  MC
                 ImGui.SetCursorPosX(baseX + col1);
                 if (mm != 0) ImGui.TextColored(mmColor, $"{mm}%% MM");
                 else ImGui.TextColored(dimWhite, "-- MM");
-                DrawStatCell(col2, baseX, ms, "MS", msColor);
+                DrawStatCell(col2, baseX, mt, "MT", mtColor);
                 DrawStatCell(col3, baseX, mc, "MC", mcColor);
             }
 
             // Calculate totals
-            int totalAD = 0, totalIIR = 0, totalPS = 0, totalMM = 0, totalMS = 0, totalMC = 0;
+            int totalAD = 0, totalIIR = 0, totalPS = 0, totalMM = 0, totalMT = 0, totalMC = 0;
             foreach (var mod in _capturedMods)
             {
                 totalAD += mod.Quantity;
                 totalIIR += mod.Rarity;
                 totalPS += mod.PackSize;
                 totalMM += mod.MoreMaps;
-                totalMS += mod.MoreScarabs;
+                totalMT += mod.MoreThreads;
                 totalMC += mod.MoreCurrency;
             }
 
             // Draw totals header
             ImGui.TextColored(new nuVector4(1f, 0.85f, 0.3f, 1f), "--- Totals ---");
             ImGui.Separator();
-            DrawStatsBlock(totalAD, totalPS, totalIIR, totalMM, totalMS, totalMC, 0f);
+            DrawStatsBlock(totalAD, totalPS, totalIIR, totalMM, totalMT, totalMC, 0f);
 
             ImGui.Dummy(new nuVector2(0, 6));
             ImGui.TextColored(new nuVector4(1f, 0.85f, 0.3f, 1f), "--- Per-Mod Breakdown ---");
@@ -378,7 +378,7 @@ namespace MapNotify_3_28
                 ImGui.PopStyleColor();
 
                 // Aligned stats block below the description
-                DrawStatsBlock(mod.Quantity, mod.PackSize, mod.Rarity, mod.MoreMaps, mod.MoreScarabs, mod.MoreCurrency, 10f);
+                DrawStatsBlock(mod.Quantity, mod.PackSize, mod.Rarity, mod.MoreMaps, mod.MoreThreads, mod.MoreCurrency, 10f);
 
                 ImGui.Separator();
             }
@@ -883,7 +883,13 @@ namespace MapNotify_3_28
         private void SaveInterestToConfig(CapturedMod mod, string baseMod = null)
         {
             var key = BaseModExtractor.GetBaseMod(baseMod ?? mod.RawName);
-            if (string.IsNullOrEmpty(key)) return;
+            if (string.IsNullOrEmpty(key))
+            {
+                // Log instead of returning silently: a collapsed key used to make the
+                // "Of Interest" checkbox appear unclickable for logbook/expedition mods.
+                LogMessage($"MapNotify: refusing to save interest entry with an empty key for '{mod.RawName}'.", 5);
+                return;
+            }
 
             var color = mod.InterestColor;
             if (color == default(nuVector4) && InterestModsDictionary != null &&

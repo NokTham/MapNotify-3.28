@@ -365,8 +365,9 @@ namespace MapNotify_3_28
                     Settings.ShowOriginatorMaps.Value
                 );
                 ImGui.SameLine(0f, 25f);
+                // Property name kept as ShowOriginatorScarabs for config compatibility.
                 Settings.ShowOriginatorScarabs.Value = Checkbox(
-                    "Show More Scarabs %",
+                    "Show More Threads %",
                     Settings.ShowOriginatorScarabs.Value
                 );
                 ImGui.SameLine(0f, 25f);

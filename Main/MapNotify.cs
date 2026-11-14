@@ -807,11 +807,24 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     private bool IsMapDeviceOpen()
     {
         var ui = ingameState?.IngameUi;
-        if (ui == null || ui.ChildCount <= Constants.UIIndices.MapDeviceRoot)
-            return false;
+        if (ui == null) return false;
 
-        var root = ui.GetChildAtIndex(Constants.UIIndices.MapDeviceRoot);
-        return IsElementVisible(root);
+        var root = ui.ChildCount > Constants.UIIndices.MapDeviceRoot
+            ? ui.GetChildAtIndex(Constants.UIIndices.MapDeviceRoot)
+            : null;
+        if (IsElementVisible(root))
+            return true;
+
+        // The raw root index has shifted between patches (67 -> 75 -> 76), so fall back to
+        // the typed accessor instead of trusting the hardcoded child index alone.
+        try
+        {
+            return ui.MapDeviceWindow?.IsVisible == true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private bool IsAtlasPanelVisible()
@@ -1016,7 +1029,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             var (existingEntry, _) = MatchMod(mod.RawName);
 
             // Extract per-mod stat contributions
-            int modAD = 0, modIIR = 0, modPS = 0, modMM = 0, modMS = 0, modMC = 0;
+            int modAD = 0, modIIR = 0, modPS = 0, modMM = 0, modMT = 0, modMC = 0;
             var stats = mod.ModRecord?.StatNames;
             var values = mod.Values;
             if (stats != null && values != null)
@@ -1031,7 +1044,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                         case MapYield.Stat.AtlasDrops: modAD += val; break;
                         case MapYield.Stat.ItemRarity: modIIR += val; break;
                         case MapYield.Stat.PackSize: modPS += val; break;
-                        case MapYield.Stat.MoreScarabs: modMS += val; break;
+                        case MapYield.Stat.MoreThreads: modMT += val; break;
                         case MapYield.Stat.MoreCurrency: modMC += val; break;
                         case MapYield.Stat.MoreMaps: modMM += val; break;
                     }
@@ -1058,7 +1071,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 Rarity = modIIR,
                 PackSize = modPS,
                 MoreMaps = modMM,
-                MoreScarabs = modMS,
+                MoreThreads = modMT,
                 MoreCurrency = modMC
             });
         }

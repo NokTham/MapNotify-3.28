@@ -310,7 +310,7 @@ namespace MapNotify_3_28
                 || !details.Identified
                 || (
                     details.OriginatorMaps == 0
-                    && details.OriginatorScarabs == 0
+                    && details.OriginatorThreads == 0
                     && details.OriginatorCurrency == 0
                 )
             )
@@ -361,8 +361,8 @@ namespace MapNotify_3_28
                     );
                 if (Settings.ShowOriginatorScarabs.Value)
                     DrawStatLine(
-                        details.OriginatorScarabs,
-                        "Scarabs",
+                        details.OriginatorThreads,
+                        "Threads",
                         new nuVector4(0.85f, 0.45f, 0.85f, 1f),
                         30
                     );
