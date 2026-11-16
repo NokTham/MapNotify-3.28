@@ -16,6 +16,46 @@ namespace MapNotify_3_28
         );
         private static readonly char[] DigitChars = "0123456789".ToCharArray();
 
+        // Advanced tooltips mix styled markup into the text nodes and add metadata
+        // lines that are not part of the modifier itself. 3.30 rare-only modifiers
+        // are rendered with a "Rare-only (Tier: N)" label; that label is sometimes
+        // emitted inside the next modifier's text node, which made the first normal
+        // mod display the raw label as part of its description.
+        private static readonly Regex TooltipMarkupRegex = new Regex(@"<[^>]*>|[{}]", RegexOptions.Compiled);
+        private static readonly Regex RareOnlyTierRegex = new Regex(
+            @"Rare-only\s*\(Tier:\s*\d+\)",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase
+        );
+        private static readonly Regex TierOnlyRegex = new Regex(@"^Tier:\s*\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex ModGroupHeaderRegex = new Regex(
+            @"^[A-Za-z' ]+Modifiers?$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase
+        );
+
+        /// <summary>
+        /// Normalizes a single tooltip text node into a modifier description line.
+        /// Returns false for markup-only nodes and for tooltip metadata such as
+        /// section headers and tier labels.
+        /// </summary>
+        private static bool TryGetCleanModTooltipLine(string raw, out string cleaned)
+        {
+            cleaned = null;
+            if (string.IsNullOrWhiteSpace(raw)) return false;
+
+            var text = TooltipMarkupRegex.Replace(raw, " ").Trim();
+            if (text.Length == 0) return false;
+
+            // The rare-only label can share a text node with the actual mod line.
+            text = RareOnlyTierRegex.Replace(text, " ").Trim();
+            text = WhitespaceRegex.Replace(text, " ").Trim();
+            if (text.Length == 0) return false;
+
+            if (TierOnlyRegex.IsMatch(text) || ModGroupHeaderRegex.IsMatch(text)) return false;
+
+            cleaned = text;
+            return true;
+        }
+
         private List<string> GetModDescriptionsFromTooltip(Element tooltip)
         {
             var descriptions = new List<string>();
@@ -51,9 +91,15 @@ namespace MapNotify_3_28
                             if (modEntry == null) continue;
                             var modLines = new List<string>();
                             ExtractTextRecursive(modEntry, modLines, 0);
-                            if (modLines.Any())
+                            var cleanedLines = new List<string>(modLines.Count);
+                            foreach (var line in modLines)
                             {
-                                var joined = string.Join("\n", modLines.Distinct());
+                                if (TryGetCleanModTooltipLine(line, out var cleanedLine))
+                                    cleanedLines.Add(cleanedLine);
+                            }
+                            if (cleanedLines.Count > 0)
+                            {
+                                var joined = string.Join("\n", cleanedLines.Distinct());
                                 if (!joined.Contains("CachedStatDescription") && !joined.StartsWith("<unknownSection") && !joined.Contains("System.Collections.Generic"))
                                     descriptions.Add(joined);
                             }
