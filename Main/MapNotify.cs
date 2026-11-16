@@ -965,6 +965,9 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         var descriptions = GetModDescriptionsFromTooltip(hoverItem.Tooltip);
         var availableDescriptions = new List<string>(descriptions);
 
+        LogMessage($"MapNotify capture: {descriptions.Count} tooltip mod lines: " +
+                   string.Join(" | ", descriptions.Select(d => Truncate(d, 90))), 5);
+
         _capturedMods = GetCapturableMods(mods, availableDescriptions);
 
         // Capture Logbook Implicits from ExpeditionSaga
@@ -1003,45 +1006,42 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             })
             .ToList();
 
-        foreach (var mod in explicitModsFromItem)
+        // Match every mod to its own tooltip line before assigning any fallback.
+        // 3.30 renders rare-only modifiers as extra tooltip entries which do not
+        // necessarily belong to an ItemMod. The old code handed the first unused
+        // line to the first mod whose text failed to match, so the rare-only line
+        // ended up on the first normal modifier (e.g. "Unique Boss has ...").
+        var modDescriptionIndices = new int[explicitModsFromItem.Count];
+        var descriptionUsed = new bool[availableDescriptions.Count];
+        int exactMatches = 0;
+
+        for (int i = 0; i < explicitModsFromItem.Count; i++)
         {
-            string matchedDescription = null;
-            int descIndex = -1;
-            string nameToMatch = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
-
-            if (!string.IsNullOrEmpty(nameToMatch))
+            modDescriptionIndices[i] = FindMatchingDescription(explicitModsFromItem[i], availableDescriptions, descriptionUsed);
+            if (modDescriptionIndices[i] >= 0)
             {
-                var cleanModName = nameToMatch.Replace("{", "").Replace("}", "").Replace("%%", "%").Replace("..", ".").Trim();
-                for (int k = 0; k < availableDescriptions.Count; k++)
-                {
-                    var fragments = cleanModName.Split('#', StringSplitOptions.RemoveEmptyEntries).Select(f => f.Trim()).Where(f => f.Length > 1).ToList();
-                    var uiTextNoRanges = NumericRangeRegex.Replace(availableDescriptions[k], "").Trim();
-                    uiTextNoRanges = WhitespaceRegex.Replace(uiTextNoRanges, " ");
-
-                    if (fragments.Count > 0 && fragments.All(f => uiTextNoRanges.Contains(f, StringComparison.OrdinalIgnoreCase)) ||
-                        (fragments.Count == 0 && uiTextNoRanges.Contains(cleanModName, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        matchedDescription = availableDescriptions[k];
-                        descIndex = k;
-                        break;
-                    }
-                }
+                descriptionUsed[modDescriptionIndices[i]] = true;
+                exactMatches++;
             }
+        }
 
-            if (matchedDescription == null && availableDescriptions.Count > 0)
-            {
-                matchedDescription = availableDescriptions[0];
-                descIndex = 0;
-            }
+        // Positional fallback is only for a fresh patch where ExileAPI cannot
+        // translate any mod at all. If at least one mod matched, every leftover
+        // line belongs to another entry (a rare-only modifier) and must stay
+        // unclaimed rather than being borrowed by this mod.
+        if (exactMatches == 0 && availableDescriptions.Count == explicitModsFromItem.Count)
+        {
+            for (int i = 0; i < explicitModsFromItem.Count; i++)
+                modDescriptionIndices[i] = i;
+        }
 
-            if (matchedDescription != null && (matchedDescription.Contains("CachedStatDescription") || matchedDescription.Contains("System.Collections.Generic") || matchedDescription.StartsWith("<unknown")))
-            {
-                if (descIndex != -1) availableDescriptions.RemoveAt(descIndex);
-                matchedDescription = null;
-                descIndex = -1;
-            }
-
-            if (descIndex != -1) availableDescriptions.RemoveAt(descIndex);
+        for (int modIndex = 0; modIndex < explicitModsFromItem.Count; modIndex++)
+        {
+            var mod = explicitModsFromItem[modIndex];
+            int descIndex = modDescriptionIndices[modIndex];
+            string matchedDescription = descIndex >= 0 && IsUsableTooltipDescription(availableDescriptions[descIndex])
+                ? availableDescriptions[descIndex]
+                : null;
 
             var (existingEntry, _) = MatchMod(mod.RawName);
 
@@ -1074,12 +1074,16 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
             var interestEntry = MatchInterest(mod.RawName);
 
+            LogMessage($"MapNotify capture: {mod.RawName} [{affixType}] " +
+                       $"translation='{Truncate(mod.Translation, 110)}' " +
+                       $"tooltipLine='{Truncate(matchedDescription ?? "<none>", 110)}'", 5);
+
             captured.Add(new CapturedMod
             {
                 RawName = mod.RawName.Trim(),
                 AffixType = affixType,
                 DisplayName = existingEntry?.Text ?? interestEntry?.Text ?? (matchedDescription ?? mod.Name),
-                Description = matchedDescription ?? (!string.IsNullOrEmpty(mod.Translation) && !mod.Translation.Contains("<unknown") ? mod.Translation : BaseModExtractor.GetReadableName(mod.RawName)),
+                Description = matchedDescription ?? GetOwnModText(mod),
                 Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
                 IsBricking = existingEntry?.Bricking ?? false,
                 IsOfInterest = interestEntry != null,
@@ -1093,6 +1097,84 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             });
         }
         return captured;
+    }
+
+    /// <summary>
+    /// Finds the tooltip line that belongs to a single item mod. Lines already used
+    /// by another mod are skipped. Only the mod's own text is considered, so a line
+    /// from an unrelated modifier (such as a 3.30 rare-only entry) can never match.
+    /// </summary>
+    private static int FindMatchingDescription(ItemMod mod, List<string> descriptions, bool[] used)
+    {
+        foreach (var candidate in GetModMatchTexts(mod))
+        {
+            if (string.IsNullOrWhiteSpace(candidate)) continue;
+
+            var cleanModName = TooltipMarkupRegex.Replace(candidate, " ")
+                .Replace("%%", "%")
+                .Replace("..", ".");
+            cleanModName = WhitespaceRegex.Replace(cleanModName, " ").Trim();
+            if (cleanModName.Length == 0) continue;
+
+            var fragments = cleanModName.Split('#', StringSplitOptions.RemoveEmptyEntries)
+                .Select(f => f.Trim())
+                .Where(f => f.Length > 1)
+                .ToList();
+
+            for (int k = 0; k < descriptions.Count; k++)
+            {
+                if (used[k] || !IsUsableTooltipDescription(descriptions[k])) continue;
+
+                var uiTextNoRanges = NumericRangeRegex.Replace(descriptions[k], "");
+                uiTextNoRanges = WhitespaceRegex.Replace(uiTextNoRanges, " ").Trim();
+
+                bool matches = fragments.Count > 0
+                    ? fragments.All(f => uiTextNoRanges.Contains(f, StringComparison.OrdinalIgnoreCase))
+                    : uiTextNoRanges.Contains(cleanModName, StringComparison.OrdinalIgnoreCase);
+
+                if (matches) return k;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Text flavours that ExileAPI may expose for a mod, most descriptive first.
+    /// Raw ids (Name/RawName) are intentionally excluded: they can never match a
+    /// localised tooltip line and only produce false positives.
+    /// </summary>
+    private static IEnumerable<string> GetModMatchTexts(ItemMod mod)
+    {
+        if (IsUsableTooltipDescription(mod.Translation)) yield return mod.Translation;
+        if (IsUsableTooltipDescription(mod.DisplayName)) yield return mod.DisplayName;
+    }
+
+    private static bool IsUsableTooltipDescription(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return false;
+        if (text.Contains("CachedStatDescription", StringComparison.OrdinalIgnoreCase)) return false;
+        if (text.Contains("System.Collections.Generic", StringComparison.OrdinalIgnoreCase)) return false;
+        if (text.StartsWith("<unknown", StringComparison.OrdinalIgnoreCase)) return false;
+        return true;
+    }
+
+    /// <summary>
+    /// Fallback text for a mod whose tooltip line could not be identified. This is
+    /// always that mod's own text, never another modifier's tooltip line.
+    /// </summary>
+    private static string GetOwnModText(ItemMod mod)
+    {
+        if (IsUsableTooltipDescription(mod.Translation))
+            return mod.Translation.Replace("{", "").Replace("}", "").Trim();
+
+        return BaseModExtractor.GetReadableName(mod.RawName);
+    }
+
+    private static string Truncate(string text, int maxLength)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+        return text.Length <= maxLength ? text : text.Substring(0, maxLength) + "...";
     }
 
     /// <summary>
