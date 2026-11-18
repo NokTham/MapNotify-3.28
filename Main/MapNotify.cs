@@ -1,20 +1,20 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System;
 using System.Linq; // Add this if not already present
+using System.Text.RegularExpressions;
 using ExileCore;
 using ExileCore.PoEMemory;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.Elements;
 using ExileCore.PoEMemory.Elements.InventoryElements;
-using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.PoEMemory.FilesInMemory;
+using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared.Cache;
 using ExileCore.Shared.Enums;
 using ExileCore.Shared.Helpers;
 using SharpDX;
 using nuVector2 = System.Numerics.Vector2;
-using System.Text.RegularExpressions;
 using nuVector4 = System.Numerics.Vector4;
 
 namespace MapNotify_3_28;
@@ -36,11 +36,14 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         "5DCAFFFF",
         "F472B6FF",
         "F0F0F0FF",
-        "F08C5AFF"
+        "F08C5AFF",
     };
 
     private static readonly Regex WhitespaceRegex = new Regex(@"\s+", RegexOptions.Compiled);
-    private static readonly Regex NumericRangeRegex = new Regex(@"\(\d+-\d+\)", RegexOptions.Compiled);
+    private static readonly Regex NumericRangeRegex = new Regex(
+        @"\(\d+-\d+\)",
+        RegexOptions.Compiled
+    );
 
     private static readonly nuVector4[] InterestPalette = InterestPaletteHex
         .Select(h => SharpToNu(HexToSDXVector4(h)))
@@ -51,8 +54,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         var palette = InterestPalette;
         if (InterestModsDictionary != null && InterestModsDictionary.Count > 0)
         {
-            var usedColors = InterestModsDictionary.Values
-                .Select(v => ToHex(v.Color).Substring(0, 6))
+            var usedColors = InterestModsDictionary
+                .Values.Select(v => ToHex(v.Color).Substring(0, 6))
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             foreach (var hex in InterestPaletteHex)
@@ -66,6 +69,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
         return palette[0];
     }
+
     public static HashSet<string> ExpectedNodes = new HashSet<string>();
     public static HashSet<string> ExpectedBonusNodes = new HashSet<string>();
 
@@ -84,7 +88,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
     private static readonly int[] ExpeditionLockerIndices =
     {
-        Constants.UIIndices.ExpeditionLockerDefault, 102, 103, 104
+        Constants.UIIndices.ExpeditionLockerDefault,
+        102,
+        103,
+        104,
     };
     private CachedValue<List<NormalInventoryItem>> _inventoryItems;
     private CachedValue<(int stashIndex, List<NormalInventoryItem>)> _stashItems;
@@ -111,7 +118,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         Name = "MapNotify-3.28";
     }
 
-    public new string ConfigDirectory => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "MapNotify-3.28");
+    public new string ConfigDirectory =>
+        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "MapNotify-3.28");
 
     public override bool Initialise()
     {
@@ -182,7 +190,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             var records = modsTable?.records;
             if (records == null || records.Count == 0)
             {
-                LogMessage("MapNotify: GameController.Files.Mods is not loaded yet or empty. Will fall back to mods.json.", 5);
+                LogMessage(
+                    "MapNotify: GameController.Files.Mods is not loaded yet or empty. Will fall back to mods.json.",
+                    5
+                );
                 return false;
             }
 
@@ -194,12 +205,23 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             bool IsYieldStatLine(string line) => MapYield.IsYieldDescription(line);
 
             // Load known mappings from mods.json if available
-            var knownLookup = new Dictionary<string, (string GroupKey, List<string> Descriptions, string Type)>(StringComparer.OrdinalIgnoreCase);
+            var knownLookup = new Dictionary<
+                string,
+                (string GroupKey, List<string> Descriptions, string Type)
+            >(StringComparer.OrdinalIgnoreCase);
             var jsonPath = Path.Combine(DirectoryFullName, "data", "mods.json");
             if (!File.Exists(jsonPath))
             {
-                var srcPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins", "Source", "MapNotify-3.28", "data", "mods.json");
-                if (File.Exists(srcPath)) jsonPath = srcPath;
+                var srcPath = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "Plugins",
+                    "Source",
+                    "MapNotify-3.28",
+                    "data",
+                    "mods.json"
+                );
+                if (File.Exists(srcPath))
+                    jsonPath = srcPath;
             }
 
             if (File.Exists(jsonPath))
@@ -212,13 +234,17 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                     {
                         foreach (var kvp in database.groups)
                         {
-                            if (IsYieldStatLine(kvp.Key) || IsYieldModKey(kvp.Key)) continue;
+                            if (IsYieldStatLine(kvp.Key) || IsYieldModKey(kvp.Key))
+                                continue;
                             if (kvp.Value.BaseMods != null)
                             {
-                                var cleanDescs = (kvp.Value.Descriptions ?? new List<string>()).Where(d => !IsYieldStatLine(d)).ToList();
+                                var cleanDescs = (kvp.Value.Descriptions ?? new List<string>())
+                                    .Where(d => !IsYieldStatLine(d))
+                                    .ToList();
                                 foreach (var bm in kvp.Value.BaseMods)
                                 {
-                                    if (string.IsNullOrWhiteSpace(bm) || IsYieldModKey(bm)) continue;
+                                    if (string.IsNullOrWhiteSpace(bm) || IsYieldModKey(bm))
+                                        continue;
                                     var norm = BaseModExtractor.GetBaseMod(bm);
                                     if (!knownLookup.ContainsKey(norm))
                                         knownLookup[norm] = (kvp.Key, cleanDescs, kvp.Value.Type);
@@ -233,42 +259,57 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             }
 
             // Filter strictly for true rollable map mods
-            var relevantMods = records.Values
-                .Where(m => m != null && !string.IsNullOrEmpty(m.Key))
+            var relevantMods = records
+                .Values.Where(m => m != null && !string.IsNullOrEmpty(m.Key))
                 .Where(m =>
                 {
-                    if (IsYieldModKey(m.Key)) return false;
+                    if (IsYieldModKey(m.Key))
+                        return false;
 
                     // Blacklist check
                     if (Constants.IsModBlacklisted(m.Key))
                         return false;
 
                     // 1. Strict AffixType filter - only true rollable affixes
-                    bool isRollableAffix = m.AffixType == ModType.Prefix ||
-                                           m.AffixType == ModType.Suffix ||
-                                           m.AffixType == ModType.Unique ||
-                                           m.AffixType == ModType.ExpeditionLogbook ||
-                                           m.AffixType == ModType.Enchantment;
-                    if (!isRollableAffix) return false;
+                    bool isRollableAffix =
+                        m.AffixType == ModType.Prefix
+                        || m.AffixType == ModType.Suffix
+                        || m.AffixType == ModType.Unique
+                        || m.AffixType == ModType.ExpeditionLogbook
+                        || m.AffixType == ModType.Enchantment;
+                    if (!isRollableAffix)
+                        return false;
 
                     // 2. Strict Domain / Family filter
                     var normKey = BaseModExtractor.GetBaseMod(m.Key);
-                    bool isKnown = knownLookup.ContainsKey(m.Key) || knownLookup.ContainsKey(normKey);
+                    bool isKnown =
+                        knownLookup.ContainsKey(m.Key) || knownLookup.ContainsKey(normKey);
                     bool isMapWorlds = m.Key.Contains("Worlds", StringComparison.OrdinalIgnoreCase);
-                    bool isUber = m.Key.Contains("Uber", StringComparison.OrdinalIgnoreCase) || m.Domain == ModDomain.UberMap;
-                    bool isExpedition = m.Key.Contains("Expedition", StringComparison.OrdinalIgnoreCase) ||
-                                        m.Key.Contains("Logbook", StringComparison.OrdinalIgnoreCase) ||
-                                        m.Domain == ModDomain.ExpeditionRelic ||
-                                        m.AffixType == ModType.ExpeditionLogbook;
-                    bool isValdo = m.Key.Contains("Valdo", StringComparison.OrdinalIgnoreCase) ||
-                                   m.Key.Contains("Puzzle", StringComparison.OrdinalIgnoreCase) ||
-                                   (m.AffixType == ModType.Unique && m.Key.StartsWith("Map", StringComparison.OrdinalIgnoreCase));
+                    bool isUber =
+                        m.Key.Contains("Uber", StringComparison.OrdinalIgnoreCase)
+                        || m.Domain == ModDomain.UberMap;
+                    bool isExpedition =
+                        m.Key.Contains("Expedition", StringComparison.OrdinalIgnoreCase)
+                        || m.Key.Contains("Logbook", StringComparison.OrdinalIgnoreCase)
+                        || m.Domain == ModDomain.ExpeditionRelic
+                        || m.AffixType == ModType.ExpeditionLogbook;
+                    bool isValdo =
+                        m.Key.Contains("Valdo", StringComparison.OrdinalIgnoreCase)
+                        || m.Key.Contains("Puzzle", StringComparison.OrdinalIgnoreCase)
+                        || (
+                            m.AffixType == ModType.Unique
+                            && m.Key.StartsWith("Map", StringComparison.OrdinalIgnoreCase)
+                        );
 
                     if (!isKnown && !isMapWorlds && !isUber && !isExpedition && !isValdo)
                         return false;
 
                     // Exclude non-map domains unless Valdo or known
-                    if (m.Domain == ModDomain.Flask || m.Domain == ModDomain.Monster || m.Domain == ModDomain.Chest)
+                    if (
+                        m.Domain == ModDomain.Flask
+                        || m.Domain == ModDomain.Monster
+                        || m.Domain == ModDomain.Chest
+                    )
                         return false;
 
                     return true;
@@ -277,25 +318,34 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
             if (relevantMods.Count == 0)
             {
-                LogMessage("MapNotify: No relevant map mods found in memory records. Will fall back to mods.json.", 5);
+                LogMessage(
+                    "MapNotify: No relevant map mods found in memory records. Will fall back to mods.json.",
+                    5
+                );
                 return false;
             }
 
             string DetermineModType(ModsDat.ModRecord m)
             {
-                if (m.Key.Contains("Expedition", StringComparison.OrdinalIgnoreCase) ||
-                    m.Key.Contains("Logbook", StringComparison.OrdinalIgnoreCase) ||
-                    m.Domain == ModDomain.ExpeditionRelic ||
-                    m.AffixType == ModType.ExpeditionLogbook)
+                if (
+                    m.Key.Contains("Expedition", StringComparison.OrdinalIgnoreCase)
+                    || m.Key.Contains("Logbook", StringComparison.OrdinalIgnoreCase)
+                    || m.Domain == ModDomain.ExpeditionRelic
+                    || m.AffixType == ModType.ExpeditionLogbook
+                )
                     return "Expedition";
 
-                if (m.Key.Contains("Uber", StringComparison.OrdinalIgnoreCase) ||
-                    m.Domain == ModDomain.UberMap)
+                if (
+                    m.Key.Contains("Uber", StringComparison.OrdinalIgnoreCase)
+                    || m.Domain == ModDomain.UberMap
+                )
                     return "Uber";
 
-                if (m.Key.Contains("Valdo", StringComparison.OrdinalIgnoreCase) ||
-                    m.Key.Contains("Puzzle", StringComparison.OrdinalIgnoreCase) ||
-                    m.AffixType == ModType.Unique)
+                if (
+                    m.Key.Contains("Valdo", StringComparison.OrdinalIgnoreCase)
+                    || m.Key.Contains("Puzzle", StringComparison.OrdinalIgnoreCase)
+                    || m.AffixType == ModType.Unique
+                )
                     return "Valdo";
 
                 return "Generic";
@@ -303,19 +353,27 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
             string DetermineAffix(ModsDat.ModRecord m)
             {
-                if (m.AffixType == ModType.Prefix) return "Prefix";
-                if (m.AffixType == ModType.Suffix) return "Suffix";
-                if (m.AffixType == ModType.Unique) return "Unique";
-                if (m.AffixType == ModType.ExpeditionLogbook) return "Logbook";
+                if (m.AffixType == ModType.Prefix)
+                    return "Prefix";
+                if (m.AffixType == ModType.Suffix)
+                    return "Suffix";
+                if (m.AffixType == ModType.Unique)
+                    return "Unique";
+                if (m.AffixType == ModType.ExpeditionLogbook)
+                    return "Logbook";
                 return m.AffixType.ToString();
             }
 
             bool IsCleanTranslation(string text)
             {
-                if (string.IsNullOrWhiteSpace(text)) return false;
-                if (text.Contains("<unknown", StringComparison.OrdinalIgnoreCase)) return false;
-                if (text.Contains("CachedStatDescription", StringComparison.OrdinalIgnoreCase)) return false;
-                if (text.Contains("System.Collections.Generic", StringComparison.OrdinalIgnoreCase)) return false;
+                if (string.IsNullOrWhiteSpace(text))
+                    return false;
+                if (text.Contains("<unknown", StringComparison.OrdinalIgnoreCase))
+                    return false;
+                if (text.Contains("CachedStatDescription", StringComparison.OrdinalIgnoreCase))
+                    return false;
+                if (text.Contains("System.Collections.Generic", StringComparison.OrdinalIgnoreCase))
+                    return false;
                 return true;
             }
 
@@ -331,7 +389,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                     for (int i = 0; i < mod.StatNames.Length; i++)
                     {
                         var statRec = mod.StatNames[i];
-                        if (statRec == null) continue;
+                        if (statRec == null)
+                            continue;
                         var stat = statRec.MatchingStat;
                         int val = 1;
                         if (mod.StatRange != null && i < mod.StatRange.Length)
@@ -345,18 +404,30 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                     string translated = null;
                     if (mapStatDesc != null)
                     {
-                        try { translated = mapStatDesc.TranslateMod(statDict); } catch { }
+                        try
+                        {
+                            translated = mapStatDesc.TranslateMod(statDict);
+                        }
+                        catch { }
                     }
                     if ((!IsCleanTranslation(translated)) && statDesc != null)
                     {
-                        try { translated = statDesc.TranslateMod(statDict); } catch { }
+                        try
+                        {
+                            translated = statDesc.TranslateMod(statDict);
+                        }
+                        catch { }
                     }
 
                     if (IsCleanTranslation(translated))
                     {
-                        var lines = translated.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries)
-                                              .Select(l => l.Trim())
-                                              .Where(l => IsCleanTranslation(l) && !IsYieldStatLine(l));
+                        var lines = translated
+                            .Split(
+                                new[] { "\r\n", "\r", "\n" },
+                                StringSplitOptions.RemoveEmptyEntries
+                            )
+                            .Select(l => l.Trim())
+                            .Where(l => IsCleanTranslation(l) && !IsYieldStatLine(l));
                         descs.AddRange(lines);
                     }
                 }
@@ -366,7 +437,16 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             }
 
             // Group relevant mods by resolved group, type, and affix
-            var groupedEntries = new Dictionary<string, (string GroupKey, List<string> Descriptions, string Type, string Affix, HashSet<string> BaseMods)>(StringComparer.OrdinalIgnoreCase);
+            var groupedEntries = new Dictionary<
+                string,
+                (
+                    string GroupKey,
+                    List<string> Descriptions,
+                    string Type,
+                    string Affix,
+                    HashSet<string> BaseMods
+                )
+            >(StringComparer.OrdinalIgnoreCase);
 
             foreach (var mod in relevantMods)
             {
@@ -377,7 +457,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
                 // 1. Try matching with known lookup from raw name
                 var normKey = BaseModExtractor.GetBaseMod(mod.Key);
-                if (knownLookup.TryGetValue(mod.Key, out var known) || knownLookup.TryGetValue(normKey, out known))
+                if (
+                    knownLookup.TryGetValue(mod.Key, out var known)
+                    || knownLookup.TryGetValue(normKey, out known)
+                )
                 {
                     groupKey = known.GroupKey;
                     descriptions = known.Descriptions;
@@ -426,30 +509,42 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 var dictKey = $"{type}_{affix}_{groupKey}".ToLowerInvariant();
                 if (!groupedEntries.TryGetValue(dictKey, out var entry))
                 {
-                    entry = (groupKey, descriptions, type, affix, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+                    entry = (
+                        groupKey,
+                        descriptions,
+                        type,
+                        affix,
+                        new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                    );
                     groupedEntries[dictKey] = entry;
                 }
 
                 entry.BaseMods.Add(mod.Key);
             }
 
-            var entries = groupedEntries.Values
-                .Where(v => !IsYieldStatLine(v.GroupKey) && v.Descriptions.Count > 0)
+            var entries = groupedEntries
+                .Values.Where(v => !IsYieldStatLine(v.GroupKey) && v.Descriptions.Count > 0)
                 .Select(v => new ModEntry
                 {
                     GroupKey = v.GroupKey,
                     Descriptions = v.Descriptions.Where(d => !IsYieldStatLine(d)).ToList(),
                     BaseMods = v.BaseMods.OrderBy(k => k).ToList(),
                     Type = v.Type,
-                    Affix = v.Affix
+                    Affix = v.Affix,
                 })
                 .Where(e => e.Descriptions.Count > 0)
-                .OrderBy(e => e.Type).ThenBy(e => e.Affix).ThenBy(e => e.GroupKey).ToList();
+                .OrderBy(e => e.Type)
+                .ThenBy(e => e.Affix)
+                .ThenBy(e => e.GroupKey)
+                .ToList();
 
             _modEntries = entries;
             _modEntriesVersion++;
             _modEntriesLoadedFromMemory = true;
-            LogMessage($"MapNotify: Successfully loaded {_modEntries.Count} mod groups ({relevantMods.Count} raw mods) from game memory.", 5);
+            LogMessage(
+                $"MapNotify: Successfully loaded {_modEntries.Count} mod groups ({relevantMods.Count} raw mods) from game memory.",
+                5
+            );
             return true;
         }
         catch (Exception ex)
@@ -469,8 +564,18 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         if (!File.Exists(path))
         {
             // If not found, try the source directory location (for development/source plugins)
-            var sourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins", "Source", "MapNotify-3.28", "data", "mods.json");
-            LogMessage($"MapNotify: mods.json not found at standard path. Trying source path: {sourcePath}", 5);
+            var sourcePath = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "Plugins",
+                "Source",
+                "MapNotify-3.28",
+                "data",
+                "mods.json"
+            );
+            LogMessage(
+                $"MapNotify: mods.json not found at standard path. Trying source path: {sourcePath}",
+                5
+            );
             path = sourcePath;
         }
 
@@ -483,20 +588,28 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
                 if (database?.groups != null)
                 {
-                    _modEntries = database.groups.Select(kvp => new ModEntry
-                    {
-                        GroupKey = kvp.Key,
-                        Descriptions = kvp.Value.Descriptions ?? new List<string>(),
-                        BaseMods = kvp.Value.BaseMods,
-                        Type = kvp.Value.Type
-                    }).ToList();
+                    _modEntries = database
+                        .groups.Select(kvp => new ModEntry
+                        {
+                            GroupKey = kvp.Key,
+                            Descriptions = kvp.Value.Descriptions ?? new List<string>(),
+                            BaseMods = kvp.Value.BaseMods,
+                            Type = kvp.Value.Type,
+                        })
+                        .ToList();
                     _modEntriesVersion++;
 
-                    LogMessage($"MapNotify: Successfully loaded {_modEntries.Count} mods from database at {path}.", 5);
+                    LogMessage(
+                        $"MapNotify: Successfully loaded {_modEntries.Count} mods from database at {path}.",
+                        5
+                    );
                 }
                 else
                 {
-                    LogError($"MapNotify: mods.json loaded but 'groups' section is null or empty at {path}.", 10);
+                    LogError(
+                        $"MapNotify: mods.json loaded but 'groups' section is null or empty at {path}.",
+                        10
+                    );
                 }
             }
             catch (Exception ex)
@@ -506,7 +619,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         }
         else
         {
-            LogError($"MapNotify: mods.json not found at either standard or source path: {path}", 10);
+            LogError(
+                $"MapNotify: mods.json not found at either standard or source path: {path}",
+                10
+            );
         }
     }
 
@@ -523,7 +639,7 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             if (!string.IsNullOrEmpty(playerName) && playerName != _lastCharacterName)
             {
                 _lastCharacterName = playerName;
-                
+
                 // Check if a profile folder exists with exactly the character's name
                 var profilePath = Path.Combine(ConfigDirectory, "Profiles", playerName);
                 var profileToSet = Directory.Exists(profilePath) ? playerName : "Default";
@@ -532,7 +648,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 {
                     Settings.SelectedProfile.Value = profileToSet;
                     ReloadModDictionaries();
-                    LogMessage($"MapNotify: Auto-switched to {(profileToSet == "Default" ? "Default profile" : $"character profile: {playerName}")}", 5);
+                    LogMessage(
+                        $"MapNotify: Auto-switched to {(profileToSet == "Default" ? "Default profile" : $"character profile: {playerName}")}",
+                        5
+                    );
                 }
             }
         }
@@ -542,7 +661,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
     public static StyledText MatchInterest(string rawName)
     {
-        if (string.IsNullOrEmpty(rawName) || InterestModsDictionary == null) return null;
+        if (string.IsNullOrEmpty(rawName) || InterestModsDictionary == null)
+            return null;
         var normalizedInput = BaseModExtractor.GetBaseMod(rawName);
         if (InterestModsDictionary.TryGetValue(normalizedInput, out var match))
             return match;
@@ -558,24 +678,35 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         return (result.match, result.isGood);
     }
 
-    private static (string matchedKey, StyledText match, bool isGood) MatchModWithKey(string rawName)
+    private static (string matchedKey, StyledText match, bool isGood) MatchModWithKey(
+        string rawName
+    )
     {
-        if (string.IsNullOrEmpty(rawName)) return (null, null, false);
+        if (string.IsNullOrEmpty(rawName))
+            return (null, null, false);
         var normalizedInput = BaseModExtractor.GetBaseMod(rawName);
 
-        if (GoodModsDictionary.TryGetValue(normalizedInput, out var goodMatch)) return (normalizedInput, goodMatch, true);
-        if (BadModsDictionary.TryGetValue(normalizedInput, out var badMatch)) return (normalizedInput, badMatch, false);
-        
+        if (GoodModsDictionary.TryGetValue(normalizedInput, out var goodMatch))
+            return (normalizedInput, goodMatch, true);
+        if (BadModsDictionary.TryGetValue(normalizedInput, out var badMatch))
+            return (normalizedInput, badMatch, false);
+
         return (null, null, false);
     }
 
     private static bool RemoveModFromFile(string path, string rawName)
     {
-        if (!File.Exists(path)) return false;
+        if (!File.Exists(path))
+            return false;
         var lines = File.ReadAllLines(path).ToList();
-        bool removed = lines.RemoveAll(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith("#") &&
-                                            BaseModExtractor.AreEquivalent(rawName, l.Split(';')[0].Trim())) > 0;
-        if (removed) File.WriteAllLines(path, lines);
+        bool removed =
+            lines.RemoveAll(l =>
+                !string.IsNullOrWhiteSpace(l)
+                && !l.StartsWith("#")
+                && BaseModExtractor.AreEquivalent(rawName, l.Split(';')[0].Trim())
+            ) > 0;
+        if (removed)
+            File.WriteAllLines(path, lines);
         return removed;
     }
 
@@ -594,10 +725,16 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
         ProcessHotkeys();
 
-        if (_showPreviewWindow) DrawPreviewWindow();
-        if (ingameState == null) return;
+        if (_showPreviewWindow)
+            DrawPreviewWindow();
+        if (ingameState == null)
+            return;
 
-        if (Settings.ShowAtlasHighlight || Settings.ShowAtlasBonusHighlight || Settings.ShowMavenWitnessHighlight)
+        if (
+            Settings.ShowAtlasHighlight
+            || Settings.ShowAtlasBonusHighlight
+            || Settings.ShowMavenWitnessHighlight
+        )
             DrawAtlasHighlights();
 
         var ui = ingameState.IngameUi;
@@ -625,7 +762,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
         if (Settings.FilterInventory && ui.InventoryPanel.IsVisible)
         {
-            if (refreshLiveSlots) _inventoryItems.ForceUpdate();
+            if (refreshLiveSlots)
+                _inventoryItems.ForceUpdate();
             DrawBordersForItems(_inventoryItems.Value, "Inventory");
         }
 
@@ -638,15 +776,23 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
     private void ProcessHotkeys()
     {
-        bool ctrlHeld = Input.GetKeyState(System.Windows.Forms.Keys.LControlKey) || Input.GetKeyState(System.Windows.Forms.Keys.RControlKey);
-        bool shiftHeld = Input.GetKeyState(System.Windows.Forms.Keys.LShiftKey) || Input.GetKeyState(System.Windows.Forms.Keys.RShiftKey);
-        bool altHeld = Input.GetKeyState(System.Windows.Forms.Keys.LMenu) || Input.GetKeyState(System.Windows.Forms.Keys.RMenu);
+        bool ctrlHeld =
+            Input.GetKeyState(System.Windows.Forms.Keys.LControlKey)
+            || Input.GetKeyState(System.Windows.Forms.Keys.RControlKey);
+        bool shiftHeld =
+            Input.GetKeyState(System.Windows.Forms.Keys.LShiftKey)
+            || Input.GetKeyState(System.Windows.Forms.Keys.RShiftKey);
+        bool altHeld =
+            Input.GetKeyState(System.Windows.Forms.Keys.LMenu)
+            || Input.GetKeyState(System.Windows.Forms.Keys.RMenu);
 
-        bool modifiersMatch = (Settings.UseControl == ctrlHeld) &&
-                             (Settings.UseShift == shiftHeld) &&
-                             (Settings.UseAlt == altHeld);
+        bool modifiersMatch =
+            (Settings.UseControl == ctrlHeld)
+            && (Settings.UseShift == shiftHeld)
+            && (Settings.UseAlt == altHeld);
 
-        if (modifiersMatch && Settings.CaptureHotkey.PressedOnce()) HandleCaptureHotkey();
+        if (modifiersMatch && Settings.CaptureHotkey.PressedOnce())
+            HandleCaptureHotkey();
     }
 
     /// <summary>
@@ -658,7 +804,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         try
         {
             var cursor = ingameState?.IngameUi?.Cursor;
-            if (cursor == null) return false;
+            if (cursor == null)
+                return false;
 
             var action = cursor.Action;
             return action == MouseActionType.HoldItem || action == MouseActionType.HoldItemForSell;
@@ -706,7 +853,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     /// </summary>
     private static bool IsElementVisible(Element element)
     {
-        if (element == null) return false;
+        if (element == null)
+            return false;
         try
         {
             return element.IsVisible;
@@ -720,7 +868,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     private Element GetVisibleHeistLocker()
     {
         var ui = ingameState?.IngameUi;
-        if (ui == null) return null;
+        if (ui == null)
+            return null;
 
         if (_heistLockerElement != null)
         {
@@ -762,7 +911,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     private Element GetVisibleExpeditionLocker()
     {
         var ui = ingameState?.IngameUi;
-        if (ui == null) return null;
+        if (ui == null)
+            return null;
 
         if (_expeditionLockerElement != null)
         {
@@ -775,7 +925,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         for (int i = 0; i < ExpeditionLockerIndices.Length; i++)
         {
             var index = ExpeditionLockerIndices[i];
-            if (ui.ChildCount <= index) continue;
+            if (ui.ChildCount <= index)
+                continue;
 
             var element = ui.GetChildAtIndex(index);
             if (IsElementVisible(element))
@@ -807,11 +958,13 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     private bool IsMapDeviceOpen()
     {
         var ui = ingameState?.IngameUi;
-        if (ui == null) return false;
+        if (ui == null)
+            return false;
 
-        var root = ui.ChildCount > Constants.UIIndices.MapDeviceRoot
-            ? ui.GetChildAtIndex(Constants.UIIndices.MapDeviceRoot)
-            : null;
+        var root =
+            ui.ChildCount > Constants.UIIndices.MapDeviceRoot
+                ? ui.GetChildAtIndex(Constants.UIIndices.MapDeviceRoot)
+                : null;
         if (IsElementVisible(root))
             return true;
 
@@ -830,7 +983,8 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     private bool IsAtlasPanelVisible()
     {
         var ui = ingameState?.IngameUi;
-        if (ui == null) return false;
+        if (ui == null)
+            return false;
 
         var atlas = ui.Atlas;
         if (IsElementVisible(atlas))
@@ -856,7 +1010,10 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             ui.PurchaseWindow?.IsVisible == true || ui.HaggleWindow?.IsVisible == true;
         bool tradeWindowVisible = ui.TradeWindow?.IsVisible == true;
 
-        if ((Settings.FilterShops && vendorWindowVisible) || (Settings.FilterTrade && tradeWindowVisible))
+        if (
+            (Settings.FilterShops && vendorWindowVisible)
+            || (Settings.FilterTrade && tradeWindowVisible)
+        )
             DrawBordersForItems(_purchaseWindowItems.Value, "Shop/Trade");
     }
 
@@ -873,15 +1030,25 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             var deviceItems = _mapDeviceItems.Value;
             foreach (var item in deviceItems)
             {
-                if (item?.Item == null || !item.IsVisible) continue;
-                if (!drawnEntities.Add(item.Item.Address)) continue;
+                if (item?.Item == null || !item.IsVisible)
+                    continue;
+                if (!drawnEntities.Add(item.Item.Address))
+                    continue;
 
                 // Separate logic for invitation slot vs regular map pieces in the device
                 var path = item.Item.Path;
-                bool isInvitation = path != null && (path.Contains("MavenMap") || path.Contains("Invitations/Maven") || path.Contains("MavenInvitation"));
+                bool isInvitation =
+                    path != null
+                    && (
+                        path.Contains("MavenMap")
+                        || path.Contains("Invitations/Maven")
+                        || path.Contains("MavenInvitation")
+                    );
 
-                if (isInvitation && !Settings.ShowForInvitations.Value) continue;
-                if (!isInvitation && !Settings.FilterTrade.Value) continue;
+                if (isInvitation && !Settings.ShowForInvitations.Value)
+                    continue;
+                if (!isInvitation && !Settings.FilterTrade.Value)
+                    continue;
 
                 try
                 {
@@ -909,17 +1076,26 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         }
     }
 
-    private void DrawBordersForItems(IEnumerable<NormalInventoryItem> items, string sourceName, HashSet<long> drawnEntities = null)
+    private void DrawBordersForItems(
+        IEnumerable<NormalInventoryItem> items,
+        string sourceName,
+        HashSet<long> drawnEntities = null
+    )
     {
-        if (items == null) return;
+        if (items == null)
+            return;
 
-        int total = 0, visible = 0, drawn = 0;
+        int total = 0,
+            visible = 0,
+            drawn = 0;
         foreach (var item in items)
         {
             total++;
-            if (item?.Item == null || !item.IsVisible) continue;
+            if (item?.Item == null || !item.IsVisible)
+                continue;
             visible++;
-            if (drawnEntities != null && !drawnEntities.Add(item.Item.Address)) continue;
+            if (drawnEntities != null && !drawnEntities.Add(item.Item.Address))
+                continue;
 
             drawn++;
             try
@@ -931,21 +1107,17 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 LogError($"Error drawing {sourceName} borders: {ex.Message}", 10);
             }
         }
-
-        if (SourceDiagnosticsDue())
-            LogSourceDiagnostics(
-                $"{sourceName} draw total={total} visible={visible} drawn={drawn}"
-            );
     }
 
     /// <summary>
-    /// Orchestrates the "Capture Mod" logic. 
-    /// Extracts raw mod data and tooltip descriptions from the hovered item 
+    /// Orchestrates the "Capture Mod" logic.
+    /// Extracts raw mod data and tooltip descriptions from the hovered item
     /// to prepare the Mod Preview window.
     /// </summary>
     private void HandleCaptureHotkey()
     {
-        if (ingameState == null) return;
+        if (ingameState == null)
+            return;
 
         // Force reload from files before capturing to ensure we have the latest settings
         ReloadModDictionaries();
@@ -957,16 +1129,14 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         if (hoverItem?.Item == null || !ItemIsMap(hoverItem.Item) || mods == null)
         {
             _showPreviewWindow = !_showPreviewWindow;
-            if (_showPreviewWindow) _capturedMods.Clear();
+            if (_showPreviewWindow)
+                _capturedMods.Clear();
             return;
         }
 
         _capturedMods.Clear();
         var descriptions = GetModDescriptionsFromTooltip(hoverItem.Tooltip);
         var availableDescriptions = new List<string>(descriptions);
-
-        LogMessage($"MapNotify capture: {descriptions.Count} tooltip mod lines: " +
-                   string.Join(" | ", descriptions.Select(d => Truncate(d, 90))), 5);
 
         _capturedMods = GetCapturableMods(mods, availableDescriptions);
 
@@ -982,14 +1152,17 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     {
         var captured = new List<CapturedMod>();
 
-        var explicitModsFromItem = mods.ItemMods
-            .Where(m => m.ModRecord != null)
-            .Where(m => m.ModRecord.AffixType.ToString().Contains("Prefix") ||
-                        m.ModRecord.AffixType.ToString().Contains("Suffix") ||
-                        m.ModRecord.AffixType.ToString().Contains("Implicit") ||
-                        m.ModRecord.AffixType.ToString().Contains("Unique") || // Include Unique modifiers for Valdo maps
-                        m.ModRecord.AffixType.ToString().Contains("Enchant") ||
-                        m.RawName.Contains("Enchant"))
+        var explicitModsFromItem = mods
+            .ItemMods.Where(m => m.ModRecord != null)
+            .Where(m =>
+                m.ModRecord.AffixType.ToString().Contains("Prefix")
+                || m.ModRecord.AffixType.ToString().Contains("Suffix")
+                || m.ModRecord.AffixType.ToString().Contains("Implicit")
+                || m.ModRecord.AffixType.ToString().Contains("Unique")
+                || // Include Unique modifiers for Valdo maps
+                m.ModRecord.AffixType.ToString().Contains("Enchant")
+                || m.RawName.Contains("Enchant")
+            )
             .Where(m => !string.IsNullOrEmpty(m.Name))
             .Where(m => !Constants.IsModBlacklisted(m.RawName))
             .GroupBy(m => WhitespaceRegex.Replace(m.RawName, ""), StringComparer.OrdinalIgnoreCase)
@@ -997,11 +1170,16 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
             .OrderBy(m =>
             {
                 var type = m.ModRecord.AffixType.ToString();
-                if (type.Contains("Enchant") || m.RawName.Contains("Enchant")) return 0;
-                if (type.Contains("Implicit")) return 1;
-                if (type.Contains("Prefix")) return 2;
-                if (type.Contains("Suffix")) return 3;
-                if (type.Contains("Unique")) return 4;
+                if (type.Contains("Enchant") || m.RawName.Contains("Enchant"))
+                    return 0;
+                if (type.Contains("Implicit"))
+                    return 1;
+                if (type.Contains("Prefix"))
+                    return 2;
+                if (type.Contains("Suffix"))
+                    return 3;
+                if (type.Contains("Unique"))
+                    return 4;
                 return 5;
             })
             .ToList();
@@ -1017,7 +1195,11 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
         for (int i = 0; i < explicitModsFromItem.Count; i++)
         {
-            modDescriptionIndices[i] = FindMatchingDescription(explicitModsFromItem[i], availableDescriptions, descriptionUsed);
+            modDescriptionIndices[i] = FindMatchingDescription(
+                explicitModsFromItem[i],
+                availableDescriptions,
+                descriptionUsed
+            );
             if (modDescriptionIndices[i] >= 0)
             {
                 descriptionUsed[modDescriptionIndices[i]] = true;
@@ -1039,14 +1221,20 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         {
             var mod = explicitModsFromItem[modIndex];
             int descIndex = modDescriptionIndices[modIndex];
-            string matchedDescription = descIndex >= 0 && IsUsableTooltipDescription(availableDescriptions[descIndex])
-                ? availableDescriptions[descIndex]
-                : null;
+            string matchedDescription =
+                descIndex >= 0 && IsUsableTooltipDescription(availableDescriptions[descIndex])
+                    ? availableDescriptions[descIndex]
+                    : null;
 
             var (existingEntry, _) = MatchMod(mod.RawName);
 
             // Extract per-mod stat contributions
-            int modAD = 0, modIIR = 0, modPS = 0, modMM = 0, modMT = 0, modMC = 0;
+            int modAD = 0,
+                modIIR = 0,
+                modPS = 0,
+                modMM = 0,
+                modMT = 0,
+                modMC = 0;
             var stats = mod.ModRecord?.StatNames;
             var values = mod.Values;
             if (stats != null && values != null)
@@ -1054,16 +1242,29 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
                 for (int i = 0; i < stats.Length && i < values.Count; i++)
                 {
                     var key = stats[i].Key;
-                    if (string.IsNullOrEmpty(key)) continue;
+                    if (string.IsNullOrEmpty(key))
+                        continue;
                     var val = values[i];
                     switch (MapYield.ClassifyStatKey(key))
                     {
-                        case MapYield.Stat.AtlasDrops: modAD += val; break;
-                        case MapYield.Stat.ItemRarity: modIIR += val; break;
-                        case MapYield.Stat.PackSize: modPS += val; break;
-                        case MapYield.Stat.MoreThreads: modMT += val; break;
-                        case MapYield.Stat.MoreCurrency: modMC += val; break;
-                        case MapYield.Stat.MoreMaps: modMM += val; break;
+                        case MapYield.Stat.AtlasDrops:
+                            modAD += val;
+                            break;
+                        case MapYield.Stat.ItemRarity:
+                            modIIR += val;
+                            break;
+                        case MapYield.Stat.PackSize:
+                            modPS += val;
+                            break;
+                        case MapYield.Stat.MoreThreads:
+                            modMT += val;
+                            break;
+                        case MapYield.Stat.MoreCurrency:
+                            modMC += val;
+                            break;
+                        case MapYield.Stat.MoreMaps:
+                            modMM += val;
+                            break;
                     }
                 }
             }
@@ -1074,27 +1275,28 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
             var interestEntry = MatchInterest(mod.RawName);
 
-            LogMessage($"MapNotify capture: {mod.RawName} [{affixType}] " +
-                       $"translation='{Truncate(mod.Translation, 110)}' " +
-                       $"tooltipLine='{Truncate(matchedDescription ?? "<none>", 110)}'", 5);
-
-            captured.Add(new CapturedMod
-            {
-                RawName = mod.RawName.Trim(),
-                AffixType = affixType,
-                DisplayName = existingEntry?.Text ?? interestEntry?.Text ?? (matchedDescription ?? mod.Name),
-                Description = matchedDescription ?? GetOwnModText(mod),
-                Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
-                IsBricking = existingEntry?.Bricking ?? false,
-                IsOfInterest = interestEntry != null,
-                InterestColor = interestEntry?.Color ?? GetNextInterestColor(),
-                Quantity = modAD,
-                Rarity = modIIR,
-                PackSize = modPS,
-                MoreMaps = modMM,
-                MoreThreads = modMT,
-                MoreCurrency = modMC
-            });
+            captured.Add(
+                new CapturedMod
+                {
+                    RawName = mod.RawName.Trim(),
+                    AffixType = affixType,
+                    DisplayName =
+                        existingEntry?.Text
+                        ?? interestEntry?.Text
+                        ?? (matchedDescription ?? mod.Name),
+                    Description = matchedDescription ?? GetOwnModText(mod),
+                    Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
+                    IsBricking = existingEntry?.Bricking ?? false,
+                    IsOfInterest = interestEntry != null,
+                    InterestColor = interestEntry?.Color ?? GetNextInterestColor(),
+                    Quantity = modAD,
+                    Rarity = modIIR,
+                    PackSize = modPS,
+                    MoreMaps = modMM,
+                    MoreThreads = modMT,
+                    MoreCurrency = modMC,
+                }
+            );
         }
         return captured;
     }
@@ -1108,31 +1310,40 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     {
         foreach (var candidate in GetModMatchTexts(mod))
         {
-            if (string.IsNullOrWhiteSpace(candidate)) continue;
+            if (string.IsNullOrWhiteSpace(candidate))
+                continue;
 
-            var cleanModName = TooltipMarkupRegex.Replace(candidate, " ")
+            var cleanModName = TooltipMarkupRegex
+                .Replace(candidate, " ")
                 .Replace("%%", "%")
                 .Replace("..", ".");
             cleanModName = WhitespaceRegex.Replace(cleanModName, " ").Trim();
-            if (cleanModName.Length == 0) continue;
+            if (cleanModName.Length == 0)
+                continue;
 
-            var fragments = cleanModName.Split('#', StringSplitOptions.RemoveEmptyEntries)
+            var fragments = cleanModName
+                .Split('#', StringSplitOptions.RemoveEmptyEntries)
                 .Select(f => f.Trim())
                 .Where(f => f.Length > 1)
                 .ToList();
 
             for (int k = 0; k < descriptions.Count; k++)
             {
-                if (used[k] || !IsUsableTooltipDescription(descriptions[k])) continue;
+                if (used[k] || !IsUsableTooltipDescription(descriptions[k]))
+                    continue;
 
                 var uiTextNoRanges = NumericRangeRegex.Replace(descriptions[k], "");
                 uiTextNoRanges = WhitespaceRegex.Replace(uiTextNoRanges, " ").Trim();
 
-                bool matches = fragments.Count > 0
-                    ? fragments.All(f => uiTextNoRanges.Contains(f, StringComparison.OrdinalIgnoreCase))
-                    : uiTextNoRanges.Contains(cleanModName, StringComparison.OrdinalIgnoreCase);
+                bool matches =
+                    fragments.Count > 0
+                        ? fragments.All(f =>
+                            uiTextNoRanges.Contains(f, StringComparison.OrdinalIgnoreCase)
+                        )
+                        : uiTextNoRanges.Contains(cleanModName, StringComparison.OrdinalIgnoreCase);
 
-                if (matches) return k;
+                if (matches)
+                    return k;
             }
         }
 
@@ -1146,16 +1357,22 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
     /// </summary>
     private static IEnumerable<string> GetModMatchTexts(ItemMod mod)
     {
-        if (IsUsableTooltipDescription(mod.Translation)) yield return mod.Translation;
-        if (IsUsableTooltipDescription(mod.DisplayName)) yield return mod.DisplayName;
+        if (IsUsableTooltipDescription(mod.Translation))
+            yield return mod.Translation;
+        if (IsUsableTooltipDescription(mod.DisplayName))
+            yield return mod.DisplayName;
     }
 
     private static bool IsUsableTooltipDescription(string text)
     {
-        if (string.IsNullOrWhiteSpace(text)) return false;
-        if (text.Contains("CachedStatDescription", StringComparison.OrdinalIgnoreCase)) return false;
-        if (text.Contains("System.Collections.Generic", StringComparison.OrdinalIgnoreCase)) return false;
-        if (text.StartsWith("<unknown", StringComparison.OrdinalIgnoreCase)) return false;
+        if (string.IsNullOrWhiteSpace(text))
+            return false;
+        if (text.Contains("CachedStatDescription", StringComparison.OrdinalIgnoreCase))
+            return false;
+        if (text.Contains("System.Collections.Generic", StringComparison.OrdinalIgnoreCase))
+            return false;
+        if (text.StartsWith("<unknown", StringComparison.OrdinalIgnoreCase))
+            return false;
         return true;
     }
 
@@ -1171,47 +1388,49 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         return BaseModExtractor.GetReadableName(mod.RawName);
     }
 
-    private static string Truncate(string text, int maxLength)
-    {
-        if (string.IsNullOrEmpty(text)) return string.Empty;
-        return text.Length <= maxLength ? text : text.Substring(0, maxLength) + "...";
-    }
-
     /// <summary>
     /// Specialized capture for Logbook implicit modifiers which are stored in the ExpeditionSaga component.
     /// </summary>
     private void CaptureLogbookMods(Entity item)
     {
-        if (item == null) return;
+        if (item == null)
+            return;
         var saga = item.GetComponent<ExpeditionSaga>();
         if (saga != null && saga.Areas != null)
         {
             foreach (var area in saga.Areas)
             {
-                if (area?.ImplicitMods == null) continue;
+                if (area?.ImplicitMods == null)
+                    continue;
                 foreach (var mod in area.ImplicitMods)
                 {
-                    if (string.IsNullOrEmpty(mod.RawName)) continue;
+                    if (string.IsNullOrEmpty(mod.RawName))
+                        continue;
                     // Avoid duplicates if multiple areas have the same mod type
-                    if (_capturedMods.Any(m => m.RawName == mod.RawName)) continue;
+                    if (_capturedMods.Any(m => m.RawName == mod.RawName))
+                        continue;
 
                     var (existingEntry, _) = MatchMod(mod.RawName);
                     var interestEntry = MatchInterest(mod.RawName);
 
-                    var modText = !string.IsNullOrEmpty(mod.Translation) ? mod.Translation : mod.Name;
+                    var modText = !string.IsNullOrEmpty(mod.Translation)
+                        ? mod.Translation
+                        : mod.Name;
                     var cleanDesc = modText.Replace("{", "").Replace("}", "").Trim();
 
-                    _capturedMods.Add(new CapturedMod
-                    {
-                        RawName = mod.RawName.Trim(),
-                        AffixType = "Logbook Implicit",
-                        DisplayName = existingEntry?.Text ?? interestEntry?.Text ?? cleanDesc,
-                        Description = cleanDesc,
-                        Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
-                        IsBricking = existingEntry?.Bricking ?? false,
-                        IsOfInterest = interestEntry != null,
-                        InterestColor = interestEntry?.Color ?? GetNextInterestColor()
-                    });
+                    _capturedMods.Add(
+                        new CapturedMod
+                        {
+                            RawName = mod.RawName.Trim(),
+                            AffixType = "Logbook Implicit",
+                            DisplayName = existingEntry?.Text ?? interestEntry?.Text ?? cleanDesc,
+                            Description = cleanDesc,
+                            Color = existingEntry?.Color ?? new nuVector4(1, 1, 1, 1),
+                            IsBricking = existingEntry?.Bricking ?? false,
+                            IsOfInterest = interestEntry != null,
+                            InterestColor = interestEntry?.Color ?? GetNextInterestColor(),
+                        }
+                    );
                 }
             }
         }

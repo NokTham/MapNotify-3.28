@@ -12,28 +12,6 @@ namespace MapNotify_3_28
 {
     public partial class MapNotify_3_28
     {
-        // Diagnostics for item discovery. Only written to the verbose log, at most
-        // once per second, and only when the message changes, so a missing highlight
-        // can be traced to discovery vs. drawing without attaching a debugger.
-        private long _lastSourceDiagMs;
-        private string _lastSourceDiagMessage;
-
-        private bool SourceDiagnosticsDue()
-        {
-            return Environment.TickCount64 - _lastSourceDiagMs >= 1000;
-        }
-
-        private void LogSourceDiagnostics(string message)
-        {
-            var now = Environment.TickCount64;
-            if (now - _lastSourceDiagMs < 1000) return;
-            if (message == _lastSourceDiagMessage) return;
-
-            _lastSourceDiagMs = now;
-            _lastSourceDiagMessage = message;
-            LogMessage($"MapNotify: {message}", 5);
-        }
-
         private bool ItemIsMap(Entity entity)
         {
             if (entity == null || entity.Address == 0) return false;
@@ -72,18 +50,12 @@ namespace MapNotify_3_28
                 var inventoryPanel = ingameState.IngameUi.InventoryPanel;
                 var collection = inventoryPanel[InventoryIndex.PlayerInventory]?.VisibleInventoryItems;
                 var result = GetItemsFromCollection(collection);
-                int directCount = result.Count;
 
                 // 3.30: VisibleInventoryItems can come back empty while the panel is
                 // open. Fall back to walking the UI tree, like the stash and locker
                 // scans already do, so inventory highlights keep working.
                 if (result.Count == 0)
                     FindMapsInElement(inventoryPanel, result);
-
-                if (SourceDiagnosticsDue())
-                    LogSourceDiagnostics(
-                        $"inventory panelVisible={inventoryPanel.IsVisible} collection={(collection == null ? -1 : collection.Count)} direct={directCount} maps={result.Count}"
-                    );
 
                 return result;
             }
@@ -222,14 +194,10 @@ namespace MapNotify_3_28
                 return new List<NormalInventoryItem>();
 
             var result = GetItemsFromCollection(merchantPanel.VisibleStash?.VisibleInventoryItems);
-            int directCount = result.Count;
 
             // 3.30: same empty-collection fallback as the inventory scan.
             if (result.Count == 0)
                 FindMapsInElement(merchantPanel, result);
-
-            if (SourceDiagnosticsDue())
-                LogSourceDiagnostics($"merchant direct={directCount} maps={result.Count}");
 
             return result;
         }
@@ -426,11 +394,6 @@ namespace MapNotify_3_28
             // Fallback: walk the whole window when the typed accessors produced nothing.
             if (result.Count == 0)
                 FindMapsInElement(window, result);
-
-            if (SourceDiagnosticsDue())
-                LogSourceDiagnostics(
-                    $"shop window={window.GetType().Name} maps={result.Count}"
-                );
 
             return result;
         }
