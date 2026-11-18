@@ -133,6 +133,19 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
         gameController = GameController;
         ingameState = gameController.IngameState;
         pluginSettings = Settings;
+
+        // HotkeyNodeV2 needs the key registered with ExileAPI's input manager.
+        // The legacy HotkeyNode did this implicitly. Keep it in sync when the
+        // built-in picker changes the value.
+        void RegisterCaptureHotkey()
+        {
+            if (Settings.CaptureHotkey.Value.Key != System.Windows.Forms.Keys.None)
+                Input.RegisterKey(Settings.CaptureHotkey.Value);
+        }
+
+        RegisterCaptureHotkey();
+        Settings.CaptureHotkey.OnValueChanged += RegisterCaptureHotkey;
+
         _inventoryItems = new TimeCache<List<NormalInventoryItem>>(
             GetInventoryItems,
             Settings.InventoryCacheInterval.Value
@@ -776,22 +789,9 @@ public partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings> // T
 
     private void ProcessHotkeys()
     {
-        bool ctrlHeld =
-            Input.GetKeyState(System.Windows.Forms.Keys.LControlKey)
-            || Input.GetKeyState(System.Windows.Forms.Keys.RControlKey);
-        bool shiftHeld =
-            Input.GetKeyState(System.Windows.Forms.Keys.LShiftKey)
-            || Input.GetKeyState(System.Windows.Forms.Keys.RShiftKey);
-        bool altHeld =
-            Input.GetKeyState(System.Windows.Forms.Keys.LMenu)
-            || Input.GetKeyState(System.Windows.Forms.Keys.RMenu);
-
-        bool modifiersMatch =
-            (Settings.UseControl == ctrlHeld)
-            && (Settings.UseShift == shiftHeld)
-            && (Settings.UseAlt == altHeld);
-
-        if (modifiersMatch && Settings.CaptureHotkey.PressedOnce())
+        // HotkeyNodeV2 stores the full key combination (Ctrl/Shift/Alt/Win)
+        // in Value, so modifier matching is handled by PressedOnce().
+        if (Settings.CaptureHotkey.PressedOnce())
             HandleCaptureHotkey();
     }
 

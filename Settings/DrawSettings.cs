@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,86 +15,178 @@ namespace MapNotify_3_28
 {
     partial class MapNotify_3_28 : BaseSettingsPlugin<MapNotifySettings>
     {
-        private string _rebindingNodeName = null;
+        private bool _capturingCaptureHotkey;
+        private System.Windows.Forms.Keys _pendingCaptureKey = System.Windows.Forms.Keys.None;
+        private System.Windows.Forms.Keys _pendingCaptureModifiers = System.Windows.Forms.Keys.None;
+        private bool _pendingCaptureWin;
+        private readonly HashSet<System.Windows.Forms.Keys> _heldAtCaptureStart = new();
 
-        public void DrawHotkeySelector(
-            string label,
-            HotkeyNode node,
-            ToggleNode ctrl,
-            ToggleNode shift,
-            ToggleNode alt
+        private static readonly System.Windows.Forms.Keys[] BindableCaptureKeys =
+            Enum.GetValues(typeof(System.Windows.Forms.Keys))
+                .Cast<System.Windows.Forms.Keys>()
+                .Where(k => k is not (
+                    System.Windows.Forms.Keys.None
+                    or System.Windows.Forms.Keys.LButton
+                    or System.Windows.Forms.Keys.RButton
+                    or System.Windows.Forms.Keys.MButton
+                    or System.Windows.Forms.Keys.XButton1
+                    or System.Windows.Forms.Keys.XButton2
+                    or System.Windows.Forms.Keys.ShiftKey
+                    or System.Windows.Forms.Keys.ControlKey
+                    or System.Windows.Forms.Keys.Menu
+                    or System.Windows.Forms.Keys.LShiftKey
+                    or System.Windows.Forms.Keys.RShiftKey
+                    or System.Windows.Forms.Keys.LControlKey
+                    or System.Windows.Forms.Keys.RControlKey
+                    or System.Windows.Forms.Keys.LMenu
+                    or System.Windows.Forms.Keys.RMenu
+                    or System.Windows.Forms.Keys.LWin
+                    or System.Windows.Forms.Keys.RWin
+                    or System.Windows.Forms.Keys.Shift
+                    or System.Windows.Forms.Keys.Control
+                    or System.Windows.Forms.Keys.Alt
+                    or System.Windows.Forms.Keys.Modifiers))
+                .Distinct()
+                .ToArray();
+
+        private static bool IsModifierHeld(
+            System.Windows.Forms.Keys generic,
+            System.Windows.Forms.Keys left,
+            System.Windows.Forms.Keys right
         )
         {
-            ImGui.Text(label);
+            return Input.IsKeyDown((int)generic)
+                || Input.IsKeyDown((int)left)
+                || Input.IsKeyDown((int)right);
+        }
 
-            var c = ctrl.Value;
-            if (ImGui.Checkbox("Ctrl##" + label, ref c))
-                ctrl.Value = c;
-            ImGui.SameLine();
-
-            var s = shift.Value;
-            if (ImGui.Checkbox("Shift##" + label, ref s))
-                shift.Value = s;
-            ImGui.SameLine();
-
-            var a = alt.Value;
-            if (ImGui.Checkbox("Alt##" + label, ref a))
-                alt.Value = a;
-            ImGui.SameLine();
-
-            bool isRebinding = _rebindingNodeName == label;
-            string prefix = "";
-            if (ctrl.Value)
-                prefix += "Ctrl + ";
-            if (shift.Value)
-                prefix += "Shift + ";
-            if (alt.Value)
-                prefix += "Alt + ";
-
-            string buttonText = isRebinding
-                ? "PRESS KEY...###" + label
-                : $"{prefix}{node.Value}###{label}";
-
-            if (ImGui.Button(buttonText, new nuVector2(150, 0)))
-                _rebindingNodeName = label;
-
-            if (isRebinding)
+        private bool TryReadCaptureKey(
+            out System.Windows.Forms.Keys key,
+            out System.Windows.Forms.Keys modifiers,
+            out bool win
+        )
+        {
+            foreach (var candidate in BindableCaptureKeys)
             {
-                if (
-                    Input.GetKeyState(System.Windows.Forms.Keys.LButton)
-                    || Input.GetKeyState(System.Windows.Forms.Keys.RButton)
-                )
+                bool down = Input.IsKeyDown((int)candidate);
+                if (_heldAtCaptureStart.Contains(candidate))
                 {
-                    _rebindingNodeName = null;
+                    if (!down)
+                        _heldAtCaptureStart.Remove(candidate);
+                    continue;
                 }
-                else if (Input.GetKeyState(System.Windows.Forms.Keys.Escape))
-                {
-                    node.Value = System.Windows.Forms.Keys.None;
-                    _rebindingNodeName = null;
-                }
-                else
-                {
-                    foreach (var key in System.Enum.GetValues<System.Windows.Forms.Keys>())
-                    {
-                        if (
-                            IsModifierKey(key)
-                            || key == System.Windows.Forms.Keys.None
-                            || key == System.Windows.Forms.Keys.LButton
-                            || key == System.Windows.Forms.Keys.RButton
-                        )
-                        {
-                            continue;
-                        }
 
-                        if (Input.GetKeyState(key))
-                        {
-                            node.Value = key;
-                            _rebindingNodeName = null;
-                            break;
-                        }
-                    }
-                }
+                if (!down)
+                    continue;
+
+                key = candidate;
+                modifiers = System.Windows.Forms.Keys.None;
+                if (
+                    IsModifierHeld(
+                        System.Windows.Forms.Keys.ControlKey,
+                        System.Windows.Forms.Keys.LControlKey,
+                        System.Windows.Forms.Keys.RControlKey
+                    )
+                )
+                    modifiers |= System.Windows.Forms.Keys.Control;
+                if (
+                    IsModifierHeld(
+                        System.Windows.Forms.Keys.ShiftKey,
+                        System.Windows.Forms.Keys.LShiftKey,
+                        System.Windows.Forms.Keys.RShiftKey
+                    )
+                )
+                    modifiers |= System.Windows.Forms.Keys.Shift;
+                if (
+                    IsModifierHeld(
+                        System.Windows.Forms.Keys.Menu,
+                        System.Windows.Forms.Keys.LMenu,
+                        System.Windows.Forms.Keys.RMenu
+                    )
+                )
+                    modifiers |= System.Windows.Forms.Keys.Alt;
+                win =
+                    Input.IsKeyDown((int)System.Windows.Forms.Keys.LWin)
+                    || Input.IsKeyDown((int)System.Windows.Forms.Keys.RWin);
+                return true;
             }
+
+            key = System.Windows.Forms.Keys.None;
+            modifiers = System.Windows.Forms.Keys.None;
+            win = false;
+            return false;
+        }
+
+        private void BeginCaptureHotkey()
+        {
+            _capturingCaptureHotkey = true;
+            _pendingCaptureKey = System.Windows.Forms.Keys.None;
+            _pendingCaptureModifiers = System.Windows.Forms.Keys.None;
+            _pendingCaptureWin = false;
+            _heldAtCaptureStart.Clear();
+            foreach (var candidate in BindableCaptureKeys)
+                if (Input.IsKeyDown((int)candidate))
+                    _heldAtCaptureStart.Add(candidate);
+        }
+
+        private void EndCaptureHotkey()
+        {
+            _capturingCaptureHotkey = false;
+            _pendingCaptureKey = System.Windows.Forms.Keys.None;
+            _pendingCaptureModifiers = System.Windows.Forms.Keys.None;
+            _pendingCaptureWin = false;
+            _heldAtCaptureStart.Clear();
+        }
+
+        private void DrawCaptureHotkeyButton()
+        {
+            bool capturing = _capturingCaptureHotkey;
+            string label = !capturing
+                ? $"Capture Hotkey [{Settings.CaptureHotkey.Value}]"
+                : _pendingCaptureKey == System.Windows.Forms.Keys.None
+                    ? "Press a key...  (Esc clears, click to cancel)"
+                    : $"Release {_pendingCaptureKey} to bind";
+
+            float width = Math.Max(150f, ImGui.CalcTextSize(label).X + 24f);
+            if (capturing)
+                ImGui.PushStyleColor(ImGuiCol.Button, new nuVector4(0.55f, 0.35f, 0f, 1f));
+            bool clicked = ImGui.Button(label + "###CaptureHotkey", new nuVector2(width, 0f));
+            if (capturing)
+                ImGui.PopStyleColor();
+
+            if (clicked)
+            {
+                if (capturing)
+                    EndCaptureHotkey();
+                else
+                    BeginCaptureHotkey();
+                return;
+            }
+
+            if (!capturing)
+                return;
+
+            if (_pendingCaptureKey == System.Windows.Forms.Keys.None)
+            {
+                if (TryReadCaptureKey(out var pressed, out var mods, out var win))
+                {
+                    _pendingCaptureKey = pressed;
+                    _pendingCaptureModifiers = mods;
+                    _pendingCaptureWin = win;
+                }
+                return;
+            }
+
+            if (Input.IsKeyDown((int)_pendingCaptureKey))
+                return;
+
+            bool clearing = _pendingCaptureKey == System.Windows.Forms.Keys.Escape;
+            System.Windows.Forms.Keys finalKey = clearing
+                ? System.Windows.Forms.Keys.None
+                : _pendingCaptureKey | _pendingCaptureModifiers;
+            bool finalWin = !clearing && _pendingCaptureWin;
+            Settings.CaptureHotkey.Value = new HotkeyNodeV2.HotkeyNodeValue(finalKey, finalWin);
+            EndCaptureHotkey();
         }
 
         public override void DrawSettings()
@@ -128,15 +221,13 @@ namespace MapNotify_3_28
 
             if (ImGui.TreeNodeEx("Core Settings", ImGuiTreeNodeFlags.CollapsingHeader))
             {
-                DrawHotkeySelector(
-                    "Capture Hotkey",
-                    Settings.CaptureHotkey,
-                    Settings.UseControl,
-                    Settings.UseShift,
-                    Settings.UseAlt
-                );
+                DrawCaptureHotkeyButton();
                 ImGui.SameLine();
-                HelpMarker("Key used to open the Map Mod Preview window.\nESC to clear.");
+                HelpMarker(
+                    "Key/combination used to open the Map Mod Preview window.\n"
+                        + "Click to rebind; hold Ctrl/Shift/Alt/Win while pressing the key to include them.\n"
+                        + "Esc clears the binding."
+                );
                 Settings.InventoryCacheInterval.Value = IntSlider(
                     "Inventory Item Caching Interval in ms",
                     Settings.InventoryCacheInterval,

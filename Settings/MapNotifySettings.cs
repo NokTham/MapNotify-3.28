@@ -13,10 +13,7 @@ namespace MapNotify_3_28
         public ToggleNode AutoSwitchProfile { get; set; } = new(false);
 
         // Core Settings
-        public HotkeyNode CaptureHotkey { get; set; } = new(System.Windows.Forms.Keys.F1);
-        public ToggleNode UseControl { get; set; } = new(false);
-        public ToggleNode UseShift { get; set; } = new(false);
-        public ToggleNode UseAlt { get; set; } = new(false);
+        public HotkeyNodeV2 CaptureHotkey { get; set; } = new(System.Windows.Forms.Keys.F1);
         public RangeNode<int> InventoryCacheInterval { get; set; } = new(200, 1, 2000);
         public RangeNode<int> StashCacheInterval { get; set; } = new(500, 1, 2000);
         public RangeNode<int> MapStashCacheInterval { get; set; } = new(500, 1, 2000);

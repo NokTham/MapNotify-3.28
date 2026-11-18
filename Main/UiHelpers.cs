@@ -73,18 +73,5 @@ namespace MapNotify_3_28
             // Advance the cursor vertically to account for the line and standard spacing
             ImGui.Dummy(new nuVector2(0, thickness + ImGui.GetStyle().ItemSpacing.Y));
         }
-
-        private bool IsModifierKey(System.Windows.Forms.Keys key)
-        {
-            return key == System.Windows.Forms.Keys.ControlKey ||
-                   key == System.Windows.Forms.Keys.LControlKey ||
-                   key == System.Windows.Forms.Keys.RControlKey ||
-                   key == System.Windows.Forms.Keys.ShiftKey ||
-                   key == System.Windows.Forms.Keys.LShiftKey ||
-                   key == System.Windows.Forms.Keys.RShiftKey ||
-                   key == System.Windows.Forms.Keys.Menu ||
-                   key == System.Windows.Forms.Keys.LMenu ||
-                   key == System.Windows.Forms.Keys.RMenu;
-        }
     }
 }
